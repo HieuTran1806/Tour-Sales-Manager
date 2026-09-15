@@ -1,5 +1,7 @@
 package org.example.gui.dialog;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.LoaiTourBUS;
 import org.example.dto.LoaiTourDTO;
 import org.example.gui.panel.UIColors;
@@ -7,19 +9,20 @@ import org.example.gui.panel.UIColors;
 import javax.swing.*;
 import java.awt.*;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class LoaiTourDialog extends JDialog{
     // define label and txt
-    private JLabel jlbMaLoaiTour, jlbTheLoai, jlbMoTa, jlbTrangThai;
-    private JTextField txtMaLoaiTour, txtTheLoai, txtMoTa, txtTrangThai;
+    JLabel jlbMaLoaiTour, jlbTheLoai, jlbMoTa, jlbTrangThai;
+    JTextField txtMaLoaiTour, txtTheLoai, txtMoTa, txtTrangThai;
 
     // define btn
-    private JButton saveBtn, cancelBtn;
+    JButton saveBtn, cancelBtn;
 
     // cmb trang thai
-    private JComboBox<String> cbTrangThai;
+    JComboBox<String> cbTrangThai;
 
-    private LoaiTourDTO loaiTourDTO;
-    private LoaiTourBUS loaiTourBUS;
+    LoaiTourDTO loaiTourDTO;
+    LoaiTourBUS loaiTourBUS;
 
     public LoaiTourDialog(LoaiTourBUS loaiTourBUS, LoaiTourDTO loaiTourDTO){
         this.loaiTourBUS = loaiTourBUS;

@@ -2,7 +2,7 @@ package org.example.login;
 
 import org.example.dao.TaiKhoanDAO;
 import org.example.dto.TaiKhoanDTO;
-import org.example.gui._MainFrame;
+import org.example.gui.MainFrame;
 import org.example.gui.panel.UIColors;
 
 import java.awt.*;
@@ -140,7 +140,7 @@ public class DangNhap extends JFrame {
             }
 
             PhanQuyen.dangNhap(taiKhoan);
-            _MainFrame mainFrame = new _MainFrame(taiKhoan);
+            MainFrame mainFrame = new MainFrame(taiKhoan);
             mainFrame.setVisible(true);
             this.dispose();
         });

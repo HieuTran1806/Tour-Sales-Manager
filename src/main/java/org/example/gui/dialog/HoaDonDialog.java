@@ -1,6 +1,8 @@
 package org.example.gui.dialog;
 
 import com.toedter.calendar.JDateChooser;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.*;
 import org.example.dto.*;
 import org.example.gui.helper.DateHelper;
@@ -16,26 +18,27 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class HoaDonDialog extends JDialog {
-    private HoaDonBUS bus;
-    private int soluong=0;
-    private CTHoaDonBUS busct;
-    private KeHoachTourBUS khtbus;
-    private KhachHangBUS khbus;
-    private NhanVienBUS nvbus;
+    HoaDonBUS bus;
+    int soluong=0;
+    CTHoaDonBUS busct;
+    KeHoachTourBUS khtbus;
+    KhachHangBUS khbus;
+    NhanVienBUS nvbus;
 
-    private CTrinhKMBUS cTrinhKMBUS;
+    CTrinhKMBUS cTrinhKMBUS;
 
-    private JButton btnluu, btnLamMoi;
+    JButton btnluu, btnLamMoi;
 
-    private JComboBox<String> cbmakh, cbmakht, cbmanv;
-    private JComboBox<CTrinhKMDTO> cbKM;
+    JComboBox<String> cbmakh, cbmakht, cbmanv;
+    JComboBox<CTrinhKMDTO> cbKM;
 
-    private JLabel lbmahd, lbmakh, lbmakht, lbmanv, lbngay, lbsoluong, lbMaKM,lbtongtien;
+    JLabel lbmahd, lbmakh, lbmakht, lbmanv, lbngay, lbsoluong, lbMaKM,lbtongtien;
 
-    private JTextField txtmahd, txtsoluong, txttongtien;
+    JTextField txtmahd, txtsoluong, txttongtien;
 
-    private JDateChooser txtngay;
+    JDateChooser txtngay;
 
     public HoaDonDialog() {
         initComponents();

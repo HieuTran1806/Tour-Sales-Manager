@@ -1,21 +1,18 @@
 package org.example.gui.helper;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
-/**
- *
- * @author Nhat
- */
+
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DateHelper {
-    private static final String DEFAULT_FORMAT = "dd/MM/yyyy";
+    static String DEFAULT_FORMAT = "dd/MM/yyyy";
 
     public static String dateToString(Date date) {
         if (date == null) {

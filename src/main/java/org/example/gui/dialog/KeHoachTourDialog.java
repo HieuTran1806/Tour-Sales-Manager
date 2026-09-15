@@ -1,5 +1,7 @@
 package org.example.gui.dialog;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.NhanVienBUS;
 import org.example.bus.KeHoachTourBUS;
 import org.example.dto.NhanVienDTO;
@@ -7,36 +9,37 @@ import org.example.dto.KeHoachTourDTO;
 import org.example.gui.panel.UIColors;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeHoachTourDialog extends JDialog {
     // define jlabel and txt
-    private JLabel jlbMaKHTour, jlbNgayKhoiHanh, jlbNgayKetThuc, jlbTongSoVe, jlbTongChi, jlbTongThu, jlbSoVeConLai, jlbTrangThai, jlbMaTour, jlbMaNVHD;
-    private JTextField txtMaKHTour, txtNgayKhoiHanh, txtNgayKetThuc, txtTongSoVe, txtTongChi, txtTongThu, txtSoVeConLai, txtMaTour;
+
+    JLabel jlbMaKHTour, jlbNgayKhoiHanh, jlbNgayKetThuc, jlbTongSoVe, jlbTongChi, jlbTongThu, jlbSoVeConLai, jlbTrangThai, jlbMaTour, jlbMaNVHD;
+    JTextField txtMaKHTour, txtNgayKhoiHanh, txtNgayKetThuc, txtTongSoVe, txtTongChi, txtTongThu, txtSoVeConLai, txtMaTour;
 
     // combobox
-    private JComboBox<NhanVienDTO> cbStaff;
-    private DefaultComboBoxModel<NhanVienDTO> staffModel;
-    private JComboBox<String> cbStatus;
-    private DefaultComboBoxModel<String> statusModel;
+    JComboBox<NhanVienDTO> cbStaff;
+    DefaultComboBoxModel<NhanVienDTO> staffModel;
+    JComboBox<String> cbStatus;
+    DefaultComboBoxModel<String> statusModel;
 
     // define btn
-    private JButton saveBtn, cancelBtn;
+    JButton saveBtn, cancelBtn;
 
-    private NhanVienBUS nhanVienBUS;
-    private KeHoachTourBUS keHoachTourBUS;
-    private KeHoachTourDTO keHoachTourDTO;
+    NhanVienBUS nhanVienBUS;
+    KeHoachTourBUS keHoachTourBUS;
+    KeHoachTourDTO keHoachTourDTO;
 
-    private String maTour;
+    String maTour;
 
     // formatter
-    private LocalDate today;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    LocalDate today;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public KeHoachTourDialog(KeHoachTourBUS keHoachTourBUS, KeHoachTourDTO keHoachTourDTO, String maTour) {
         this.keHoachTourBUS = keHoachTourBUS;

@@ -1,5 +1,7 @@
 package org.example.gui.dialog;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.CTietKHTourBUS;
 import org.example.dto.CTietKHTourDTO;
 import org.example.gui.panel.UIColors;
@@ -9,18 +11,19 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeHoachTourDetailDialog extends JDialog {
-    private String maKHTour;
+    String maKHTour;
 
     // relate to table
-    private DefaultTableModel tableModel;
-    private JTable table;
-    private JScrollPane scrollPane;
+    DefaultTableModel tableModel;
+    JTable table;
+    JScrollPane scrollPane;
 
     // define btn
-    private JButton addBtn, deleteBtn, editBtn, refreshBtn;
+    JButton addBtn, deleteBtn, editBtn, refreshBtn;
 
-    private CTietKHTourBUS cTietKHTourBUS;
+    CTietKHTourBUS cTietKHTourBUS;
 
     public KeHoachTourDetailDialog(String maKHTour){
         this.maKHTour = maKHTour;

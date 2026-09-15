@@ -1,5 +1,7 @@
 package org.example.gui.dialog;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.PhieuDatTourBUS;
 import org.example.dao.PhieuDatTourDAO;
 import org.example.dao.KhachHangDAO;
@@ -16,19 +18,27 @@ import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PhieuDatTourDialog extends JDialog {
+    JButton btnDong, btnLuu;
+    JLabel txtHo, txtTen, jlbMaKH, jlbMaKeHoachTour, jlbGia;
 
-    private PhieuDatTourDAO dskhangkhtour = new PhieuDatTourDAO();
-    private PhieuDatTourPanel parentPanel;
+    JPanel jPanel33, jPanel34, jPanel35;
+
+    JTextField txtGiaVe, txtHoKH, txtMaKH, txtMaKHTour, txtTenKH;
+
+    PhieuDatTourDAO dskhangkhtour = new PhieuDatTourDAO();
+    PhieuDatTourPanel parentPanel;
     public enum Mode {
         ADD, EDIT
     }
-    private Mode mode;
-    private PhieuDatTourDTO currentKHangKHTour;
-    private PhieuDatTourDAO ds;
-    private KhachHangDAO dsKhachHang;
-    private KeHoachTourDAO dsKeHoachTour;
-    private TourDAO dsTour;
+
+    Mode mode;
+    PhieuDatTourDTO currentKHangKHTour;
+    PhieuDatTourDAO ds;
+    KhachHangDAO dsKhachHang;
+    KeHoachTourDAO dsKeHoachTour;
+    TourDAO dsTour;
 
     public PhieuDatTourDialog(Frame parent, boolean modal,
                               PhieuDatTourDAO ds, Mode mode, PhieuDatTourDTO khangkhtour) {
@@ -369,21 +379,4 @@ public class PhieuDatTourDialog extends JDialog {
             txtGiaVe.setText(String.valueOf(currentKHangKHTour.getGiaVe()));
         }
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton btnDong;
-    private JButton btnLuu;
-    private JLabel txtHo;
-    private JLabel txtTen;
-    private JLabel jlbMaKH;
-    private JLabel jlbMaKeHoachTour;
-    private JLabel jlbGia;
-    private JPanel jPanel33;
-    private JPanel jPanel34;
-    private JPanel jPanel35;
-    private JTextField txtGiaVe;
-    private JTextField txtHoKH;
-    private JTextField txtMaKH;
-    private JTextField txtMaKHTour;
-    private JTextField txtTenKH;
 }

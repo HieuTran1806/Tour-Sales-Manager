@@ -1,6 +1,8 @@
 package org.example.gui.dialog;
 
 import com.toedter.calendar.JDateChooser;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.NhanVienBUS;
 import org.example.dao.NhanVienDAO;
 import org.example.dto.NhanVienDTO;
@@ -11,14 +13,26 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class NhanVienDialog extends JDialog {
+    Mode mode;
+    NhanVienDTO currentNhanVien;
+    NhanVienDAO ds;
+
+    JButton btnHuy, btnLuu;
+
+    JDateChooser jDateChooser1;
+
+    JLabel jLabel1, jLabel2, jLabel3, jLabel4, jLabel5, jLabel6, jLabel7;
+
+    JPanel jPanel1, jPanel2, jPanel3, jPanel4, jPanel5, jPanel6, jPanel7;
+
+    JTextField txtChucVu, txtDiaChi, txtHoNV, txtMaNV, txtSoDienThoai, txtTenNV;
+
     public enum Mode {
         ADD,
         EDIT
     }
-    private Mode mode;
-    private NhanVienDTO currentNhanVien;
-    private NhanVienDAO ds;
 
     public NhanVienDialog(java.awt.Frame parent, boolean modal,
                           NhanVienDAO ds, Mode mode,
@@ -515,14 +529,4 @@ public class NhanVienDialog extends JDialog {
         txtSoDienThoai.setText(nv.getSdt());
         txtDiaChi.setText(nv.getDiaChi());
     }
-
-    private JButton btnHuy, btnLuu;
-
-    private JDateChooser jDateChooser1;
-
-    private JLabel jLabel1, jLabel2, jLabel3, jLabel4, jLabel5, jLabel6, jLabel7;
-
-    private JPanel jPanel1, jPanel2, jPanel3, jPanel4, jPanel5, jPanel6, jPanel7;
-
-    private JTextField txtChucVu, txtDiaChi, txtHoNV, txtMaNV, txtSoDienThoai, txtTenNV;
 }

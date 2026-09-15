@@ -74,7 +74,7 @@ public class CTrinhKMDAO {
             pstmt.setString(2, ct.getTenKM());
             pstmt.setDate(3, java.sql.Date.valueOf(ct.getNgayBD()));
             pstmt.setDate(4, java.sql.Date.valueOf(ct.getNgayKT()));
-            pstmt.setBoolean(5,ct.getHinhThucKM() );
+            pstmt.setBoolean(5,ct.isHinhThucKM() );
             pstmt.setFloat(6, ct.getChietKhau());
             pstmt.setString(7, ct.getGhiChu());
             int rowsAffected = pstmt.executeUpdate();
@@ -103,7 +103,7 @@ public class CTrinhKMDAO {
             pstmt.setString(1, ct.getTenKM());
             pstmt.setDate(2, java.sql.Date.valueOf(ct.getNgayBD()));
             pstmt.setDate(3, java.sql.Date.valueOf(ct.getNgayKT()));
-            pstmt.setBoolean(4, ct.getHinhThucKM());
+            pstmt.setBoolean(4, ct.isHinhThucKM());
             pstmt.setFloat(5, ct.getChietKhau());
             pstmt.setString(6, ct.getGhiChu());
             pstmt.setString(7, ct.getMaKM());

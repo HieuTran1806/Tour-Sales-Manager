@@ -1,5 +1,7 @@
 package org.example.gui.dialog;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.*;
 import org.example.dto.*;
 import org.example.gui.panel.UIColors;
@@ -9,11 +11,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DiaDiemDialog extends JDialog {
-    private DiaDiemBUS bus;
-    private DiaDiemDTO dd;
-    private boolean sua=false;
-    private String maDiaDiemCu = "";
+    DiaDiemBUS bus;
+    DiaDiemDTO dd;
+    boolean sua=false;
+    String maDiaDiemCu = "";
 
     public DiaDiemDialog() {
         this.bus=new DiaDiemBUS();
@@ -36,7 +39,7 @@ public class DiaDiemDialog extends JDialog {
         txtmadiadiem.setText(dd.getMaDiaDiem());
         txtmadiadiem.setEnabled(false);
         txttendd.setText(dd.getTenDiaDiem());
-        txtdiachi.setText(dd.getdiachi());
+        txtdiachi.setText(dd.getDiaChi());
         txtquocgia.setText(dd.getQuocGia());
     }
 

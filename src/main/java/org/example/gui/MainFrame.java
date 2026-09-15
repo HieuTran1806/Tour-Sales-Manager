@@ -11,13 +11,13 @@ import javax.swing.*;
 
 import org.example.login.DangNhap;
 
-public class _MainFrame extends JFrame {
+public class MainFrame extends JFrame {
     //layout
     private CardLayout cardLayout;
     private JPanel contentArea;
     private JButton activeButton;
 
-    public _MainFrame(TaiKhoanDTO taiKhoanDangNhap) {
+    public MainFrame(TaiKhoanDTO taiKhoanDangNhap) {
         // Set favicon
         try {
             ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("logosgu.png")));

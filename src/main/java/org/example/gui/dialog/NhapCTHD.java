@@ -7,6 +7,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.CTHoaDonBUS;
 import org.example.bus.HoaDonBUS;
 import org.example.bus.KhachHangBUS;
@@ -18,11 +21,17 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class NhapCTHD extends JDialog {
-    private String mahd;
-    private int soluong;
-    private CTHoaDonBUS bus;
-    public HoaDonBUS hdbus;
+    String mahd;
+    int soluong;
+    CTHoaDonBUS bus;
+
+    private HoaDonBUS hdbus;
+
+    JButton btnluu;
+    JScrollPane jScrollPane1;
+    JTable tblnhapct;
 
     public NhapCTHD(Frame parent, boolean modal, String mahd, int soluong) {
         super(parent, modal);
@@ -187,9 +196,4 @@ public class NhapCTHD extends JDialog {
     private void tblnhapctKeyPressed(KeyEvent evt) {
         // TODO add your handling code here:
     }
-
-    // variables
-    private JButton btnluu;
-    private JScrollPane jScrollPane1;
-    private JTable tblnhapct;
 }

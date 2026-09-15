@@ -1,5 +1,7 @@
 package org.example.gui.dialog;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.DiaDiemBUS;
 import org.example.bus.LoaiTourBUS;
 import org.example.bus.TourBUS;
@@ -13,27 +15,28 @@ import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class TourDiaLog extends JDialog {
     // label and txt
-    private JLabel jlbMaTour, jlbTen, jlbSoNgay, jlbDonGia, jlbSoCho, jlbDiaDiemKhoiHanh, jlbMaLoaiTour, jlbImgLink, jlbPreview, jlbMaDiaDiem;
-    private JTextField txtMaTour, txtTen, txtSoNgay, txtDonGia, txtSoCho, txtDiaDiemKhoiHanh, txtImgLink;
+    JLabel jlbMaTour, jlbTen, jlbSoNgay, jlbDonGia, jlbSoCho, jlbDiaDiemKhoiHanh, jlbMaLoaiTour, jlbImgLink, jlbPreview, jlbMaDiaDiem;
+    JTextField txtMaTour, txtTen, txtSoNgay, txtDonGia, txtSoCho, txtDiaDiemKhoiHanh, txtImgLink;
 
     // define btn
-    private JButton saveBtn, cancelBtn, chooseImageBtn;
+    JButton saveBtn, cancelBtn, chooseImageBtn;
 
-    private String path;
+    String path;
 
-    private File fileSelected;
+    File fileSelected;
 
     // define relate panel
-    private JPanel formPanel, southPanel;
+    JPanel formPanel, southPanel;
 
-    private TourBUS tourBUS;
-    private TourDTO tourDTO;
-    private LoaiTourBUS loaiTourBUS;
-    private DiaDiemBUS diaDiemBUS;
-    private JComboBox<LoaiTourDTO> cbLoaiTours;
-    private JComboBox<DiaDiemDTO> cbDiaDiem;
+    TourBUS tourBUS;
+    TourDTO tourDTO;
+    LoaiTourBUS loaiTourBUS;
+    DiaDiemBUS diaDiemBUS;
+    JComboBox<LoaiTourDTO> cbLoaiTours;
+    JComboBox<DiaDiemDTO> cbDiaDiem;
 
     public TourDiaLog(TourBUS tourBUS, TourDTO tourDTO){
         this.tourDTO = tourDTO;
@@ -159,7 +162,7 @@ public class TourDiaLog extends JDialog {
         cbDiaDiem.addActionListener(e -> {
             DiaDiemDTO selected = (DiaDiemDTO) cbDiaDiem.getSelectedItem();
             if(selected != null){
-                txtDiaDiemKhoiHanh.setText(selected.getdiachi());
+                txtDiaDiemKhoiHanh.setText(selected.getDiaChi());
             }
         });
         formPanel.add(cbDiaDiem);
@@ -183,7 +186,7 @@ public class TourDiaLog extends JDialog {
             DiaDiemDTO dd = cbDiaDiem.getItemAt(i);
             if(dd.getMaDiaDiem().equalsIgnoreCase(tourDTO.getMaDiaDiem())){
                 cbDiaDiem.setSelectedIndex(i);
-                txtDiaDiemKhoiHanh.setText(dd.getdiachi());
+                txtDiaDiemKhoiHanh.setText(dd.getDiaChi());
                 break;
             }
         }

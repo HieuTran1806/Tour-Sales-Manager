@@ -79,7 +79,7 @@ public class CTrinhKMBUS {
     public CTrinhKMDTO getFullCTrinhKM(String maKM) {
         CTrinhKMDTO basic = dao.timCTrinhKM(maKM);
         if (basic == null) return null;
-        if (basic.getHinhThucKM()) {
+        if (basic.isHinhThucKM()) {
             KMHDDAO daoHD = new KMHDDAO();
             return daoHD.timKMHD(maKM);   // Trả về đối tượng KMHD đầy đủ
         } else {
@@ -153,12 +153,12 @@ public class CTrinhKMBUS {
                     }
                     break;
                 case "KMHD":
-                    if (ct.getHinhThucKM() && (ct.getMaKM().toLowerCase().contains(keyword.toLowerCase())||ct.getTenKM().toLowerCase().contains(keyword.toLowerCase()))) {
+                    if (ct.isHinhThucKM() && (ct.getMaKM().toLowerCase().contains(keyword.toLowerCase())||ct.getTenKM().toLowerCase().contains(keyword.toLowerCase()))) {
                         result.add(ct);
                     }
                     break;
                 case "KMTour":
-                    if (!ct.getHinhThucKM() && (ct.getMaKM().toLowerCase().contains(keyword.toLowerCase())||ct.getTenKM().toLowerCase().contains(keyword.toLowerCase()))) {
+                    if (!ct.isHinhThucKM() && (ct.getMaKM().toLowerCase().contains(keyword.toLowerCase())||ct.getTenKM().toLowerCase().contains(keyword.toLowerCase()))) {
                         result.add(ct);
                     }
                     break;

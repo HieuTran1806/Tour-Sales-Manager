@@ -43,7 +43,7 @@ public class DiaDiemDAO {
             PreparedStatement ps=conn.prepareStatement(sql)){
             ps.setNString(1, dd.getMaDiaDiem());
             ps.setNString(2,dd.getTenDiaDiem());
-            ps.setNString(3,dd.getdiachi());
+            ps.setNString(3,dd.getDiaChi());
             ps.setNString(4,dd.getQuocGia());
 
             return ps.executeUpdate()>0;
@@ -72,7 +72,7 @@ public class DiaDiemDAO {
         try(Connection conn= MyConnection.getConnection();
             PreparedStatement ps=conn.prepareStatement(sql)){
             ps.setNString(1, dd.getTenDiaDiem());
-            ps.setNString(2,dd.getdiachi());
+            ps.setNString(2,dd.getDiaChi());
             ps.setNString(3,dd.getQuocGia());
             ps.setNString(4,dd.getMaDiaDiem());
             return ps.executeUpdate()>0;

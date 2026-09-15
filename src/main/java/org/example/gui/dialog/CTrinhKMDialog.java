@@ -1,6 +1,8 @@
 package org.example.gui.dialog;
 
 import com.toedter.calendar.JDateChooser;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.CTrinhKMBUS;
 import org.example.dao.TourDAO;
 import org.example.dto.CTrinhKMDTO;
@@ -23,10 +25,11 @@ import java.util.Date;
 
 import java.time.LocalDate;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CTrinhKMDialog extends JDialog {
-    private CTrinhKMBUS bus;
-    private boolean isEdit = false;
-    private CardLayout card;
+    CTrinhKMBUS bus;
+    boolean isEdit = false;
+    CardLayout card;
 
     public CTrinhKMDialog() {
         initComponents();
@@ -146,7 +149,7 @@ public class CTrinhKMDialog extends JDialog {
         txtTenctkm.setText(ct.getTenKM());
         txtNgayBD.setDate(ct.getNgayBD() != null ? java.sql.Date.valueOf(ct.getNgayBD()) : null);
         txtNgayKT.setDate(ct.getNgayKT() != null ? java.sql.Date.valueOf(ct.getNgayKT()) : null);
-        if (ct.getHinhThucKM()) {          // KMHD
+        if (ct.isHinhThucKM()) {          // KMHD
             rdoHd.setSelected(true);
             card.show(pnlSwitch, "card2");
             if (ct instanceof KMHDDTO) {

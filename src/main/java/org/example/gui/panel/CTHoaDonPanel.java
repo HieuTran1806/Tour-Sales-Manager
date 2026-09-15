@@ -1,6 +1,8 @@
 
 package org.example.gui.panel;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.gui.dialog.CTHoaDonDialog;
 
 import java.awt.*;
@@ -13,10 +15,11 @@ import org.example.gui.helper.ExcelHelper;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CTHoaDonPanel extends JPanel {
-    private DefaultTableModel model;
-    private CTHoaDonBUS bus;
-    private int soluongcanxoa=0;
+    DefaultTableModel model;
+    CTHoaDonBUS bus;
+    int soluongcanxoa=0;
 
     public CTHoaDonPanel() {
         initComponents();

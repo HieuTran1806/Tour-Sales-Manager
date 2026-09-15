@@ -33,7 +33,7 @@ public class DiaDiemBUS {
 
     public DiaDiemDTO timDiaDiemTheoMa(String maDiaDiem){
         for(DiaDiemDTO dd : ds){
-            if(dd.MaDiaDiem.trim().equalsIgnoreCase(maDiaDiem))
+            if(dd.getMaDiaDiem().trim().equalsIgnoreCase(maDiaDiem))
                 return dd;
         }
         return null;

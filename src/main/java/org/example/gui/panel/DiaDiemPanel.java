@@ -35,7 +35,7 @@ public class DiaDiemPanel extends JPanel {
         if(ds==null) return;
         for(DiaDiemDTO dd: ds){
             model.addRow(new Object[]{
-                    dd.getMaDiaDiem(), dd.getTenDiaDiem(), dd.getdiachi(),dd.getQuocGia()});
+                    dd.getMaDiaDiem(), dd.getTenDiaDiem(), dd.getDiaChi(),dd.getQuocGia()});
         }
     }
     private void loadData(){
@@ -45,7 +45,7 @@ public class DiaDiemPanel extends JPanel {
         if(ds==null) return;
         for(DiaDiemDTO dd: ds){
             model.addRow(new Object[]{
-                    dd.getMaDiaDiem() ,dd.getTenDiaDiem(),dd.getdiachi(),dd.getQuocGia()});
+                    dd.getMaDiaDiem() ,dd.getTenDiaDiem(),dd.getDiaChi(),dd.getQuocGia()});
         }
     }
 
@@ -56,7 +56,7 @@ public class DiaDiemPanel extends JPanel {
         if(ds==null) return;
         for(DiaDiemDTO dd: ds){
             model.addRow(new Object[]{
-                    dd.getMaDiaDiem(), dd.getTenDiaDiem(),dd.getdiachi(),dd.getQuocGia()});
+                    dd.getMaDiaDiem(), dd.getTenDiaDiem(),dd.getDiaChi(),dd.getQuocGia()});
         }
     }
 

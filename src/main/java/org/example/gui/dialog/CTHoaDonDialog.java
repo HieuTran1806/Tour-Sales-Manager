@@ -5,16 +5,20 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.*;
 import org.example.dto.*;
 import org.example.gui.panel.UIColors;
 
 import javax.swing.*;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CTHoaDonDialog extends JDialog {
-    private CTHoaDonBUS bus;
-    private HoaDonBUS hdbus;
-    private KhachHangBUS khbus;
+    CTHoaDonBUS bus;
+    HoaDonBUS hdbus;
+    KhachHangBUS khbus;
 
     public CTHoaDonDialog() {
         initComponents();

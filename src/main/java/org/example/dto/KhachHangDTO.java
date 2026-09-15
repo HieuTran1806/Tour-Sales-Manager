@@ -1,8 +1,15 @@
 package org.example.dto;
 
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.time.LocalDate;
+
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KhachHangDTO extends Person {
-    private String maKH;
+    String maKH;
 
     public KhachHangDTO() {
     }
@@ -11,13 +18,4 @@ public class KhachHangDTO extends Person {
         super(ho, ten, diaChi, sdt, ngaySinh);
         this.maKH = maKH;
     }
-
-    public String getMaKH() {
-        return maKH;
-    }
-
-    public void setMaKH(String maKH) {
-        this.maKH = maKH;
-    }
-
 }

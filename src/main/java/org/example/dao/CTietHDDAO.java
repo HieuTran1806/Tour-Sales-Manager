@@ -7,10 +7,6 @@ import java.sql.*;
 import org.example.dto.CTietHDDTO;
 import java.util.*;
 
-/**
- *
- * @author Nhat
- */
 public class CTietHDDAO {
     public CTietHDDAO() {
     }
@@ -47,11 +43,9 @@ public class CTietHDDAO {
         }
         catch(SQLException ex){
             ex.printStackTrace();
-
         }
         return ds;
     }
-
 
     public CTietHDDTO maptoCthd(ResultSet rs) throws SQLException{
         String MaHD =rs.getString("MaHD");

@@ -1,9 +1,17 @@
 package org.example.dto;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
+
 import java.time.LocalDate;
 
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KMHDDTO extends CTrinhKMDTO {
-    private float tongTienApDung;
+    float tongTienApDung;
 
     public KMHDDTO() {
     }
@@ -12,13 +20,4 @@ public class KMHDDTO extends CTrinhKMDTO {
         super(maKM, tenKM, ngayBD, ngayKT, hinhThucKM, chietKhau, ghiChu);
         this.tongTienApDung = tongTienApDung;
     }
-
-    public float getTongTienApDung() {
-        return tongTienApDung;
-    }
-
-    public void setTongTienApDung(float tongTienApDung) {
-        this.tongTienApDung = tongTienApDung;
-    }
-
 }

@@ -3,6 +3,8 @@ package org.example.gui.dialog;
 
 
 import com.toedter.calendar.JDateChooser;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.KhachHangBUS;
 import org.example.dao.KhachHangDAO;
 import org.example.dto.KhachHangDTO;
@@ -13,18 +15,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.LocalDate;
-
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KhachHangDialog extends JDialog {
-
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(KhachHangDialog.class.getName());
-    private KhachHangDAO dsKhachHang = new KhachHangDAO();
-    private KhachHangPanel parentPanel;
+    KhachHangDAO dsKhachHang = new KhachHangDAO();
+    KhachHangPanel parentPanel;
     public enum Mode {
         ADD, EDIT
     }
-    private Mode mode;
-    private KhachHangDTO currentKhachHang;
-    private KhachHangDAO ds;
+    Mode mode;
+    KhachHangDTO currentKhachHang;
+    KhachHangDAO ds;
 
     public KhachHangDialog(java.awt.Frame parent, boolean modal, KhachHangDAO ds, Mode mode, KhachHangDTO kh) {
         super(parent, modal);
@@ -45,9 +45,7 @@ public class KhachHangDialog extends JDialog {
         }
     }
 
-
     @SuppressWarnings("unchecked")
-
     private void initComponents() {
 
         jPanel22 = new JPanel();

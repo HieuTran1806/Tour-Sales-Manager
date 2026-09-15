@@ -1,5 +1,7 @@
 package org.example.gui.dialog;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.CTietKHTourBUS;
 import org.example.dto.CTietKHTourDTO;
 import org.example.gui.panel.UIColors;
@@ -9,15 +11,16 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CTietKHTourDialog extends JDialog {
-    private JLabel jlbMaCTietKHTour, jlbNgayThucHien, jlbTongChi, jlbTienO, jlbTienAn, jlbTienDiLai, jlbDiemDi, jlbDiemDen, jlbMaKHtour;
-    private JTextField txtMaCTietKHTour, txtNgayThucHien, txtTongChi, txtTienO, txtTienAn, txtTienDiLai, txtDiemDi, txtDiemDen, txtMaKHtour;
-    private JButton saveBtn, cancelBtn;
-    private CTietKHTourBUS cTietKHTourBUS;
-    private CTietKHTourDTO cTietKHTourDTO;
-    private String maKHTour;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private LocalDate today;
+    JLabel jlbMaCTietKHTour, jlbNgayThucHien, jlbTongChi, jlbTienO, jlbTienAn, jlbTienDiLai, jlbDiemDi, jlbDiemDen, jlbMaKHtour;
+    JTextField txtMaCTietKHTour, txtNgayThucHien, txtTongChi, txtTienO, txtTienAn, txtTienDiLai, txtDiemDi, txtDiemDen, txtMaKHtour;
+    JButton saveBtn, cancelBtn;
+    CTietKHTourBUS cTietKHTourBUS;
+    CTietKHTourDTO cTietKHTourDTO;
+    String maKHTour;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    LocalDate today;
 
     public CTietKHTourDialog(CTietKHTourBUS cTietKHTourBUS, CTietKHTourDTO cTietKHTourDTO, String maKHTour){
         this.cTietKHTourBUS = cTietKHTourBUS;

@@ -59,7 +59,7 @@ public class CTrinhKMPanel extends JPanel {
                     km.getTenKM(),
                     km.getNgayBD().format(formatter),
                     km.getNgayKT().format(formatter),
-                    km.getHinhThucKM() ? "KMHD" : "KMTour",
+                    km.isHinhThucKM() ? "KMHD" : "KMTour",
                     km.getChietKhau(),
                     km.getGhiChu()
             });
@@ -75,7 +75,7 @@ public class CTrinhKMPanel extends JPanel {
                     km.getTenKM(),
                     km.getNgayBD().format(formatter),
                     km.getNgayKT().format(formatter),
-                    km.getHinhThucKM() ? "KMHD" : "KMTour",
+                    km.isHinhThucKM() ? "KMHD" : "KMTour",
                     km.getChietKhau(),
                     km.getGhiChu()
             });
