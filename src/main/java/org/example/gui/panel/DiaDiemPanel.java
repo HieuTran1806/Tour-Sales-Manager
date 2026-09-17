@@ -7,6 +7,8 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 import com.toedter.calendar.JDateChooser;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.gui.dialog.DiaDiemDialog;
 import org.example.dao.*;
 import org.example.bus.*;
@@ -16,9 +18,27 @@ import org.example.gui.helper.ExcelHelper;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DiaDiemPanel extends JPanel {
-    private DefaultTableModel model;
-    private DiaDiemBUS bus;
+    // define variables
+    JButton btnreset, btnsua, btnthem, btnxoa;
+
+    JComboBox<String> cbtim;
+
+    JScrollPane jScrollPane2;
+
+    JLabel lbname, lbtim;
+
+    JPanel pnlfooter, pnlheader, pnltable, pnlsearch;
+
+    JTable tbldd;
+
+    JDateChooser txtdate;
+
+    JTextField txttendd;
+
+    DefaultTableModel model;
+    DiaDiemBUS bus;
 
     public DiaDiemPanel() {
         initComponents();
@@ -73,7 +93,6 @@ public class DiaDiemPanel extends JPanel {
         btnxoa = new JButton();
         btnsua = new JButton();
         btnreset = new JButton();
-        btnxuat = new JButton();
         pnltable = new JPanel();
         jScrollPane2 = new JScrollPane();
         tbldd = new JTable();
@@ -128,9 +147,6 @@ public class DiaDiemPanel extends JPanel {
 
         lamMoi();
         pnlfooter.add(btnreset);
-
-        xuatExcel();
-        pnlfooter.add(btnxuat);
 
         add(pnlfooter, BorderLayout.PAGE_END);
 
@@ -236,13 +252,6 @@ public class DiaDiemPanel extends JPanel {
         });
     }
 
-    private void xuatExcel(){
-        btnxuat = createBtn("Xuất excel", UIColors.EXPORT_EXCEL);
-        btnxuat.addActionListener(v -> {
-            ExcelHelper.xuatExcel(tbldd, this, "Danh sach hoa don");
-        });
-    }
-
     private void txtTenDdKeyReleased(KeyEvent evt) {
         // TODO add your handling code here:
         String ten = txttendd.getText().trim();
@@ -273,21 +282,4 @@ public class DiaDiemPanel extends JPanel {
             }
         }
     }
-
-    // define variables
-    private JButton btnreset, btnsua, btnthem, btnxoa, btnxuat;
-
-    private JComboBox<String> cbtim;
-
-    private JScrollPane jScrollPane2;
-
-    private JLabel lbname, lbtim;
-
-    private JPanel pnlfooter, pnlheader, pnltable, pnlsearch;
-
-    private JTable tbldd;
-
-    private JDateChooser txtdate;
-
-    private JTextField txttendd;
 }

@@ -63,39 +63,39 @@ public class PhieuDatTourDialog extends JDialog {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void initComponents() {
-
-        btnLuu = new JButton();
-        btnDong = new JButton();
-        jPanel33 = new JPanel();
-        jlbMaKH = new JLabel();
-        txtMaKH = new JTextField();
-        jPanel34 = new JPanel();
-        jlbMaKeHoachTour = new JLabel();
-        txtMaKHTour = new JTextField();
-        jPanel35 = new JPanel();
-        jlbGia = new JLabel();
-        txtGiaVe = new JTextField();
-        txtHo = new JLabel();
-        txtHoKH = new JTextField();
-        txtTen = new JLabel();
-        txtTenKH = new JTextField();
-
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
+        // 1. Khởi tạo các thành phần UI
+        btnLuu = new JButton("Lưu");
+        btnDong = new JButton("Đóng");
+
+        jlbMaKH = new JLabel("Mã khách hàng:");
+        txtMaKH = new JTextField();
+
+        txtHo = new JLabel("Họ:");
+        txtHoKH = new JTextField();
+        txtHoKH.setEnabled(false);
+
+        txtTen = new JLabel("Tên:");
+        txtTenKH = new JTextField();
+        txtTenKH.setEnabled(false);
+
+        jlbMaKeHoachTour = new JLabel("Mã kế hoạch - Tour:");
+        txtMaKHTour = new JTextField();
+
+        jlbGia = new JLabel("Giá vé:");
+        txtGiaVe = new JTextField();
+        txtGiaVe.setEnabled(false);
+
+        // Events & Verifiers
         save();
         cancel();
 
-        jlbMaKH.setText("Mã khách hàng:");
-
         txtMaKH.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) {
-                txtMaKHFocusLost(evt);
-            }
+            public void focusLost(FocusEvent evt) { txtMaKHFocusLost(evt); }
         });
         txtMaKH.addActionListener(this::txtMaKHActionPerformed);
-
         txtMaKH.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
@@ -105,45 +105,17 @@ public class PhieuDatTourDialog extends JDialog {
                     return false;
                 }
                 for (KhachHangDTO kh : dsKhachHang.layDanhSachKHang()) {
-                    if (kh.getMaKH().equals(text)) {
-                        return true;
-                    }
+                    if (kh.getMaKH().equals(text)) return true;
                 }
                 JOptionPane.showMessageDialog(PhieuDatTourDialog.this, "Mã khách hàng không tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         });
 
-        javax.swing.GroupLayout jPanel33Layout = new javax.swing.GroupLayout(jPanel33);
-        jPanel33.setLayout(jPanel33Layout);
-        jPanel33Layout.setHorizontalGroup(
-                jPanel33Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel33Layout.createSequentialGroup()
-                                .addGap(59, 59, 59)
-                                .addComponent(jlbMaKH)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtMaKH, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(49, Short.MAX_VALUE))
-        );
-        jPanel33Layout.setVerticalGroup(
-                jPanel33Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel33Layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(jPanel33Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jlbMaKH)
-                                        .addComponent(txtMaKH, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(15, Short.MAX_VALUE))
-        );
-
-        jlbMaKeHoachTour.setText("Mã kế hoạch - Tour:");
-
         txtMaKHTour.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) {
-                txtMaKHTourFocusLost(evt);
-            }
+            public void focusLost(FocusEvent evt) { txtMaKHTourFocusLost(evt); }
         });
         txtMaKHTour.addActionListener(this::txtMaKHTourActionPerformed);
-
         txtMaKHTour.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
@@ -153,131 +125,61 @@ public class PhieuDatTourDialog extends JDialog {
                     return false;
                 }
                 for (KeHoachTourDTO kt : dsKeHoachTour.getAllKeHoachTours()) {
-                    if (kt.getMaKHTour().equals(text)) {
-                        return true;
-                    }
+                    if (kt.getMaKHTour().equals(text)) return true;
                 }
                 JOptionPane.showMessageDialog(PhieuDatTourDialog.this, "Mã kế hoạch - Tour không tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         });
 
-        javax.swing.GroupLayout jPanel34Layout = new javax.swing.GroupLayout(jPanel34);
-        jPanel34.setLayout(jPanel34Layout);
-        jPanel34Layout.setHorizontalGroup(
-                jPanel34Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel34Layout.createSequentialGroup()
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jlbMaKeHoachTour)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtMaKHTour, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(41, 41, 41))
-        );
-        jPanel34Layout.setVerticalGroup(
-                jPanel34Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel34Layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(jPanel34Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jlbMaKeHoachTour)
-                                        .addComponent(txtMaKHTour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(15, Short.MAX_VALUE))
-        );
-
-        jlbGia.setText("Giá vé:");
-
-        txtGiaVe.setEnabled(false);
         txtGiaVe.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) {
-                txtGiaVeFocusLost(evt);
-            }
+            public void focusLost(FocusEvent evt) { txtGiaVeFocusLost(evt); }
         });
         txtGiaVe.addActionListener(this::txtGiaVeActionPerformed);
-
-        javax.swing.GroupLayout jPanel35Layout = new javax.swing.GroupLayout(jPanel35);
-        jPanel35.setLayout(jPanel35Layout);
-        jPanel35Layout.setHorizontalGroup(
-                jPanel35Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel35Layout.createSequentialGroup()
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jlbGia)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtGiaVe, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(41, 41, 41))
-        );
-        jPanel35Layout.setVerticalGroup(
-                jPanel35Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel35Layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(jPanel35Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jlbGia)
-                                        .addComponent(txtGiaVe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(15, Short.MAX_VALUE))
-        );
-
-        txtHo.setText("Họ:");
-
-        txtHoKH.setEnabled(false);
         txtHoKH.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) {
-                txtHoKHFocusLost(evt);
-            }
+            public void focusLost(FocusEvent evt) { txtHoKHFocusLost(evt); }
         });
 
-        txtTen.setText("Tên:");
+        // main layout
+        setLayout(new BorderLayout(10, 10));
 
-        txtTenKH.setEnabled(false);
+        // 4 rows 2 cols
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 15));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Căn lề padding 4 góc
 
-        javax.swing.GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(jPanel33, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jPanel34, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addContainerGap())
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(58, 58, 58)
-                                .addComponent(btnLuu)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnDong)
-                                .addGap(61, 61, 61))
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jPanel35, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addContainerGap())
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(43, 43, 43)
-                                .addComponent(txtHo)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtHoKH, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtTen)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtTenKH, GroupLayout.PREFERRED_SIZE, 103, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(jPanel33, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(txtHo)
-                                        .addComponent(txtHoKH, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(txtTen)
-                                        .addComponent(txtTenKH, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
-                                .addComponent(jPanel34, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel35, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addGap(14, 14, 14)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(btnLuu)
-                                        .addComponent(btnDong))
-                                .addGap(33, 33, 33))
-        );
+        formPanel.add(jlbMaKH);
+        formPanel.add(txtMaKH);
+
+        JPanel hoPanel = new JPanel(new BorderLayout(5, 0));
+        hoPanel.add(txtHo, BorderLayout.WEST);
+        hoPanel.add(txtHoKH, BorderLayout.CENTER);
+
+        JPanel tenPanel = new JPanel(new BorderLayout(5, 0));
+        tenPanel.add(txtTen, BorderLayout.WEST);
+        tenPanel.add(txtTenKH, BorderLayout.CENTER);
+
+        JPanel namePanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        namePanel.add(hoPanel);
+        namePanel.add(tenPanel);
+
+        formPanel.add(new JLabel("Họ và Tên khách:"));
+        formPanel.add(namePanel);
+
+        formPanel.add(jlbMaKeHoachTour);
+        formPanel.add(txtMaKHTour);
+
+        formPanel.add(jlbGia);
+        formPanel.add(txtGiaVe);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
+        buttonPanel.add(btnLuu);
+        buttonPanel.add(btnDong);
+
+        add(formPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+
         pack();
+        setLocationRelativeTo(null);
     }
 
     private JButton createBtn(String text, Color color){

@@ -20,7 +20,7 @@ public class TourPanel extends JPanel {
 
     // define button
 
-    private JButton addBtn, deleteBtn, editBtn, refreshBtn, detailBtn, bookingBtn;
+    private JButton addBtn, deleteBtn, editBtn, refreshBtn, detailBtn;
 
     // relate to table
     private JTable table;
@@ -104,8 +104,7 @@ public class TourPanel extends JPanel {
         southPanel.add(editBtn);
         viewDetail();
         southPanel.add(detailBtn);
-        booking();
-        southPanel.add(bookingBtn);
+
         refresh();
         southPanel.add(refreshBtn);
 
@@ -244,13 +243,6 @@ public class TourPanel extends JPanel {
         });
     }
 
-    private void booking(){
-        bookingBtn = createBtn("Booking", UIColors.BOOKING);
-        bookingBtn.addActionListener(e -> {
-
-        });
-    }
-
     private void refresh(){
         refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(e -> {
@@ -301,7 +293,6 @@ public class TourPanel extends JPanel {
             deleteBtn.setEnabled(hadSelection);
             editBtn.setEnabled(hadSelection);
             detailBtn.setEnabled(hadSelection);
-            bookingBtn.setEnabled(hadSelection);
         });
     }
 }

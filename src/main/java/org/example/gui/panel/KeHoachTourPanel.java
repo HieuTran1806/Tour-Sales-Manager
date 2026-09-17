@@ -1,12 +1,16 @@
 package org.example.gui.panel;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.NhanVienBUS;
 import org.example.bus.KeHoachTourBUS;
 import org.example.bus.TourBUS;
+import org.example.dao.PhieuDatTourDAO;
 import org.example.dto.KeHoachTourDTO;
 import org.example.dto.TourDTO;
 import org.example.gui.dialog.KeHoachTourDetailDialog;
 import org.example.gui.dialog.KeHoachTourDialog;
+import org.example.gui.dialog.PhieuDatTourDialog;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,24 +18,40 @@ import java.awt.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
+
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeHoachTourPanel extends JPanel {
     // cmb
-    private final JComboBox<TourDTO> cbTour;
-    private DefaultComboBoxModel<TourDTO> toursModel;
+
+    final JComboBox<TourDTO> cbTour;
+
+    DefaultComboBoxModel<TourDTO> toursModel;
 
     // define btn
-    private JButton addBtn, deleteBtn, editBtn, detailsBtn, refreshBtn;
+
+    JButton addBtn, deleteBtn, editBtn, detailsBtn, refreshBtn, bookingBtn;
 
     // relate to table
-    private DefaultTableModel tableModel;
-    private JTable table;
-    private JScrollPane scrollPane;
 
-    private KeHoachTourBUS keHoachTourBUS;
-    private NhanVienBUS nhanVienBUS;
-    private TourBUS tourBUS;
-    private JLabel jlbChonTour;
-    private ArrayList<KeHoachTourDTO> lsKeHoachTours;
+    DefaultTableModel tableModel;
+
+    JTable table;
+
+    JScrollPane scrollPane;
+
+
+    KeHoachTourBUS keHoachTourBUS;
+
+    NhanVienBUS nhanVienBUS;
+
+    TourBUS tourBUS;
+
+    JLabel jlbChonTour;
+
+    ArrayList<KeHoachTourDTO> lsKeHoachTours;
+
+    PhieuDatTourDialog phieuDatTourDialog;
+    PhieuDatTourDAO dao = new PhieuDatTourDAO();
 
     // formatter
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -41,6 +61,7 @@ public class KeHoachTourPanel extends JPanel {
         tourBUS = new TourBUS();
         nhanVienBUS = new NhanVienBUS();
         cbTour = new JComboBox<>();
+
         init();
 
         // first load table
@@ -93,6 +114,8 @@ public class KeHoachTourPanel extends JPanel {
         southPanel.add(editBtn);
         viewDetail();
         southPanel.add(detailsBtn);
+        booking();
+        southPanel.add(bookingBtn);
         refresh();
         southPanel.add(refreshBtn);
 
@@ -176,6 +199,14 @@ public class KeHoachTourPanel extends JPanel {
         loadTable(selectedTour.getMaTour());
     }
 
+    private void booking(){
+        bookingBtn = createBtn("Booking", UIColors.BOOKING);
+        bookingBtn.addActionListener(e -> {
+            phieuDatTourDialog = new PhieuDatTourDialog(null, true, dao, PhieuDatTourDialog.Mode.ADD, null);
+            phieuDatTourDialog.setVisible(true);
+        });
+    }
+
     private void delete(){
         deleteBtn = createBtn("Xóa kế hoạch tour", UIColors.DELETE);
         deleteBtn.setEnabled(false);
@@ -252,6 +283,7 @@ public class KeHoachTourPanel extends JPanel {
             deleteBtn.setEnabled(hadSelection);
             editBtn.setEnabled(hadSelection);
             detailsBtn.setEnabled(hadSelection);
+            bookingBtn.setEnabled(hadSelection);
         });
     }
 }

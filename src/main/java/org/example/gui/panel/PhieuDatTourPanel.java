@@ -20,7 +20,7 @@ public class PhieuDatTourPanel extends JPanel {
     PhieuDatTourDAO ds = new PhieuDatTourDAO();
     KhachHangDAO dsKH = new KhachHangDAO();
     PhieuDatTourBUS khangkhtBUS = new PhieuDatTourBUS();
-    PhieuDatTourDialog khangkhtDialog;
+    PhieuDatTourDialog phieuDatTourDialog;
 
     public PhieuDatTourPanel() {
         khangkhtBUS = new PhieuDatTourBUS();
@@ -153,8 +153,8 @@ public class PhieuDatTourPanel extends JPanel {
     private void them(){
         btnThem = createBtn("Thêm", UIColors.ADD);
         btnThem.addActionListener(v -> {
-            khangkhtDialog = new PhieuDatTourDialog(null, true, ds, PhieuDatTourDialog.Mode.ADD, null);
-            khangkhtDialog.setVisible(true);
+            phieuDatTourDialog = new PhieuDatTourDialog(null, true, ds, PhieuDatTourDialog.Mode.ADD, null);
+            phieuDatTourDialog.setVisible(true);
 
             loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
         });
@@ -192,8 +192,8 @@ public class PhieuDatTourPanel extends JPanel {
                 String maKHTour = (String) jTable2.getValueAt(i, 3);
                 PhieuDatTourDTO khangkht = khangkhtBUS.timKiemKHang_KHTourTheoMaKHTour(maKHTour);
                 if (khangkht != null && khangkht.getMaKHang().equals(maKHang)) {
-                    khangkhtDialog = new PhieuDatTourDialog(null, true, ds, PhieuDatTourDialog.Mode.EDIT, khangkht);
-                    khangkhtDialog.setVisible(true);
+                    phieuDatTourDialog = new PhieuDatTourDialog(null, true, ds, PhieuDatTourDialog.Mode.EDIT, khangkht);
+                    phieuDatTourDialog.setVisible(true);
 
                     loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
                 }
