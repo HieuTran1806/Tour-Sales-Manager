@@ -103,7 +103,7 @@ public class KeHoachTourPanel extends JPanel {
 
     private void initTable(){
         // columns of table
-        String[] columns = {"Mã kế hoạch Tour", "Ngày khởi hành", "Ngày kết thúc", "Tổng số vé", "Tổng chi dự kiến", "Tổng thu dự kiến", "Số vé còn lại", "Trạng thái", "Mã Tour", "Mã nhân viên hướng dẫn"};
+        String[] columns = {"Mã kế hoạch Tour", "Ngày khởi hành", "Ngày kết thúc", "Tổng số vé", "Tổng chi dự kiến", "Số vé còn lại", "Trạng thái", "Mã Tour", "Mã nhân viên hướng dẫn"};
 
         tableModel = new DefaultTableModel(columns, 0);
         table = new JTable(tableModel);
@@ -170,7 +170,7 @@ public class KeHoachTourPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn tour");
             return;
         }
-        KeHoachTourDialog keHoachTourDialog = new KeHoachTourDialog(keHoachTourBUS, keHoachTourDTO,( (TourDTO)cbTour.getSelectedItem()).getMaTour());
+        KeHoachTourDialog keHoachTourDialog = new KeHoachTourDialog(keHoachTourBUS, keHoachTourDTO, tourBUS,( (TourDTO)cbTour.getSelectedItem()).getMaTour());
         keHoachTourDialog.setVisible(true);
 
         loadTable(selectedTour.getMaTour());

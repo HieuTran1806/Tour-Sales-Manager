@@ -21,6 +21,6 @@ public class TourDTO {
 
     @Override
     public String toString(){
-        return maTour + " - " + ten;
+        return maTour;
     }
 }

@@ -3,16 +3,19 @@ package org.example.bus;
 import org.example.dao.TourDAO;
 import org.example.dto.TourDTO;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 
 public class TourBUS {
     private ArrayList<TourDTO> lsTour;
     private TourDAO tourDAO;
+    private KeHoachTourBUS keHoachTourBUS;
 
     //constructor
     public TourBUS(){
         tourDAO = new TourDAO();
         lsTour = new ArrayList<>();
+        keHoachTourBUS = new KeHoachTourBUS();
     }
 
     public ArrayList<TourDTO> getAllTours(){
@@ -80,4 +83,15 @@ public class TourBUS {
         lsTour = tourDAO.getListByName(name);
         return lsTour;
     }
+
+    public int getVacantSpot(String maTour){
+        TourDTO t = getByID(maTour);
+        if(t != null){
+            return t.getSoCho();
+        }
+
+        return 0;
+    }
+
+
 }

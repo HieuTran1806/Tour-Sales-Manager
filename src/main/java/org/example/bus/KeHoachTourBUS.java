@@ -2,6 +2,7 @@ package org.example.bus;
 
 import org.example.dao.KeHoachTourDAO;
 import org.example.dto.KeHoachTourDTO;
+import org.example.dto.TourDTO;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -80,6 +81,8 @@ public class KeHoachTourBUS {
         if(t.getTongSoVe() < 0)
             return "Tổng số vé không hợp lệ";
 
+        if(t.getSoVeConLai() < 0)
+            return "Số vé còn lại không hợp lệ";
         return null;
     }
 
@@ -108,5 +111,14 @@ public class KeHoachTourBUS {
                 return true;
         }
         return false;
+    }
+
+    public int totalPricesOfTourWithId(String maTour){
+        int total = 0;
+        for(KeHoachTourDTO kt : lsKeHoachTour){
+            if(kt.getMaTour().equalsIgnoreCase(maTour))
+            total += kt.getTongSoVe();
+        }
+        return total;
     }
 }
