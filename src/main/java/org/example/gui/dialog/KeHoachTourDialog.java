@@ -19,8 +19,8 @@ import java.util.ArrayList;
 public class KeHoachTourDialog extends JDialog {
     // define jlabel and txt
 
-    JLabel jlbMaKHTour, jlbNgayKhoiHanh, jlbNgayKetThuc, jlbTongSoVe, jlbTongChi, jlbTongThu, jlbSoVeConLai, jlbTrangThai, jlbMaTour, jlbMaNVHD;
-    JTextField txtMaKHTour, txtNgayKhoiHanh, txtNgayKetThuc, txtTongSoVe, txtTongChi, txtTongThu, txtSoVeConLai, txtMaTour;
+    JLabel jlbMaKHTour, jlbNgayKhoiHanh, jlbNgayKetThuc, jlbTongSoVe, jlbTongChi, jlbSoVeConLai, jlbTrangThai, jlbMaTour, jlbMaNVHD;
+    JTextField txtMaKHTour, txtNgayKhoiHanh, txtNgayKetThuc, txtTongSoVe, txtTongChi, txtSoVeConLai, txtMaTour;
 
     // combobox
     JComboBox<NhanVienDTO> cbStaff;
@@ -120,13 +120,6 @@ public class KeHoachTourDialog extends JDialog {
         txtTongChi = new JTextField();
         formPanel.add(txtTongChi);
 
-        //row tongThu
-        jlbTongThu = new JLabel("Tổng thu");
-        jlbTongThu.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbTongThu);
-        txtTongThu = new JTextField();
-        formPanel.add(txtTongThu);
-
         //row soVeConLai
         jlbSoVeConLai = new JLabel("Số vé còn lại");
         jlbSoVeConLai.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
@@ -176,7 +169,6 @@ public class KeHoachTourDialog extends JDialog {
 
         txtTongSoVe.setText(keHoachTourDTO.getTongSoVe() + "");
         txtTongChi.setText(keHoachTourDTO.getTongChiDuKien() + "");
-        txtTongThu.setText(keHoachTourDTO.getTongThuDuKien() + "");
         txtMaTour.setText(keHoachTourDTO.getMaTour());
         // combobox manvhd
     }
@@ -217,21 +209,20 @@ public class KeHoachTourDialog extends JDialog {
     public void save(){
         saveBtn = createBtn("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(e -> {
-            if(isEmpty(txtMaKHTour, txtNgayKhoiHanh, txtNgayKetThuc, txtTongSoVe, txtTongChi, txtTongThu, txtSoVeConLai)){
+            if(isEmpty(txtMaKHTour, txtNgayKhoiHanh, txtNgayKetThuc, txtTongSoVe, txtTongChi, txtSoVeConLai)){
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin");
                 return;
             }
 
             //validate numbers
             int tongSoVe, soVeConLai;
-            long tongChi, tongThu;
+            long tongChi;
             LocalDate ngayKhoiHanh;
             LocalDate ngayKetThuc;
             String trangThai = "";
             try {
                 tongSoVe = Integer.parseInt(txtTongSoVe.getText().trim());
                 tongChi = Long.parseLong(txtTongChi.getText().trim());
-                tongThu = Long.parseLong(txtTongThu.getText().trim());
                 soVeConLai = Integer.parseInt(txtSoVeConLai.getText().trim());
                 trangThai = cbStatus.getSelectedItem().toString();
             } catch (NumberFormatException ex) {
@@ -258,7 +249,7 @@ public class KeHoachTourDialog extends JDialog {
                     keHoachTourMoi = new KeHoachTourDTO(
                             txtMaKHTour.getText(), ngayKhoiHanh,
                             ngayKetThuc, tongSoVe,
-                            tongChi, tongThu,
+                            tongChi,
                             soVeConLai, status,
                             txtMaTour.getText(), selectedStaff.getMaNV()
                     );
@@ -285,7 +276,6 @@ public class KeHoachTourDialog extends JDialog {
                 keHoachTourDTO.setNgayKetThuc(LocalDate.parse(txtNgayKetThuc.getText(), formatter));
                 keHoachTourDTO.setTongSoVe(tongSoVe);
                 keHoachTourDTO.setTongChiDuKien(tongChi);
-                keHoachTourDTO.setTongThuDuKien(tongThu);
                 keHoachTourDTO.setSoVeConLai(soVeConLai);
                 keHoachTourDTO.setTrangThai(trangThai);
                 keHoachTourDTO.setMaTour(txtMaTour.getText());

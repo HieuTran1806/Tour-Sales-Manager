@@ -16,7 +16,6 @@ public class KeHoachTourDTO {
     LocalDate ngayKetThuc;
     int tongSoVe;
     long tongChiDuKien;
-    long tongThuDuKien;
     int soVeConLai;
     String trangThai;
     String maTour;

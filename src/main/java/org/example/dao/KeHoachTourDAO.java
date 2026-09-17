@@ -28,7 +28,6 @@ public class KeHoachTourDAO {
                         rs.getDate("ngayKetThuc").toLocalDate(),
                         rs.getInt("tongSoVe"),
                         rs.getLong("tongChiDuKien"),
-                        rs.getLong("tongThuDuKien"),
                         rs.getInt("soVeConLai"),
                         rs.getString("trangThai"),
                         rs.getString("maTour"),
@@ -51,7 +50,6 @@ public class KeHoachTourDAO {
             sql += ","  + "'" +  t.getNgayKetThuc() + "'";
             sql += ","  + "'" +  t.getTongSoVe() + "'";
             sql += ","  + "'" +  t.getTongChiDuKien() + "'";
-            sql += ","  + "'" +  t.getTongThuDuKien() + "'";
             sql += ","  + "'" +  t.getSoVeConLai() + "'";
             sql += ","  + "'" +  t.getTrangThai() + "'";
             sql += ","  + "'" +  t.getMaTour() + "'";
@@ -89,7 +87,6 @@ public class KeHoachTourDAO {
             qry += ",ngayketthuc = " + "'" + t.getNgayKetThuc() + "'";
             qry += ",tongsove = " + "'" + t.getTongSoVe() + "'";
             qry += ",tongchidukien = " + "'" + t.getTongChiDuKien() + "'";
-            qry += ",tongthudukien = " + "'" + t.getTongThuDuKien() + "'";
             qry += ",soveconlai = " + "'" + t.getSoVeConLai() + "'";
             qry += ",trangthai = " + "'" + t.getTrangThai() + "'";
             qry += ",matour = " + "'" + t.getMaTour() + "'";

@@ -77,9 +77,6 @@ public class KeHoachTourBUS {
         if(t.getTongChiDuKien() < 0)
             return "Tổng chi không hợp lệ";
 
-        if(t.getTongThuDuKien() < 0)
-            return "Tổng thu không hợp lệ";
-
         if(t.getTongSoVe() < 0)
             return "Tổng số vé không hợp lệ";
 

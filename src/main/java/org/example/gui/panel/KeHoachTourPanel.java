@@ -124,7 +124,6 @@ public class KeHoachTourPanel extends JPanel {
                     kt.getNgayKetThuc().format(formatter),
                     kt.getTongSoVe(),
                     kt.getTongChiDuKien(),
-                    kt.getTongThuDuKien(),
                     kt.getSoVeConLai(),
                     kt.getTrangThai(),
                     kt.getMaTour(),
