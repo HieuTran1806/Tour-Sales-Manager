@@ -18,6 +18,12 @@ public class DiaDiemDialog extends JDialog {
     boolean sua=false;
     String maDiaDiemCu = "";
 
+    JButton btnluu, btnHuy;
+
+    JLabel lbMaDiaDiem, lbDiaChi, lbTenDiaDiem, lbTenQuocGia;
+
+    JTextField txtmadiadiem, txtdiachi, txttendd,txtquocgia;
+
     public DiaDiemDialog() {
         this.bus=new DiaDiemBUS();
         initComponents();
@@ -52,87 +58,60 @@ public class DiaDiemDialog extends JDialog {
     }
 
     private void initComponents() {
-        txtmadiadiem = new JTextField();
-        txttendd = new JTextField();
-        txtquocgia = new JTextField();
-        txtdiachi = new JTextField();
-        lbMaDiaDiem = new JLabel();
-        lbTenQuocGia = new JLabel();
-        lbTenDiaDiem = new JLabel();
-        lbDiaChi = new JLabel();
-        btnluu = new JButton();
-        btnHuy = new JButton();
-
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Địa điểm");
 
-        lbMaDiaDiem.setText("Mã địa điểm");
+        lbMaDiaDiem = new JLabel("Mã địa điểm:");
+        txtmadiadiem = new JTextField();
 
-        lbTenQuocGia.setText("Quốc gia");
+        lbTenDiaDiem = new JLabel("Tên địa điểm:");
+        txttendd = new JTextField();
 
-        txtquocgia.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                txtquocgiaActionPerformed(evt);
-            }
-        });
+        lbDiaChi = new JLabel("Địa chỉ:");
+        txtdiachi = new JTextField();
 
-        lbTenDiaDiem.setText("Tên địa điểm");
+        lbTenQuocGia = new JLabel("Quốc gia:");
+        txtquocgia = new JTextField();
 
-        lbDiaChi.setText("Địa chỉ");
+        btnluu = createBtn("Lưu", UIColors.SAVE);
+        btnHuy = createBtn("Huỷ", UIColors.CANCEL);
 
-        // define handle function
+        setLayout(new BorderLayout(10, 10));
+
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 15));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
+
+        formPanel.add(lbMaDiaDiem);
+        formPanel.add(txtmadiadiem);
+
+        formPanel.add(lbTenDiaDiem);
+        formPanel.add(txttendd);
+
+        formPanel.add(lbDiaChi);
+        formPanel.add(txtdiachi);
+
+        formPanel.add(lbTenQuocGia);
+        formPanel.add(txtquocgia);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0)); // Tạo lề dưới
+
+        // Set kích thước cố định cho nút để trông cân đối hơn
         luu();
+        btnluu.setPreferredSize(new Dimension(100, 35));
         huy();
+        btnHuy.setPreferredSize(new Dimension(100, 35));
 
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(47, 47, 47)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                        .addComponent(btnluu, GroupLayout.PREFERRED_SIZE, 75, GroupLayout.PREFERRED_SIZE)
-                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                .addComponent(lbMaDiaDiem, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(lbTenDiaDiem, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(lbDiaChi, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(lbTenQuocGia, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE)))
-                                .addGap(48, 48, 48)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
-                                        .addComponent(txtmadiadiem)
-                                        .addComponent(txttendd)
-                                        .addComponent(txtquocgia)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(btnHuy)
-                                                .addGap(9, 9, 9))
-                                        .addComponent(txtdiachi, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addContainerGap(56, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addContainerGap(68, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lbMaDiaDiem)
-                                        .addComponent(txtmadiadiem, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(9, 9, 9)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lbTenDiaDiem)
-                                        .addComponent(txttendd, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(9, 9, 9)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                        .addComponent(lbDiaChi)
-                                        .addComponent(txtdiachi, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(9, 9, 9)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lbTenQuocGia)
-                                        .addComponent(txtquocgia, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(9, 9, 9)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(btnluu)
-                                        .addComponent(btnHuy))
-                                .addGap(18, 18, 18))
-        );
+        buttonPanel.add(btnluu);
+        buttonPanel.add(btnHuy);
+
+        // 5. Thêm vào Dialog
+        add(formPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        setPreferredSize(new Dimension(350, 260));
         pack();
+        setLocationRelativeTo(null);
     }
 
     private JButton createBtn(String text, Color color){
@@ -209,10 +188,4 @@ public class DiaDiemDialog extends JDialog {
         // TODO add your handling code here:
     }
 
-    // define variables
-    private JButton btnluu, btnHuy;
-
-    private JLabel lbMaDiaDiem, lbDiaChi, lbTenDiaDiem, lbTenQuocGia;
-
-    private JTextField txtmadiadiem, txtdiachi, txttendd,txtquocgia;
 }
