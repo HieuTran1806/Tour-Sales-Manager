@@ -1,5 +1,7 @@
 package org.example.gui.panel;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.CTrinhKMBUS;
 import org.example.dto.CTrinhKMDTO;
 
@@ -12,21 +14,22 @@ import java.text.Normalizer;
 import java.time.*;
 import java.util.ArrayList;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CalendarKMPanel extends JPanel {
 
-    private JPanel calendarPanel;
-    private JLabel lblMonth;
-    private JTextField txtSearch;
+    JPanel calendarPanel;
+    JLabel lblMonth;
+    JTextField txtSearch;
 
-    private int month;
-    private int year;
+    int month;
+    int year;
 
-    private ArrayList<CTrinhKMDTO> listKM = new ArrayList<>();
-    private ArrayList<CTrinhKMDTO> filteredList = new ArrayList<>();
+    ArrayList<CTrinhKMDTO> listKM = new ArrayList<>();
+    ArrayList<CTrinhKMDTO> filteredList = new ArrayList<>();
 
-    private CTrinhKMBUS bus;
+    CTrinhKMBUS bus;
 
-    private int currentIndex = -1;
+    int currentIndex = -1;
 
     public CalendarKMPanel() {
         setLayout(new BorderLayout(10,10));

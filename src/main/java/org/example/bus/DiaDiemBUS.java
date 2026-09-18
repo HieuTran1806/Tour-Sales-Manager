@@ -1,12 +1,15 @@
 package org.example.bus;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.dao.DiaDiemDAO;
 import org.example.dto.DiaDiemDTO;
 import java.util.ArrayList;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DiaDiemBUS {
-    public static ArrayList<DiaDiemDTO> ds;
-    public static DiaDiemDAO dao=new DiaDiemDAO();
+    ArrayList<DiaDiemDTO> ds;
+    DiaDiemDAO dao=new DiaDiemDAO();
 
     public DiaDiemBUS(){
         if(ds==null){
@@ -18,7 +21,7 @@ public class DiaDiemBUS {
         dao.getDs();
     }
 
-    public static ArrayList<DiaDiemDTO> getDs(){
+    public ArrayList<DiaDiemDTO> getDs(){
         return ds;
     }
 

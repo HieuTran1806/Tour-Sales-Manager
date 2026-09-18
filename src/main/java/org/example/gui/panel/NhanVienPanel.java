@@ -1,5 +1,7 @@
 package org.example.gui.panel;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.NhanVienBUS;
 import org.example.dao.NhanVienDAO;
 import org.example.dto.NhanVienDTO;
@@ -21,7 +23,24 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class NhanVienPanel extends JPanel {
+    JButton btnLamMoi, btnSua, btnThem, btnXoa;
+
+    JComboBox<String> jComboBox1;
+
+    JLabel jLabel1, jLabel2;
+
+    JPanel jPanel1 , jPanel2, jPanel3;
+
+    JScrollPane jScrollPane1;
+
+    JTable jTable1;
+
+    JTextField txtSearch;
+
+    //formatter
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     NhanVienDAO ds = new NhanVienDAO();
     NhanVienBUS nvBUS = new NhanVienBUS();
@@ -295,22 +314,4 @@ public class NhanVienPanel extends JPanel {
             });
         }
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton btnLamMoi, btnSua, btnThem, btnXoa;
-
-    private JComboBox<String> jComboBox1;
-
-    private JLabel jLabel1, jLabel2;
-
-    private JPanel jPanel1 , jPanel2, jPanel3;
-
-    private JScrollPane jScrollPane1;
-
-    private JTable jTable1;
-
-    private JTextField txtSearch;
-
-    //formatter
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 }

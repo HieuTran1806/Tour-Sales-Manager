@@ -151,7 +151,7 @@ public class TourDiaLog extends JDialog {
         jlbMaDiaDiem.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
         formPanel.add(jlbMaDiaDiem);
 
-        ArrayList<DiaDiemDTO> lsDiaDiem = DiaDiemBUS.ds;
+        ArrayList<DiaDiemDTO> lsDiaDiem = diaDiemBUS.getDs();
         diaDiemBUS.DocDs();
         DefaultComboBoxModel<DiaDiemDTO> diaDiemModel = new DefaultComboBoxModel<>();
         for(DiaDiemDTO dd : lsDiaDiem){

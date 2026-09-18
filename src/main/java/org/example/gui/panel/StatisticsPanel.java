@@ -1,6 +1,8 @@
 package org.example.gui.panel;
 
 import com.toedter.calendar.JDateChooser;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.*;
 import org.example.gui.helper.ExcelHelper;
 
@@ -12,18 +14,19 @@ import java.time.ZoneId;
 
 import static java.sql.Date.valueOf;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class StatisticsPanel extends JPanel {
-    private JDateChooser dateFrom;
-    private JDateChooser dateTo;
-    private JComboBox<Integer> cbYear; // Thêm ComboBox chọn năm
+    JDateChooser dateFrom;
+    JDateChooser dateTo;
+    JComboBox<Integer> cbYear; // Thêm ComboBox chọn năm
 
     // define BUS
-    private TourBUS tourBUS;
-    private HoaDonBUS hoaDonBus;
+    TourBUS tourBUS;
+    HoaDonBUS hoaDonBus;
 
-    private JPanel cardsPanel;
-    private JPanel chartsPanel;
-    private JButton btnFilter;
+    JPanel cardsPanel;
+    JPanel chartsPanel;
+    JButton btnFilter;
 
     public StatisticsPanel() {
         tourBUS = new TourBUS();

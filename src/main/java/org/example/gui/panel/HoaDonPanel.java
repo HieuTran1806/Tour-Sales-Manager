@@ -2,6 +2,8 @@
 package org.example.gui.panel;
 
 import com.toedter.calendar.JDateChooser;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.dto.*;
 import org.example.bus.*;
 import org.example.gui.dialog.*;
@@ -16,9 +18,24 @@ import java.util.Date;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class HoaDonPanel extends JPanel {
-    private HoaDonBUS bus;
-    private DefaultTableModel model;
+    JButton btnchitiet, btnreset, btnsua, btnthem, btnxoa, btnxuat;
+
+    JComboBox<String> cbtim;
+
+    JScrollPane jScrollPane1;
+
+    JLabel lbname, lbtim;
+    JPanel pnlfooter, pnlheader, pnlsearch, pnltable;
+
+    JTable tblhoadon;
+
+    JDateChooser txtday;
+    JTextField txttim;
+
+    HoaDonBUS bus;
+    DefaultTableModel model;
 
     public HoaDonPanel() {
         initComponents();
@@ -32,7 +49,7 @@ public class HoaDonPanel extends JPanel {
         model.setRowCount(0);
         bus.docDs();
 
-        ArrayList<HoaDonDTO> ds = HoaDonBUS.getDs();
+        ArrayList<HoaDonDTO> ds = bus.getDs();
         if(ds==null) return;
         for(HoaDonDTO hd: ds){
             model.addRow(new Object[]{
@@ -356,18 +373,4 @@ public class HoaDonPanel extends JPanel {
             }
         }
     }
-
-    private JButton btnchitiet, btnreset, btnsua, btnthem, btnxoa, btnxuat;
-
-    private JComboBox<String> cbtim;
-
-    private JScrollPane jScrollPane1;
-
-    private JLabel lbname, lbtim;
-    private JPanel pnlfooter, pnlheader, pnlsearch, pnltable;
-
-    private JTable tblhoadon;
-
-    private JDateChooser txtday;
-    private JTextField txttim;
 }

@@ -96,7 +96,6 @@ public class DiaDiemDialog extends JDialog {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0)); // Tạo lề dưới
 
-        // Set kích thước cố định cho nút để trông cân đối hơn
         luu();
         btnluu.setPreferredSize(new Dimension(100, 35));
         huy();
@@ -105,7 +104,6 @@ public class DiaDiemDialog extends JDialog {
         buttonPanel.add(btnluu);
         buttonPanel.add(btnHuy);
 
-        // 5. Thêm vào Dialog
         add(formPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 

@@ -7,13 +7,14 @@ import org.example.dto.LoaiTourDTO;
 import org.example.gui.panel.UIColors;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LoaiTourDialog extends JDialog{
     // define label and txt
     JLabel jlbMaLoaiTour, jlbTheLoai, jlbMoTa, jlbTrangThai;
-    JTextField txtMaLoaiTour, txtTheLoai, txtMoTa, txtTrangThai;
+    JTextField txtMaLoaiTour, txtTheLoai, txtMoTa;
 
     // define btn
     JButton saveBtn, cancelBtn;
@@ -85,12 +86,15 @@ public class LoaiTourDialog extends JDialog{
 
         // row trang thai
         jlbTrangThai = new JLabel("Trạng thái");
-        jlbTrangThai.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        jlbTrangThai.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 0));
         panelForm.add(jlbTrangThai);
 
         String[] status = {"Đang hoạt động", "Ngưng"};
         cbTrangThai = new JComboBox<>(status);
         panelForm.add(cbTrangThai);
+
+        // add padding bottom for JPBTN
+        jpBtn.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         add(panelForm, BorderLayout.CENTER);
         add(jpBtn, BorderLayout.SOUTH);

@@ -8,6 +8,9 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.PhieuDatTourBUS;
 import org.example.dao.PhieuDatTourDAO;
 import org.example.dao.KhachHangDAO;
@@ -16,7 +19,21 @@ import org.example.dto.KhachHangDTO;
 import org.example.gui.dialog.PhieuDatTourDialog;
 import org.example.login.PhanQuyen;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PhieuDatTourPanel extends JPanel {
+    JButton btnLamMoi, btnSua, btnThem, btnXoa;
+
+    JComboBox<String> jComboBox2;
+
+    JLabel jLabel1, jLabel2;
+
+    JPanel jPanel1, jPanel2, jPanel3;
+
+    JScrollPane jScrollPane2;
+
+    JTable jTable2;
+
+    JTextField txtSearch;
     PhieuDatTourDAO ds = new PhieuDatTourDAO();
     KhachHangDAO dsKH = new KhachHangDAO();
     PhieuDatTourBUS khangkhtBUS = new PhieuDatTourBUS();
@@ -259,19 +276,4 @@ public class PhieuDatTourPanel extends JPanel {
             }
         }
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton btnLamMoi, btnSua, btnThem, btnXoa;
-
-    private JComboBox<String> jComboBox2;
-
-    private JLabel jLabel1, jLabel2;
-
-    private JPanel jPanel1, jPanel2, jPanel3;
-
-    private JScrollPane jScrollPane2;
-
-    private JTable jTable2;
-
-    private JTextField txtSearch;
 }

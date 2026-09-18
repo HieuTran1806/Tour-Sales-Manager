@@ -23,34 +23,26 @@ public class PhieuDatTourDialog extends JDialog {
     JButton btnDong, btnLuu;
     JLabel txtHo, txtTen, jlbMaKH, jlbMaKeHoachTour, jlbGia;
 
-    JPanel jPanel33, jPanel34, jPanel35;
-
     JTextField txtGiaVe, txtHoKH, txtMaKH, txtMaKHTour, txtTenKH;
 
-    PhieuDatTourDAO dskhangkhtour = new PhieuDatTourDAO();
-    PhieuDatTourPanel parentPanel;
     public enum Mode {
         ADD, EDIT
     }
 
     Mode mode;
     PhieuDatTourDTO currentKHangKHTour;
-    PhieuDatTourDAO ds;
     KhachHangDAO dsKhachHang;
     KeHoachTourDAO dsKeHoachTour;
-    TourDAO dsTour;
 
     public PhieuDatTourDialog(Frame parent, boolean modal,
                               PhieuDatTourDAO ds, Mode mode, PhieuDatTourDTO khangkhtour) {
 
         super(parent, modal);
-        this.ds = ds;
         this.mode = mode;
         this.currentKHangKHTour = khangkhtour;
 
         dsKhachHang = new KhachHangDAO();
         dsKeHoachTour = new KeHoachTourDAO();
-        dsTour = new TourDAO();
 
         initComponents();
         this.setLocationRelativeTo(null);
@@ -66,7 +58,6 @@ public class PhieuDatTourDialog extends JDialog {
     private void initComponents() {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        // 1. Khởi tạo các thành phần UI
         btnLuu = new JButton("Lưu");
         btnDong = new JButton("Đóng");
 

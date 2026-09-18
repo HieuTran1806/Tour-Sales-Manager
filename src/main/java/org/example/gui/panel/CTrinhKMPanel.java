@@ -1,4 +1,6 @@
 package org.example.gui.panel;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.CTrinhKMBUS;
 import org.example.dto.CTrinhKMDTO;
 import org.example.gui.dialog.CTrinhKMDialog;
@@ -17,10 +19,26 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CTrinhKMPanel extends JPanel {
+    JButton btnAdd, btnDel, btnEdit, btnLoad, btnXuat;
 
-    private CTrinhKMBUS bus;
-    private DefaultTableModel model;
+    JComboBox<String> cbbKM;
+
+    Box.Filler filler1;
+
+    JLabel jLabel1, jLabel2, jLabel3;
+
+    JPanel jPanel1, jPanel2, jPanel3;
+
+    JScrollPane jScrollPane1;
+
+    JTable tblKM;
+
+    JTextField txtSearch;
+
+    CTrinhKMBUS bus;
+    DefaultTableModel model;
 
     public CTrinhKMPanel() {
         initComponents();
@@ -346,21 +364,4 @@ public class CTrinhKMPanel extends JPanel {
     private void txtSearchActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSearchActionPerformed
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton btnAdd, btnDel, btnEdit, btnLoad, btnXuat;
-
-    private JComboBox<String> cbbKM;
-
-    private Box.Filler filler1;
-
-    private JLabel jLabel1, jLabel2, jLabel3;
-
-    private JPanel jPanel1, jPanel2, jPanel3;
-
-    private JScrollPane jScrollPane1;
-
-    private JTable tblKM;
-
-    private JTextField txtSearch;
 }

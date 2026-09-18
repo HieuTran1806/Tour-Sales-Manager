@@ -1,5 +1,7 @@
 package org.example.gui;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.dto.TaiKhoanDTO;
 import org.example.gui.panel.*;
 import org.example.login.PhanQuyen;
@@ -11,11 +13,12 @@ import javax.swing.*;
 
 import org.example.login.DangNhap;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class MainFrame extends JFrame {
     //layout
-    private CardLayout cardLayout;
-    private JPanel contentArea;
-    private JButton activeButton;
+    CardLayout cardLayout;
+    JPanel contentArea;
+    JButton activeButton;
 
     public MainFrame(TaiKhoanDTO taiKhoanDangNhap) {
         // Set favicon

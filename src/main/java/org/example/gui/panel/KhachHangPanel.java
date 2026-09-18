@@ -8,6 +8,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.KhachHangBUS;
 import org.example.dao.KhachHangDAO;
 import org.example.dto.KhachHangDTO;
@@ -19,11 +22,23 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KhachHangPanel extends JPanel {
+    JButton btnLamMoi, btnSua, btnThem, btnXoa;
+
+    JComboBox<String> jComboBox1;
+
+    JLabel jLabel1, jLabel2;
+    JPanel jPanel1, jPanel2, jPanel3;
+
+    JScrollPane jScrollPane1;
+
+    JTable jTable1;
+
+    JTextField txtSearch;
 
     KhachHangDAO ds = new KhachHangDAO();
     KhachHangBUS khachHangBUS = new KhachHangBUS();
-    KhachHangDialog KHdialog;
     public KhachHangPanel() {
         khachHangBUS = new KhachHangBUS();
         initComponents();
@@ -266,18 +281,4 @@ public class KhachHangPanel extends JPanel {
             });
         }
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton btnLamMoi, btnSua, btnThem, btnXoa;
-
-    private JComboBox<String> jComboBox1;
-
-    private JLabel jLabel1, jLabel2;
-    private JPanel jPanel1, jPanel2, jPanel3;
-
-    private JScrollPane jScrollPane1;
-
-    private JTable jTable1;
-
-    private JTextField txtSearch;
 }

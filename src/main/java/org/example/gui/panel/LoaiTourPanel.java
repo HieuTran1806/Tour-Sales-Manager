@@ -1,5 +1,7 @@
 package org.example.gui.panel;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.LoaiTourBUS;
 import org.example.dto.LoaiTourDTO;
 import org.example.gui.dialog.LoaiTourDialog;
@@ -11,24 +13,25 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.ArrayList;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class LoaiTourPanel extends JPanel {
     // txt field
-    private JTextField txtSearch;
+    JTextField txtSearch;
 
     // define panel
-    private JPanel northPanel, southPanel, searchPanel;
+    JPanel northPanel, southPanel, searchPanel;
 
     // relate to table
-    private JTable table;
-    private JScrollPane scrollPane;
-    private DefaultTableModel tableModel;
-    private TableRowSorter<DefaultTableModel> rowSorter;
+    JTable table;
+    JScrollPane scrollPane;
+    DefaultTableModel tableModel;
+    TableRowSorter<DefaultTableModel> rowSorter;
 
     // define btn
-    private JButton addBtn, deleteBtn, editBtn, refreshBtn;
+    JButton addBtn, deleteBtn, editBtn, refreshBtn;
 
-    private ArrayList<LoaiTourDTO> lsLoaiTour;
-    private LoaiTourBUS loaiTourBUS;
+    ArrayList<LoaiTourDTO> lsLoaiTour;
+    LoaiTourBUS loaiTourBUS;
 
     public LoaiTourPanel(){
         loaiTourBUS = new LoaiTourBUS();

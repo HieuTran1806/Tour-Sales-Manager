@@ -1,5 +1,7 @@
 package org.example.bus;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.dao.HoaDonDAO;
 import org.example.dto.HoaDonDTO;
 
@@ -7,9 +9,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class HoaDonBUS {
-    public static ArrayList<HoaDonDTO> ds;
-    public static HoaDonDAO dao = new HoaDonDAO();
+    ArrayList<HoaDonDTO> ds;
+    HoaDonDAO dao = new HoaDonDAO();
 
     public HoaDonBUS(){
         if(ds==null)
@@ -20,7 +23,7 @@ public class HoaDonBUS {
         ds=dao.getDsHoaDon();
     }
 
-    public static ArrayList<HoaDonDTO> getDs(){
+    public ArrayList<HoaDonDTO> getDs(){
         if (ds == null)
             ds = dao.getDsHoaDon();
         return ds;

@@ -17,7 +17,7 @@ import javax.swing.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CTHoaDonDialog extends JDialog {
     CTHoaDonBUS bus;
-    HoaDonBUS hdbus;
+    HoaDonBUS hoaDonBUS;
     KhachHangBUS khbus;
 
     public CTHoaDonDialog() {
@@ -37,11 +37,11 @@ public class CTHoaDonDialog extends JDialog {
     }
 
     public void loadCbox(){
-        this.hdbus=new HoaDonBUS();
+        this.hoaDonBUS=new HoaDonBUS();
         this.khbus =new KhachHangBUS();
         this.bus =new CTHoaDonBUS();
         ArrayList<KhachHangDTO> dskh =KhachHangBUS.dsKH;
-        ArrayList<HoaDonDTO> dshd =HoaDonBUS.ds;
+        ArrayList<HoaDonDTO> dshd = hoaDonBUS.getDs();
         List<String> dsMa = new ArrayList<>();
 
         for(HoaDonDTO hd: dshd){
@@ -56,11 +56,11 @@ public class CTHoaDonDialog extends JDialog {
     }
 
     public void loadCbox(CTietHDDTO ct){
-        this.hdbus=new HoaDonBUS();
+        this.hoaDonBUS=new HoaDonBUS();
         this.khbus =new KhachHangBUS();
         this.bus =new CTHoaDonBUS();
         ArrayList<KhachHangDTO> dskh =KhachHangBUS.dsKH;
-        ArrayList<HoaDonDTO> dshd =HoaDonBUS.ds;
+        ArrayList<HoaDonDTO> dshd =hoaDonBUS.getDs();
         List<String> dsMa = new ArrayList<>();
 
         for(HoaDonDTO hd: dshd){

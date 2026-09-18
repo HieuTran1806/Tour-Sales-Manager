@@ -1,4 +1,6 @@
 package org.example.gui.panel;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.bus.TourBUS;
 import org.example.dto.TourDTO;
 import org.example.gui.dialog.TourDetailDialog;
@@ -11,27 +13,28 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.ArrayList;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class TourPanel extends JPanel {
     // text field
-    private JTextField txtSearch;
+    JTextField txtSearch;
 
     // define panel
-    private JPanel northPanel, southPanel, searchPanel;
+    JPanel northPanel, southPanel, searchPanel;
 
     // define button
 
-    private JButton addBtn, deleteBtn, editBtn, refreshBtn, detailBtn;
+    JButton addBtn, deleteBtn, editBtn, refreshBtn, detailBtn;
 
     // relate to table
-    private JTable table;
-    private JScrollPane scrollPane;
-    private DefaultTableModel tableModel;
-    private TableRowSorter<DefaultTableModel> rowSorter;
+    JTable table;
+    JScrollPane scrollPane;
+    DefaultTableModel tableModel;
+    TableRowSorter<DefaultTableModel> rowSorter;
 
     // comboBox
-    private JComboBox<String> cmbSearchType;
+    JComboBox<String> cmbSearchType;
 
-    private final TourBUS tourBUS;
+    final TourBUS tourBUS;
 
     public TourPanel(){
         tourBUS = new TourBUS();

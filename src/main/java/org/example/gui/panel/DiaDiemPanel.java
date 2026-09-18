@@ -72,7 +72,7 @@ public class DiaDiemPanel extends JPanel {
     private void loadData(String ma){
         model.setRowCount(0);
 
-        ArrayList<DiaDiemDTO> ds = DiaDiemBUS.ds;
+        ArrayList<DiaDiemDTO> ds = bus.getDs();
         if(ds==null) return;
         for(DiaDiemDTO dd: ds){
             model.addRow(new Object[]{

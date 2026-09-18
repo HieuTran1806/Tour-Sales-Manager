@@ -1,5 +1,7 @@
 package org.example.bus;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.dao.KeHoachTourDAO;
 import org.example.dto.KeHoachTourDTO;
 
@@ -8,8 +10,9 @@ import java.util.ArrayList;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeHoachTourBUS {
-    private ArrayList<KeHoachTourDTO> lsKeHoachTour;
+    ArrayList<KeHoachTourDTO> lsKeHoachTour;
     KeHoachTourDAO keHoachTourDAO;
 
     public KeHoachTourBUS(){
@@ -110,14 +113,5 @@ public class KeHoachTourBUS {
                 return true;
         }
         return false;
-    }
-
-    public int totalPricesOfTourWithId(String maTour){
-        int total = 0;
-        for(KeHoachTourDTO kt : lsKeHoachTour){
-            if(kt.getMaTour().equalsIgnoreCase(maTour))
-            total += kt.getTongSoVe();
-        }
-        return total;
     }
 }

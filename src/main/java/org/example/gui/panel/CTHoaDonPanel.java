@@ -17,9 +17,25 @@ import javax.swing.table.DefaultTableModel;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CTHoaDonPanel extends JPanel {
+    JButton btnreset, btnsua, btnthem, btnxoa, btnxuat;
+
+    JComboBox<String> cbtim;
+
+    JScrollPane jScrollPane1;
+
+    JLabel lbname, lbtim;
+
+    JPanel pnlfooter, pnlheader, pnlsearch, pnltable;
+
+    JTable tblcthd;
+
+    JTextField txttim;
+
     DefaultTableModel model;
     CTHoaDonBUS bus;
     int soluongcanxoa=0;
+
+
 
     public CTHoaDonPanel() {
         initComponents();
@@ -328,21 +344,4 @@ public class CTHoaDonPanel extends JPanel {
             }
         }
     }
-
-
-    private JButton btnreset;
-    private JButton btnsua;
-    private JButton btnthem;
-    private JButton btnxoa;
-    private JButton btnxuat;
-    private JComboBox<String> cbtim;
-    private JScrollPane jScrollPane1;
-    private JLabel lbname;
-    private JLabel lbtim;
-    private JPanel pnlfooter;
-    private JPanel pnlheader;
-    private JPanel pnlsearch;
-    private JPanel pnltable;
-    private JTable tblcthd;
-    private JTextField txttim;
 }

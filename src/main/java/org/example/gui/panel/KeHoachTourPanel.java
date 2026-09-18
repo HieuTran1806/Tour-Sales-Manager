@@ -21,17 +21,11 @@ import java.util.ArrayList;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeHoachTourPanel extends JPanel {
-    // cmb
-
     final JComboBox<TourDTO> cbTour;
 
     DefaultComboBoxModel<TourDTO> toursModel;
 
-    // define btn
-
     JButton addBtn, deleteBtn, editBtn, detailsBtn, refreshBtn, bookingBtn;
-
-    // relate to table
 
     DefaultTableModel tableModel;
 
@@ -39,10 +33,7 @@ public class KeHoachTourPanel extends JPanel {
 
     JScrollPane scrollPane;
 
-
     KeHoachTourBUS keHoachTourBUS;
-
-    NhanVienBUS nhanVienBUS;
 
     TourBUS tourBUS;
 
@@ -59,7 +50,6 @@ public class KeHoachTourPanel extends JPanel {
     public KeHoachTourPanel(){
         keHoachTourBUS = new KeHoachTourBUS();
         tourBUS = new TourBUS();
-        nhanVienBUS = new NhanVienBUS();
         cbTour = new JComboBox<>();
 
         init();
@@ -171,7 +161,7 @@ public class KeHoachTourPanel extends JPanel {
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // in south panel
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn.setContentAreaFilled(true);
         btn.setOpaque(true);
@@ -271,8 +261,8 @@ public class KeHoachTourPanel extends JPanel {
             cbTour.setModel(toursModel);
             CBTourPresent();
 
-            // get selected tour
             TourDTO selectedTour = (TourDTO) cbTour.getSelectedItem();
+            assert selectedTour != null;
             loadTable(selectedTour.getMaTour());
         });
     }

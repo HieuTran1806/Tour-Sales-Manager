@@ -83,18 +83,18 @@ public class KhachHangDialog extends JDialog {
                 if (!ma.matches("^KH\\d{3}$")) {
                     JOptionPane.showMessageDialog(null,
                             "Mã khách hàng phải có dạng KHxxx!");
-                    return false; // Không cho rời field
+                    return false;
                 }
                 if (ma.isEmpty()) {
                     JOptionPane.showMessageDialog(null,
                             "Mã khách hàng không được để trống!");
-                    return false; // Không cho rời field
+                    return false;
                 }
                 for (KhachHangDTO kh : ds.layDanhSachKHang()) {
                     if (kh.getMaKH().equals(ma)) {
                         JOptionPane.showMessageDialog(null,
                                 "Mã khách hàng đã tồn tại!");
-                        return false; // Không cho rời field
+                        return false;
                     }
                 }
                 return true;

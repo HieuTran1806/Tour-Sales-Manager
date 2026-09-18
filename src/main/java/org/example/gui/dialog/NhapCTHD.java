@@ -27,7 +27,7 @@ public class NhapCTHD extends JDialog {
     int soluong;
     CTHoaDonBUS bus;
 
-    private HoaDonBUS hdbus;
+    HoaDonBUS hdbus;
 
     JButton btnluu;
     JScrollPane jScrollPane1;
