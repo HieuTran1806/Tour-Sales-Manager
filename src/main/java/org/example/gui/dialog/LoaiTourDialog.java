@@ -47,11 +47,7 @@ public class LoaiTourDialog extends JDialog{
         txtTheLoai.setText(loaiTourDTO.getTheLoai());
         txtMoTa.setText(loaiTourDTO.getMoTa());
 
-        // if(loaiTourDTO.getTrangThai() == 0){
-        //
-        // }
-
-        String oldStatus = String.valueOf(loaiTourDTO.getTrangThai());
+        String oldStatus = loaiTourDTO.getTrangThai(); // load status
         cbTrangThai.setSelectedItem(oldStatus);
     }
 
@@ -139,7 +135,10 @@ public class LoaiTourDialog extends JDialog{
             }else{
                 loaiTourDTO.setTheLoai(txtTheLoai.getText());
                 loaiTourDTO.setMoTa(txtMoTa.getText());
-                loaiTourDTO.setTrangThai(String.valueOf(cbTrangThai.getSelectedIndex()));
+
+                String selectedStatus = (cbTrangThai.getSelectedIndex() == 0) ? "Đang hoạt động" : "Ngưng";
+                loaiTourDTO.setTrangThai(selectedStatus);
+
                 loaiTourBUS.editLoaiTour(loaiTourDTO);
                 dispose();
                 JOptionPane.showMessageDialog(this, "Chỉnh sửa thành công");
