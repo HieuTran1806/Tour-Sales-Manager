@@ -1,6 +1,4 @@
-
 package org.example.gui.dialog;
-
 
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
@@ -8,20 +6,29 @@ import lombok.experimental.FieldDefaults;
 import org.example.bus.KhachHangBUS;
 import org.example.dao.KhachHangDAO;
 import org.example.dto.KhachHangDTO;
-import org.example.gui.panel.KhachHangPanel;
 import org.example.gui.panel.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.LocalDate;
+
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class KhachHangDialog extends JDialog {
-    KhachHangDAO dsKhachHang = new KhachHangDAO();
-    KhachHangPanel parentPanel;
+    JButton btnHuy, btnLuu;
+
+    JDateChooser jDateChooser1;
+
+    JLabel lbIDCustomer, lbLastName, lbAddress, lbDob, lbFirstName, lbPhoneNumber;
+
+    JPanel jPanel22, jPanel23, jPanel24, jPanel26, jPanel27, jPanel28;
+
+    JTextField txtAddress, txtFirstName, txtIDCustomer, txtPhoneNumber, txtLastName;
+
     public enum Mode {
         ADD, EDIT
     }
+
     Mode mode;
     KhachHangDTO currentKhachHang;
     KhachHangDAO ds;
@@ -33,12 +40,11 @@ public class KhachHangDialog extends JDialog {
         this.currentKhachHang = kh;
 
         initComponents();
-        this.setLocationRelativeTo(null); // set location after init
 
         if (mode == Mode.EDIT && kh != null) {
             setKhachHangData(kh);
-            txtMaKH.setEditable(false);
-            txtHoKH.requestFocus();
+            txtIDCustomer.setEditable(false);
+            txtFirstName.requestFocus();
             setTitle("Sửa khách hàng");
         } else {
             setTitle("Thêm khách hàng");
@@ -49,36 +55,36 @@ public class KhachHangDialog extends JDialog {
     private void initComponents() {
 
         jPanel22 = new JPanel();
-        jLabel22 = new JLabel();
-        txtMaKH = new JTextField();
+        lbIDCustomer = new JLabel();
+        txtIDCustomer = new JTextField();
         jPanel23 = new JPanel();
-        jLabel23 = new JLabel();
-        txtTenKH = new JTextField();
+        lbLastName = new JLabel();
+        txtLastName = new JTextField();
         jPanel24 = new JPanel();
-        jLabel24 = new JLabel();
-        txtDiaChiKH = new JTextField();
+        lbAddress = new JLabel();
+        txtAddress = new JTextField();
         btnLuu = new JButton();
         btnHuy = new JButton();
         jPanel26 = new JPanel();
-        jLabel26 = new JLabel();
+        lbDob = new JLabel();
         jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jPanel27 = new JPanel();
-        jLabel27 = new JLabel();
-        txtHoKH = new JTextField();
+        lbFirstName = new JLabel();
+        txtFirstName = new JTextField();
         jPanel28 = new JPanel();
-        jLabel28 = new JLabel();
-        txtSoDienThoaiKH = new JTextField();
+        lbPhoneNumber = new JLabel();
+        txtPhoneNumber = new JTextField();
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel22.setText("Mã khách hàng:");
+        lbIDCustomer.setText("Mã khách hàng:");
 
-        txtMaKH.addActionListener(this::txtMaKHActionPerformed);
+        txtIDCustomer.addActionListener(this::txtIDCustomerActionPerformed);
 
-        txtMaKH.setInputVerifier(new InputVerifier() {
+        txtIDCustomer.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String ma = txtMaKH.getText().trim();
+                String ma = txtIDCustomer.getText().trim();
 
                 if (!ma.matches("^KH\\d{3}$")) {
                     JOptionPane.showMessageDialog(null,
@@ -107,9 +113,9 @@ public class KhachHangDialog extends JDialog {
                 jPanel22Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel22Layout.createSequentialGroup()
                                 .addGap(59, 59, 59)
-                                .addComponent(jLabel22)
+                                .addComponent(lbIDCustomer)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtMaKH, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtIDCustomer, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel22Layout.setVerticalGroup(
@@ -117,19 +123,19 @@ public class KhachHangDialog extends JDialog {
                         .addGroup(jPanel22Layout.createSequentialGroup()
                                 .addGap(12, 12, 12)
                                 .addGroup(jPanel22Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel22)
-                                        .addComponent(txtMaKH, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(lbIDCustomer)
+                                        .addComponent(txtIDCustomer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
-        jLabel23.setText("Tên:");
+        lbLastName.setText("Tên:");
 
-        txtTenKH.addActionListener(this::txtTenKHActionPerformed);
+        txtLastName.addActionListener(this::txtLastNameActionPerformed);
 
-        txtTenKH.setInputVerifier(new InputVerifier() {
+        txtLastName.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String ten = txtTenKH.getText().trim();
+                String ten = txtLastName.getText().trim();
                 if (!ten.matches("^[\\p{L}]+(\\s[\\p{L}]+)*$")) {
                     JOptionPane.showMessageDialog(null,
                             "Tên chỉ được chứa chữ cái và khoảng trắng!");
@@ -150,9 +156,9 @@ public class KhachHangDialog extends JDialog {
                 jPanel23Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel23Layout.createSequentialGroup()
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel23)
+                                .addComponent(lbLastName)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtTenKH, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtLastName, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
                                 .addGap(46, 46, 46))
         );
         jPanel23Layout.setVerticalGroup(
@@ -160,19 +166,19 @@ public class KhachHangDialog extends JDialog {
                         .addGroup(jPanel23Layout.createSequentialGroup()
                                 .addGap(12, 12, 12)
                                 .addGroup(jPanel23Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel23)
-                                        .addComponent(txtTenKH, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(lbLastName)
+                                        .addComponent(txtLastName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
-        jLabel24.setText("Địa chỉ:");
+        lbAddress.setText("Địa chỉ:");
 
-        txtDiaChiKH.addActionListener(this::txtDiaChiKHActionPerformed);
+        txtAddress.addActionListener(this::txtAddressActionPerformed);
 
-        txtDiaChiKH.setInputVerifier(new InputVerifier() {
+        txtAddress.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String diaChi = txtDiaChiKH.getText().trim();
+                String diaChi = txtAddress.getText().trim();
                 if (!diaChi.matches("^[\\p{L}0-9\\s,.-]+$")) {
                     JOptionPane.showMessageDialog(null,
                             "Địa chỉ chỉ được chứa chữ cái, số, khoảng trắng và các ký tự ,.-!");
@@ -193,9 +199,9 @@ public class KhachHangDialog extends JDialog {
                 jPanel24Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel24Layout.createSequentialGroup()
                                 .addGap(101, 101, 101)
-                                .addComponent(jLabel24)
+                                .addComponent(lbAddress)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtDiaChiKH, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtAddress, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel24Layout.setVerticalGroup(
@@ -203,8 +209,8 @@ public class KhachHangDialog extends JDialog {
                         .addGroup(jPanel24Layout.createSequentialGroup()
                                 .addGap(12, 12, 12)
                                 .addGroup(jPanel24Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel24)
-                                        .addComponent(txtDiaChiKH, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(lbAddress)
+                                        .addComponent(txtAddress, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
@@ -212,7 +218,7 @@ public class KhachHangDialog extends JDialog {
         luu();
         huy();
 
-        jLabel26.setText("Ngày sinh:");
+        lbDob.setText("Ngày sinh:");
 
         jDateChooser1.setDateFormatString("dd/MM/yyyy");
 
@@ -241,7 +247,7 @@ public class KhachHangDialog extends JDialog {
                 jPanel26Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel26Layout.createSequentialGroup()
                                 .addGap(86, 86, 86)
-                                .addComponent(jLabel26)
+                                .addComponent(lbDob)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jDateChooser1, GroupLayout.PREFERRED_SIZE, 201, GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -252,18 +258,18 @@ public class KhachHangDialog extends JDialog {
                                 .addContainerGap()
                                 .addGroup(jPanel26Layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                         .addComponent(jDateChooser1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jLabel26))
+                                        .addComponent(lbDob))
                                 .addContainerGap(21, Short.MAX_VALUE))
         );
 
-        jLabel27.setText("Họ:");
+        lbFirstName.setText("Họ:");
 
-        txtHoKH.addActionListener(this::txtHoKHActionPerformed);
+        txtFirstName.addActionListener(this::txtFirstNameActionPerformed);
 
-        txtHoKH.setInputVerifier(new InputVerifier() {
+        txtFirstName.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String ho = txtHoKH.getText().trim();
+                String ho = txtFirstName.getText().trim();
                 if (!ho.matches("^[\\p{L}]+(\\s[\\p{L}]+)*$")) {
                     JOptionPane.showMessageDialog(null,
                             "Họ chỉ được chứa chữ cái và khoảng trắng!");
@@ -284,9 +290,9 @@ public class KhachHangDialog extends JDialog {
                 jPanel27Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel27Layout.createSequentialGroup()
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel27)
+                                .addComponent(lbFirstName)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtHoKH, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtFirstName, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
                                 .addGap(41, 41, 41))
         );
         jPanel27Layout.setVerticalGroup(
@@ -294,19 +300,19 @@ public class KhachHangDialog extends JDialog {
                         .addGroup(jPanel27Layout.createSequentialGroup()
                                 .addGap(12, 12, 12)
                                 .addGroup(jPanel27Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel27)
-                                        .addComponent(txtHoKH, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(lbFirstName)
+                                        .addComponent(txtFirstName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
-        jLabel28.setText("Số điện thoại:");
+        lbPhoneNumber.setText("Số điện thoại:");
 
-        txtSoDienThoaiKH.addActionListener(this::txtSoDienThoaiKHActionPerformed);
+        txtPhoneNumber.addActionListener(this::txtPhoneNumberActionPerformed);
 
-        txtSoDienThoaiKH.setInputVerifier(new InputVerifier() {
+        txtPhoneNumber.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String sdt = txtSoDienThoaiKH.getText().trim();
+                String sdt = txtPhoneNumber.getText().trim();
                 if (!sdt.matches("^0\\d{9}$")) {
                     JOptionPane.showMessageDialog(null,
                             "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0!");
@@ -327,9 +333,9 @@ public class KhachHangDialog extends JDialog {
                 jPanel28Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel28Layout.createSequentialGroup()
                                 .addGap(67, 67, 67)
-                                .addComponent(jLabel28)
+                                .addComponent(lbPhoneNumber)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtSoDienThoaiKH, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtPhoneNumber, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
                                 .addContainerGap(39, Short.MAX_VALUE))
         );
         jPanel28Layout.setVerticalGroup(
@@ -337,8 +343,8 @@ public class KhachHangDialog extends JDialog {
                         .addGroup(jPanel28Layout.createSequentialGroup()
                                 .addGap(12, 12, 12)
                                 .addGroup(jPanel28Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel28)
-                                        .addComponent(txtSoDienThoaiKH, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(lbPhoneNumber)
+                                        .addComponent(txtPhoneNumber, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
@@ -392,20 +398,21 @@ public class KhachHangDialog extends JDialog {
                                 .addGap(0, 33, Short.MAX_VALUE))
         );
 
+        this.setLocationRelativeTo(null); // set location after init
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtMaKHActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtMaKHActionPerformed
+    private void txtIDCustomerActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtIDCustomerActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtMaKHActionPerformed
+    }//GEN-LAST:event_txtIDCustomerActionPerformed
 
-    private void txtTenKHActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtTenKHActionPerformed
+    private void txtLastNameActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtLastNameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtTenKHActionPerformed
+    }//GEN-LAST:event_txtLastNameActionPerformed
 
-    private void txtDiaChiKHActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtDiaChiKHActionPerformed
+    private void txtAddressActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtAddressActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtDiaChiKHActionPerformed
+    }//GEN-LAST:event_txtAddressActionPerformed
 
     private JButton createBtn(String text, Color color){
         JButton btn = new JButton(text);
@@ -420,12 +427,12 @@ public class KhachHangDialog extends JDialog {
     private void luu(){
         btnLuu = createBtn("Lưu", UIColors.SAVE);
         btnLuu.addActionListener(v -> {
-            String maKH = txtMaKH.getText().trim();
-            String ten = txtTenKH.getText().trim();
-            String diaChi = txtDiaChiKH.getText().trim();
+            String maKH = txtIDCustomer.getText().trim();
+            String ten = txtLastName.getText().trim();
+            String diaChi = txtAddress.getText().trim();
             LocalDate ngaySinh = jDateChooser1.getDate() != null ? jDateChooser1.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate() : null;
-            String ho = txtHoKH.getText().trim();
-            String sdt = txtSoDienThoaiKH.getText().trim();
+            String ho = txtFirstName.getText().trim();
+            String sdt = txtPhoneNumber.getText().trim();
 
             KhachHangBUS khachHangBUS = new KhachHangBUS();
             if (mode == Mode.ADD) {
@@ -449,35 +456,24 @@ public class KhachHangDialog extends JDialog {
             dispose();
         });
     }
-    private void txtHoKHActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtHoKHActionPerformed
+    private void txtFirstNameActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtFirstNameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtHoKHActionPerformed
+    }//GEN-LAST:event_txtFirstNameActionPerformed
 
-    private void txtSoDienThoaiKHActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtSoDienThoaiKHActionPerformed
+    private void txtPhoneNumberActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtPhoneNumberActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtSoDienThoaiKHActionPerformed
+    }//GEN-LAST:event_txtPhoneNumberActionPerformed
 
     public void setKhachHangData(KhachHangDTO kh) {
-        txtMaKH.setText(kh.getMaKH());
-        txtTenKH.setText(kh.getTen());
-        txtDiaChiKH.setText(kh.getDiaChi());
+        txtIDCustomer.setText(kh.getMaKH());
+        txtLastName.setText(kh.getTen());
+        txtAddress.setText(kh.getDiaChi());
         if (kh.getNgaySinh() != null) {
             jDateChooser1.setDate(java.util.Date.from(kh.getNgaySinh().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()));
         } else {
             jDateChooser1.setDate(null);
         }
-        txtHoKH.setText(kh.getHo());
-        txtSoDienThoaiKH.setText(kh.getSdt());
+        txtFirstName.setText(kh.getHo());
+        txtPhoneNumber.setText(kh.getSdt());
     }
-
-    // variables
-    private JButton btnHuy, btnLuu;
-
-    private JDateChooser jDateChooser1;
-
-    private JLabel jLabel22, jLabel23, jLabel24, jLabel26, jLabel27, jLabel28;
-
-    private JPanel jPanel22, jPanel23, jPanel24, jPanel26, jPanel27, jPanel28;
-
-    private JTextField txtDiaChiKH, txtHoKH, txtMaKH, txtSoDienThoaiKH, txtTenKH;
 }
