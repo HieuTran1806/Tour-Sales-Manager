@@ -15,7 +15,7 @@ import org.example.bus.KhachHangBUS;
 import org.example.dao.KhachHangDAO;
 import org.example.dto.KhachHangDTO;
 import org.example.gui.dialog.KhachHangDialog;
-import org.example.login.PhanQuyen;
+import org.example.login.SessionManager;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -39,10 +39,12 @@ public class KhachHangPanel extends JPanel {
 
     KhachHangDAO ds = new KhachHangDAO();
     KhachHangBUS khachHangBUS = new KhachHangBUS();
+    SessionManager sessionManager;
+
     public KhachHangPanel() {
         khachHangBUS = new KhachHangBUS();
         initComponents();
-        if (!PhanQuyen.laQuanLy()) {
+        if (!sessionManager.isAdmin()) {
             btnXoa.setEnabled(false);
         }
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
@@ -208,7 +210,7 @@ public class KhachHangPanel extends JPanel {
         btnXoa = createBtn("Xóa", UIColors.DELETE);
         btnSua.setEnabled(false);
         btnXoa.addActionListener(v -> {
-            if (!PhanQuyen.laQuanLy()) {
+            if (!sessionManager.isAdmin()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa dữ liệu.");
                 return;
             }
@@ -235,7 +237,7 @@ public class KhachHangPanel extends JPanel {
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void jTable1MouseClicked(MouseEvent evt) {
-        if (PhanQuyen.laQuanLy()) {
+        if (sessionManager.isAdmin()) {
             btnXoa.setEnabled(true);
         }
         btnSua.setEnabled(true);

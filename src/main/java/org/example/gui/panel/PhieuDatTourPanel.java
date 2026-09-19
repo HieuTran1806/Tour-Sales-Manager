@@ -17,7 +17,7 @@ import org.example.dao.KhachHangDAO;
 import org.example.dto.PhieuDatTourDTO;
 import org.example.dto.KhachHangDTO;
 import org.example.gui.dialog.PhieuDatTourDialog;
-import org.example.login.PhanQuyen;
+import org.example.login.SessionManager;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PhieuDatTourPanel extends JPanel {
@@ -38,11 +38,12 @@ public class PhieuDatTourPanel extends JPanel {
     KhachHangDAO dsKH = new KhachHangDAO();
     PhieuDatTourBUS khangkhtBUS = new PhieuDatTourBUS();
     PhieuDatTourDialog phieuDatTourDialog;
+    SessionManager sessionManager;
 
     public PhieuDatTourPanel() {
         khangkhtBUS = new PhieuDatTourBUS();
         initComponents();
-        if (!PhanQuyen.laQuanLy()) {
+        if (!sessionManager.isAdmin()) {
             btnXoa.setEnabled(false);
         }
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
@@ -181,7 +182,7 @@ public class PhieuDatTourPanel extends JPanel {
         btnXoa = createBtn("Xóa", UIColors.DELETE);
         btnSua.setEnabled(false);
         btnXoa.addActionListener(v -> {
-            if (!PhanQuyen.laQuanLy()) {
+            if (!sessionManager.isAdmin()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa dữ liệu.");
                 return;
             }
@@ -226,7 +227,7 @@ public class PhieuDatTourPanel extends JPanel {
     }
 
     private void jTable2MouseClicked(MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
-        if (PhanQuyen.laQuanLy()) {
+        if (sessionManager.isAdmin()) {
             btnXoa.setEnabled(true);
         }
         btnSua.setEnabled(true);

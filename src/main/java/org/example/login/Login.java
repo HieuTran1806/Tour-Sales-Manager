@@ -1,5 +1,7 @@
 package org.example.login;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.example.dao.TaiKhoanDAO;
 import org.example.dto.TaiKhoanDTO;
 import org.example.gui.MainFrame;
@@ -9,9 +11,18 @@ import java.awt.*;
 import java.util.Arrays;
 import javax.swing.*;
 
-public class DangNhap extends JFrame {
-    private final TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAO();
-    public DangNhap() {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Login extends JFrame {
+    JButton loginBtn, logoutBtn;
+    JLabel jlbAccount, jlbPassword;
+    JTextField txtUsername;
+    JPasswordField txtPassword;
+
+    final TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAO();
+    final SessionManager sessionManager = new SessionManager();
+
+
+    public Login() {
         initComponents();
         setLocationRelativeTo(null);
     }
@@ -27,7 +38,7 @@ public class DangNhap extends JFrame {
             e.printStackTrace();
         }
         //set title
-        setTitle("Đăng Nhập - Library Management System");
+        setTitle("Đăng Nhập - Tour Management System");
 
         jlbAccount = new JLabel();
         jlbPassword = new JLabel();
@@ -139,7 +150,7 @@ public class DangNhap extends JFrame {
                 return;
             }
 
-            PhanQuyen.dangNhap(taiKhoan);
+            sessionManager.loginAccount(taiKhoan);
             MainFrame mainFrame = new MainFrame(taiKhoan);
             mainFrame.setVisible(true);
             this.dispose();
@@ -166,12 +177,4 @@ public class DangNhap extends JFrame {
         btn.setBorderPainted(false);
         return btn;
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JButton loginBtn;
-    private JButton logoutBtn;
-    private JLabel jlbAccount;
-    private JLabel jlbPassword;
-    private JTextField txtUsername;
-    private JPasswordField txtPassword;
 }

@@ -4,14 +4,14 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.dto.TaiKhoanDTO;
 import org.example.gui.panel.*;
-import org.example.login.PhanQuyen;
+import org.example.login.SessionManager;
 
 import java.awt.*;
 import java.util.Objects;
 
 import javax.swing.*;
 
-import org.example.login.DangNhap;
+import org.example.login.Login;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MainFrame extends JFrame {
@@ -19,6 +19,7 @@ public class MainFrame extends JFrame {
     CardLayout cardLayout;
     JPanel contentArea;
     JButton activeButton;
+    SessionManager sessionManager;
 
     public MainFrame(TaiKhoanDTO taiKhoanDangNhap) {
         // Set favicon
@@ -52,7 +53,7 @@ public class MainFrame extends JFrame {
 
         //menu items: label, cardName
         String[][] menus;
-        if (PhanQuyen.laQuanLy()) {
+        if (sessionManager.isAdmin()) {
             menus = new String[][]{
                     {"Tour", "Tour"},
                     {"Loại Tour", "LoaiTour"},
@@ -162,11 +163,11 @@ public class MainFrame extends JFrame {
 
     private void handleLogout() {
         try {
-            PhanQuyen.class.getMethod("dangXuat").invoke(null);
+            SessionManager.class.getMethod("dangXuat").invoke(null);
         } catch (Exception ignored) {}
 
         SwingUtilities.invokeLater(() -> {
-            DangNhap dangNhap = new DangNhap();
+            Login dangNhap = new Login();
             dangNhap.setVisible(true);
             this.dispose();
         });
