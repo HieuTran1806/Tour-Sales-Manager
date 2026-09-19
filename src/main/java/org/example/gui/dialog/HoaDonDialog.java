@@ -22,10 +22,7 @@ import java.util.List;
 public class HoaDonDialog extends JDialog {
     HoaDonBUS bus;
     int soluong=0;
-    CTHoaDonBUS busct;
     KeHoachTourBUS khtbus;
-    KhachHangBUS khbus;
-    NhanVienBUS nvbus;
 
     CTrinhKMBUS cTrinhKMBUS;
 
@@ -44,8 +41,6 @@ public class HoaDonDialog extends JDialog {
         initComponents();
         this.bus=new HoaDonBUS();
         this.khtbus=new KeHoachTourBUS();
-        this.khbus =new KhachHangBUS();
-        this.nvbus =new NhanVienBUS();
         this.cTrinhKMBUS = new CTrinhKMBUS();
 
         this.setTitle("Hóa đơn");
@@ -160,11 +155,9 @@ public class HoaDonDialog extends JDialog {
     public void loadCbox(){
         this.bus=new HoaDonBUS();
         this.khtbus=new KeHoachTourBUS();
-        this.khbus =new KhachHangBUS();
         ArrayList<KeHoachTourDTO> dskht =khtbus.getAllKeHoachTours();
         ArrayList<KhachHangDTO> dskh =KhachHangBUS.dsKH;
         ArrayList<NhanVienDTO> dsnv =NhanVienBUS.dsNV;
-        ArrayList<CTrinhKMDTO> dsKM = cTrinhKMBUS.getDsCTrinhKM();
         List<String> dsMa = new ArrayList<>();
 
         for(KeHoachTourDTO kht: dskht){
@@ -185,7 +178,7 @@ public class HoaDonDialog extends JDialog {
         setupAutoComplete(cbmanv, dsMa);
 
         // cbKM
-        ArrayList<CTrinhKMDTO> lsKM = cTrinhKMBUS.dsCTrinhKM;
+        ArrayList<CTrinhKMDTO> lsKM = cTrinhKMBUS.getDsCTrinhKM();
         cTrinhKMBUS.docDsCTrinhKM();
         DefaultComboBoxModel<CTrinhKMDTO> khuyenMaiModel = new DefaultComboBoxModel<>();
         for(CTrinhKMDTO km : lsKM){

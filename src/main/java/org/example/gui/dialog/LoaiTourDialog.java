@@ -43,8 +43,16 @@ public class LoaiTourDialog extends JDialog{
     private void loadData(){
         txtMaLoaiTour.setText(loaiTourDTO.getMaLoaiTour());
         txtMaLoaiTour.setEnabled(false);
+
         txtTheLoai.setText(loaiTourDTO.getTheLoai());
         txtMoTa.setText(loaiTourDTO.getMoTa());
+
+        // if(loaiTourDTO.getTrangThai() == 0){
+        //
+        // }
+
+        String oldStatus = String.valueOf(loaiTourDTO.getTrangThai());
+        cbTrangThai.setSelectedItem(oldStatus);
     }
 
     public void init(){
@@ -93,7 +101,6 @@ public class LoaiTourDialog extends JDialog{
         cbTrangThai = new JComboBox<>(status);
         panelForm.add(cbTrangThai);
 
-        // add padding bottom for JPBTN
         jpBtn.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         add(panelForm, BorderLayout.CENTER);
@@ -122,20 +129,17 @@ public class LoaiTourDialog extends JDialog{
                 if(loaiTourBUS.existedLoaiTourWithID(txtMaLoaiTour.getText()))
                     JOptionPane.showMessageDialog(null, "Mã loại tour đã tồn tại, vui lòng nhập mã khác!");
                 else {
-                    // trang thai 
-                    int trangThaiValue = (cbTrangThai.getSelectedIndex() == 0) ? 1 : 0;
-                    
-                    LoaiTourDTO loaiMoi = new LoaiTourDTO(txtMaLoaiTour.getText(), txtTheLoai.getText(), txtMoTa.getText(), trangThaiValue);
-                    loaiTourBUS.addLoaiTour(loaiMoi);
+                    // trang thai
+                    String statusSelected = (String) cbTrangThai.getSelectedItem();
+                    LoaiTourDTO newType = new LoaiTourDTO(txtMaLoaiTour.getText(), txtTheLoai.getText(), txtMoTa.getText(), statusSelected);
+                    loaiTourBUS.addLoaiTour(newType);
                     dispose();
                     JOptionPane.showMessageDialog(null, "Đã thêm");
                 }
             }else{
                 loaiTourDTO.setTheLoai(txtTheLoai.getText());
                 loaiTourDTO.setMoTa(txtMoTa.getText());
-                int trangThaiValue = (cbTrangThai.getSelectedIndex() == 0) ? 1 : 0;
-                loaiTourDTO.setTrangThai(trangThaiValue);
-
+                loaiTourDTO.setTrangThai(String.valueOf(cbTrangThai.getSelectedIndex()));
                 loaiTourBUS.editLoaiTour(loaiTourDTO);
                 dispose();
                 JOptionPane.showMessageDialog(this, "Chỉnh sửa thành công");

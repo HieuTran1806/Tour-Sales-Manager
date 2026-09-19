@@ -117,17 +117,11 @@ public class LoaiTourPanel extends JPanel {
         lsLoaiTour = loaiTourBUS.getAllLoaiTour();
 
         for (LoaiTourDTO lt : lsLoaiTour){
-            String trangThaiString;
-            if(lt.getTrangThai() == 1){
-                trangThaiString = "Đang hoạt đông";
-            }else{
-                trangThaiString = "Ngưng";
-            }
             tableModel.addRow(new Object[]{
                     lt.getMaLoaiTour(),
                     lt.getTheLoai(),
                     lt.getMoTa(),
-                    trangThaiString
+                    lt.getTrangThai()
             });
         }
     }
@@ -199,6 +193,7 @@ public class LoaiTourPanel extends JPanel {
     private void edit(){
         editBtn = createBtn("Chỉnh sửa", UIColors.EDIT);
         editBtn.setEnabled(false);
+
         editBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row == -1) {
@@ -224,17 +219,11 @@ public class LoaiTourPanel extends JPanel {
         tableModel.setRowCount(0);
 
         for(LoaiTourDTO lt : list) {
-            String trangThaiString;
-            if(lt.getTrangThai() == 1){
-                trangThaiString = "Đang hoạt đông";
-            }else{
-                trangThaiString = "Ngưng";
-            }
             tableModel.addRow(new Object[]{
                     lt.getMaLoaiTour(),
                     lt.getTheLoai(),
                     lt.getMoTa(),
-                    trangThaiString
+                    lt.getTrangThai()
             });
         }
     }

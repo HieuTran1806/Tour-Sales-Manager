@@ -27,7 +27,7 @@ public class LoaiTourDAO {
                         rs.getString(1),
                         rs.getString(2),
                         rs.getString(3),
-                        rs.getInt(4)
+                        rs.getString(4)
                 );
                 lsCate.add(t);
             }

@@ -38,12 +38,11 @@ public class PhieuDatTourPanel extends JPanel {
     KhachHangDAO dsKH = new KhachHangDAO();
     PhieuDatTourBUS khangkhtBUS = new PhieuDatTourBUS();
     PhieuDatTourDialog phieuDatTourDialog;
-    SessionManager sessionManager;
 
     public PhieuDatTourPanel() {
         khangkhtBUS = new PhieuDatTourBUS();
         initComponents();
-        if (!sessionManager.isAdmin()) {
+        if (!SessionManager.isAdmin()) {
             btnXoa.setEnabled(false);
         }
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
@@ -182,7 +181,7 @@ public class PhieuDatTourPanel extends JPanel {
         btnXoa = createBtn("Xóa", UIColors.DELETE);
         btnSua.setEnabled(false);
         btnXoa.addActionListener(v -> {
-            if (!sessionManager.isAdmin()) {
+            if (!SessionManager.isAdmin()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa dữ liệu.");
                 return;
             }
@@ -227,7 +226,7 @@ public class PhieuDatTourPanel extends JPanel {
     }
 
     private void jTable2MouseClicked(MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
-        if (sessionManager.isAdmin()) {
+        if (SessionManager.isAdmin()) {
             btnXoa.setEnabled(true);
         }
         btnSua.setEnabled(true);

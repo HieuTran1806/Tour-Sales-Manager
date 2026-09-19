@@ -43,12 +43,11 @@ public class NhanVienPanel extends JPanel {
 
     NhanVienDAO ds = new NhanVienDAO();
     NhanVienBUS nvBUS = new NhanVienBUS();
-    SessionManager sessionManager = new SessionManager();
 
     public NhanVienPanel() {
         nvBUS = new NhanVienBUS();
         initComponents();
-        if (!sessionManager.isAdmin()) {
+        if (!SessionManager.isAdmin()) {
             btnThem.setEnabled(false);
             btnXoa.setEnabled(false);
             btnSua.setEnabled(false);
@@ -187,7 +186,7 @@ public class NhanVienPanel extends JPanel {
     private void them(){
         btnThem = createBtn("Thêm", UIColors.ADD);
         btnThem.addActionListener(v -> {
-            if (!sessionManager.isAdmin()) {
+            if (!SessionManager.isAdmin()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền thao tác với nhân viên.");
                 return;
             }
@@ -210,7 +209,7 @@ public class NhanVienPanel extends JPanel {
         btnSua = createBtn("Sửa", UIColors.EDIT);
         btnSua.setEnabled(false);
         btnSua.addActionListener(v -> {
-            if (!sessionManager.isAdmin()) {
+            if (!SessionManager.isAdmin()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền thao tác với nhân viên.");
                 return;
             }
@@ -235,7 +234,7 @@ public class NhanVienPanel extends JPanel {
         btnXoa = createBtn("Xóa", UIColors.DELETE);
         btnXoa.setEnabled(false);
         btnXoa.addActionListener(v -> {
-            if (!sessionManager.isAdmin()) {
+            if (!SessionManager.isAdmin()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa dữ liệu.");
                 return;
             }
@@ -267,7 +266,7 @@ public class NhanVienPanel extends JPanel {
     }//GEN-LAST:event_txtSearchActionPerformed
 
     private void jTable1MouseClicked(MouseEvent evt){
-        if (sessionManager.isAdmin()) {
+        if (SessionManager.isAdmin()) {
             btnXoa.setEnabled(true);
             btnSua.setEnabled(true);
         }

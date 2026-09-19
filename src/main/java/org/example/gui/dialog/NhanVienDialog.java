@@ -12,22 +12,28 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.LocalDate;
+import java.util.Objects;
+
+import static java.sql.Date.valueOf;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NhanVienDialog extends JDialog {
     Mode mode;
     NhanVienDTO currentNhanVien;
     NhanVienDAO ds;
+    NhanVienBUS bus;
 
     JButton btnHuy, btnLuu;
 
-    JDateChooser jDateChooser1;
+    JDateChooser jDob;
 
-    JLabel jLabel1, jLabel2, jLabel3, jLabel4, jLabel5, jLabel6, jLabel7;
+    JLabel lbIDStaff, lbFirstName, lbLastName, lbRole, lbBirth, lbPhoneNumber, lbAddress;
 
-    JPanel jPanel1, jPanel2, jPanel3, jPanel4, jPanel5, jPanel6, jPanel7;
+    JTextField txtAddress, txtFirstName, txtIdStaff, txtPhoneNumber, txtLastName;
 
-    JTextField txtChucVu, txtDiaChi, txtHoNV, txtMaNV, txtSoDienThoai, txtTenNV;
+    JPanel panelForm, jpBtn;
+
+    JComboBox<String> cbRoles;
 
     public enum Mode {
         ADD,
@@ -41,14 +47,15 @@ public class NhanVienDialog extends JDialog {
         this.ds = ds;
         this.mode = mode;
         this.currentNhanVien = nv;
+        cbRoles = new JComboBox<>();
 
         initComponents();
         this.setLocationRelativeTo(null); // set location after init
 
         if (mode == Mode.EDIT && nv != null) {
-            setNhanVienData(nv);
-            txtMaNV.setEditable(false); // Không cho sửa mã NV
-            txtHoNV.requestFocus(); // Chuyển focus đến trường Họ
+            setStaffData(nv);
+            txtIdStaff.setEditable(false); // Không cho sửa mã NV
+            txtFirstName.requestFocus(); // Chuyển focus đến trường Họ
             setTitle("Sửa nhân viên");
         } else {
             setTitle("Thêm nhân viên");
@@ -59,92 +66,33 @@ public class NhanVienDialog extends JDialog {
     @SuppressWarnings("unchecked")
 
     private void initComponents() {
+        setLayout(new BorderLayout());
+        panelForm = new JPanel(new GridLayout(7, 2, 10, 10));
+        jpBtn = new JPanel(new FlowLayout());
 
-        jPanel1 = new JPanel();
-        jLabel1 = new JLabel();
-        txtMaNV = new JTextField();
-        jPanel2 = new JPanel();
-        jLabel2 = new JLabel();
-        txtHoNV = new JTextField();
-        jPanel3 = new JPanel();
-        jLabel3 = new JLabel();
-        txtTenNV = new JTextField();
-        jPanel4 = new JPanel();
-        jLabel4 = new JLabel();
-        txtChucVu = new JTextField();
-        jPanel5 = new JPanel();
-        jLabel5 = new JLabel();
-        jDateChooser1 = new JDateChooser();
-        jPanel6 = new JPanel();
-        jLabel6 = new JLabel();
-        txtSoDienThoai = new JTextField();
-        jPanel7 = new JPanel();
-        jLabel7 = new JLabel();
-        txtDiaChi = new JTextField();
-        btnLuu = new JButton();
-        btnHuy = new JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        //row idStaff
+        lbIDStaff = new JLabel("Mã nhân viên: ");
+        lbIDStaff.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        panelForm.add(lbIDStaff);
+        txtIdStaff = new JTextField();
+        panelForm.add(txtIdStaff);
 
-        jLabel1.setText("Mã nhân viên:");
+        txtIdStaff.addActionListener(this::txtIdStaffActionPerformed);
 
-        txtMaNV.addActionListener(this::txtMaNVActionPerformed);
+        //row firstName
+        lbFirstName = new JLabel("Họ: ");
+        lbFirstName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        panelForm.add(lbFirstName);
+        txtFirstName = new JTextField();
+        panelForm.add(txtFirstName);
 
-        txtMaNV.setInputVerifier(new InputVerifier() {
+        txtFirstName.addActionListener(this::txtFirstNameActionPerformed);
+
+        txtFirstName.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String ma = txtMaNV.getText().trim();
-
-                if (!ma.matches("^NV\\d{3}$")) {
-                    JOptionPane.showMessageDialog(null,
-                            "Mã nhân viên phải có dạng NVxxx!");
-                    return false; // Không cho rời field
-                }
-                if (ma.isEmpty()) {
-                    JOptionPane.showMessageDialog(null,
-                            "Mã nhân viên không được để trống!");
-                    return false; // Không cho rời field
-                }
-                for (NhanVienDTO nv : ds.layDanhSachNV()) {
-                    if (nv.getMaNV().equals(ma)) {
-                        JOptionPane.showMessageDialog(null,
-                                "Mã nhân viên đã tồn tại!");
-                        return false; // Không cho rời field
-                    }
-                }
-                return true;
-            }
-        });
-
-        GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(71, 71, 71)
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtMaNV, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel1)
-                                        .addComponent(txtMaNV, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(15, Short.MAX_VALUE))
-        );
-
-        jLabel2.setText("Họ:");
-
-        txtHoNV.addActionListener(this::txtHoNVActionPerformed);
-
-        txtHoNV.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                String ho = txtHoNV.getText().trim();
+                String ho = txtFirstName.getText().trim();
                 if (!ho.matches("^[\\p{L}]+(\\s[\\p{L}]+)*$")) {
                     JOptionPane.showMessageDialog(null,
                             "Họ chỉ được chứa chữ cái và khoảng trắng!");
@@ -159,35 +107,19 @@ public class NhanVienDialog extends JDialog {
             }
         });
 
-        GroupLayout jPanel2Layout = new GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-                jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtHoNV, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
-                                .addGap(82, 82, 82))
-        );
-        jPanel2Layout.setVerticalGroup(
-                jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel2)
-                                        .addComponent(txtHoNV, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(15, Short.MAX_VALUE))
-        );
+        //row lastName
+        lbLastName = new JLabel("Tên: ");
+        lbLastName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        panelForm.add(lbLastName);
+        txtLastName = new JTextField();
+        panelForm.add(txtLastName);
 
-        jLabel3.setText("Tên:");
+        txtLastName.addActionListener(this::txtLastNameActionPerformed);
 
-        txtTenNV.addActionListener(this::txtTenNVActionPerformed);
-
-        txtTenNV.setInputVerifier(new InputVerifier() {
+        txtLastName.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String ten = txtTenNV.getText().trim();
+                String ten = txtLastName.getText().trim();
                 if (!ten.matches("^[\\p{L}]+(\\s[\\p{L}]+)*$")) {
                     JOptionPane.showMessageDialog(null,
                             "Tên chỉ được chứa chữ cái và khoảng trắng!");
@@ -202,83 +134,33 @@ public class NhanVienDialog extends JDialog {
             }
         });
 
-        GroupLayout jPanel3Layout = new GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-                jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtTenNV, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
-                                .addGap(87, 87, 87))
-        );
-        jPanel3Layout.setVerticalGroup(
-                jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel3)
-                                        .addComponent(txtTenNV, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(15, Short.MAX_VALUE))
-        );
+        //row role
+        lbRole = new JLabel("Chức vụ: ");
+        lbRole.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        panelForm.add(lbRole);
+        loadRolesCombobox();
+        panelForm.add(cbRoles);
+        panelForm.add(cbRoles);
 
-        jLabel4.setText("Chức vụ:");
+        //row birthDay
+        lbBirth = new JLabel("Ngày sinh ");
+        lbBirth.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        panelForm.add(lbBirth);
 
-        txtChucVu.addActionListener(this::txtChucVuActionPerformed);
+        jDob = new JDateChooser();
+        jDob.setDateFormatString("dd/MM/yyyy");
+        jDob.setDate(valueOf(LocalDate.now()));
+        panelForm.add(jDob);
 
-        txtChucVu.setInputVerifier(new InputVerifier() {
+        jDob.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String chucVu = txtChucVu.getText().trim();
-                if (!chucVu.matches("^[\\p{L}]+(\\s[\\p{L}]+)*$")) {
-                    JOptionPane.showMessageDialog(null,
-                            "Chức vụ chỉ được chứa chữ cái và khoảng trắng!");
-                    return false; // Không cho rời field
-                }
-                if (chucVu.isEmpty()) {
-                    JOptionPane.showMessageDialog(null,
-                            "Chức vụ không được để trống!");
-                    return false; // Không cho rời field
-                }
-                return true;
-            }
-        });
-
-        GroupLayout jPanel4Layout = new GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-                jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addGap(99, 99, 99)
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtChucVu, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel4Layout.setVerticalGroup(
-                jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel4)
-                                        .addComponent(txtChucVu, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(15, Short.MAX_VALUE))
-        );
-
-        jLabel5.setText("Ngày sinh");
-
-        jDateChooser1.setDateFormatString("dd/MM/yyyy");
-
-        jDateChooser1.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                if (jDateChooser1.getDate() == null) {
+                if (jDob.getDate() == null) {
                     JOptionPane.showMessageDialog(null,
                             "Ngày sinh không được để trống!");
                     return false; // Không cho rời field
                 }
-                if (jDateChooser1.getDate().after(new java.util.Date())) {
+                if (jDob.getDate().after(new java.util.Date())) {
                     JOptionPane.showMessageDialog(null,
                             "Ngày sinh không được lớn hơn ngày hiện tại!");
                     return false; // Không cho rời field
@@ -287,35 +169,19 @@ public class NhanVienDialog extends JDialog {
             }
         });
 
-        GroupLayout jPanel5Layout = new GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel5Layout.createSequentialGroup()
-                                .addGap(93, 93, 93)
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jDateChooser1, GroupLayout.PREFERRED_SIZE, 199, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel5Layout.setVerticalGroup(
-                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel5Layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jDateChooser1, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jLabel5, GroupLayout.Alignment.TRAILING))
-                                .addContainerGap(18, Short.MAX_VALUE))
-        );
+        //row role
+        lbPhoneNumber = new JLabel("Số điện thoại: ");
+        lbPhoneNumber.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        panelForm.add(lbPhoneNumber);
+        txtPhoneNumber = new JTextField();
+        panelForm.add(txtPhoneNumber);
 
-        jLabel6.setText("Số điện thoại:");
+        txtPhoneNumber.addActionListener(this::txtPhoneNumberActionPerformed);
 
-        txtSoDienThoai.addActionListener(this::txtSoDienThoaiActionPerformed);
-
-        txtSoDienThoai.setInputVerifier(new InputVerifier() {
+        txtPhoneNumber.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String sdt = txtSoDienThoai.getText().trim();
+                String sdt = txtPhoneNumber.getText().trim();
                 if (!sdt.matches("^0\\d{9}$")) {
                     JOptionPane.showMessageDialog(null,
                             "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0!");
@@ -330,36 +196,21 @@ public class NhanVienDialog extends JDialog {
             }
         });
 
+        //row address
+        lbAddress = new JLabel("Chức vụ: ");
+        lbAddress.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        panelForm.add(lbAddress);
+        txtAddress = new JTextField();
+        panelForm.add(txtAddress);
 
-        GroupLayout jPanel6Layout = new GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-                jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel6Layout.createSequentialGroup()
-                                .addGap(73, 73, 73)
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtSoDienThoai, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(86, Short.MAX_VALUE))
-        );
-        jPanel6Layout.setVerticalGroup(
-                jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel6Layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel6)
-                                        .addComponent(txtSoDienThoai, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(15, Short.MAX_VALUE))
-        );
+        lbAddress.setText("Địa chỉ:");
 
-        jLabel7.setText("Địa chỉ:");
+        txtAddress.addActionListener(this::txtAddressActionPerformed);
 
-        txtDiaChi.addActionListener(this::txtDiaChiActionPerformed);
-
-        txtDiaChi.setInputVerifier(new InputVerifier() {
+        txtAddress.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
-                String diaChi = txtDiaChi.getText().trim();
+                String diaChi = txtAddress.getText().trim();
                 if (!diaChi.matches("^[\\p{L}0-9\\s,.-]+$")) {
                     JOptionPane.showMessageDialog(null,
                             "Địa chỉ chỉ được chứa chữ cái, số, khoảng trắng và các ký tự ,.-!");
@@ -374,85 +225,39 @@ public class NhanVienDialog extends JDialog {
             }
         });
 
-        GroupLayout jPanel7Layout = new GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-                jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel7Layout.createSequentialGroup()
-                                .addGap(107, 107, 107)
-                                .addComponent(jLabel7)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtDiaChi, GroupLayout.PREFERRED_SIZE, 203, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel7Layout.setVerticalGroup(
-                jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel7Layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel7)
-                                        .addComponent(txtDiaChi, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap(15, Short.MAX_VALUE))
-        );
-
         // define handle funtion
         luu();
+        jpBtn.add(btnLuu);
         huy();
+        jpBtn.add(btnHuy);
 
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel3, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel4, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel5, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel6, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel7, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(80, 80, 80)
-                                .addComponent(btnLuu)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnHuy)
-                                .addGap(88, 88, 88))
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jPanel2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(jPanel1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel2, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel3, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel4, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel5, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel6, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel7, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(btnLuu)
-                                        .addComponent(btnHuy))
-                                .addGap(0, 27, Short.MAX_VALUE))
-        );
 
+        add(panelForm, BorderLayout.CENTER);
+        jpBtn.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
+        add(jpBtn, BorderLayout.SOUTH);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtSoDienThoaiActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtSoDienThoaiActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtSoDienThoaiActionPerformed
+    private void loadRolesCombobox() {
+        String[] roles = {"Tư vấn", "", "Điều hành tour", "Quản trị nội dung"};
 
-    private void txtHoNVActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtHoNVActionPerformed
+        // Đưa mảng vào DefaultComboBoxModel
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(roles);
+
+        // Gán model cho ComboBox
+        cbRoles = new JComboBox<>(model);
+    }
+
+    private void txtPhoneNumberActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtPhoneNumberActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtHoNVActionPerformed
+    }//GEN-LAST:event_txtPhoneNumberActionPerformed
+
+    private void txtFirstNameActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtFirstNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFirstNameActionPerformed
 
     private JButton createBtn(String text, Color color){
         JButton btn = new JButton(text);
@@ -466,26 +271,45 @@ public class NhanVienDialog extends JDialog {
     private void luu(){
         btnLuu = createBtn("Lưu", UIColors.SAVE);
         btnLuu.addActionListener(v -> {
-            String maNV = txtMaNV.getText().trim();
-            String ho = txtHoNV.getText().trim();
-            String ten = txtTenNV.getText().trim();
-            String chucVu = txtChucVu.getText().trim();
-            LocalDate ngaySinh = jDateChooser1.getDate() != null ? jDateChooser1.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate() : null;
-            String sdt = txtSoDienThoai.getText().trim();
-            String diaChi = txtDiaChi.getText().trim();
+            String idStaff = txtFirstName.getText().trim();
+            String firstName = txtFirstName.getText().trim();
+            String lastName = txtLastName.getText().trim();
+            String role = Objects.requireNonNull(cbRoles.getSelectedItem()).toString();
+            LocalDate dob = jDob.getDate() != null ? jDob.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate() : null;
+            String phoneNumber = txtPhoneNumber.getText().trim();
+            String address = txtAddress.getText().trim();
 
-            NhanVienBUS nvBUS = new NhanVienBUS();
+            if (idStaff.isEmpty()) {
+                JOptionPane.showMessageDialog(null,
+                        "Mã nhân viên không được để trống!");
+                return;
+            }
+            if (!idStaff.matches("^NV\\d{3}$")) {
+                JOptionPane.showMessageDialog(null,
+                        "Mã nhân viên phải có dạng NVxxx!");
+                return;
+            }
+            for (NhanVienDTO nv : ds.layDanhSachNV()) {
+                if (nv.getMaNV().equals(idStaff)) {
+                    JOptionPane.showMessageDialog(null,
+                            "Mã nhân viên đã tồn tại!");
+                    return;
+                }
+            }
+
+            bus = new NhanVienBUS();
             if (mode == Mode.ADD) {
-                NhanVienDTO newNV = new NhanVienDTO(maNV, chucVu, ho, ten, diaChi, sdt, ngaySinh);
-                nvBUS.them(newNV);
+                NhanVienDTO newStaff = new NhanVienDTO(idStaff, role, firstName, lastName, address, phoneNumber, dob);
+                bus.them(newStaff);
             } else if (mode == Mode.EDIT && currentNhanVien != null) {
-                currentNhanVien.setHo(ho);
-                currentNhanVien.setTen(ten);
-                currentNhanVien.setChucVu(chucVu);
-                currentNhanVien.setNgaySinh(ngaySinh);
-                currentNhanVien.setSdt(sdt);
-                currentNhanVien.setDiaChi(diaChi);
-                nvBUS.suaNhanVien(currentNhanVien);
+                currentNhanVien.setHo(firstName);
+                currentNhanVien.setTen(lastName);
+                currentNhanVien.setChucVu(role);
+                currentNhanVien.setNgaySinh(dob);
+                currentNhanVien.setSdt(phoneNumber);
+                currentNhanVien.setDiaChi(address);
+
+                bus.suaNhanVien(currentNhanVien);
             }
 
             JOptionPane.showMessageDialog(this, "Đã lưu TK là mà nhân viên, MK: 123"   );
@@ -500,33 +324,32 @@ public class NhanVienDialog extends JDialog {
         });
     }
 
-    private void txtChucVuActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtChucVuActionPerformed
+    private void txtAddressActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtAddressActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtChucVuActionPerformed
+    }//GEN-LAST:event_txtAddressActionPerformed
 
-    private void txtDiaChiActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtDiaChiActionPerformed
+    private void txtLastNameActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtLastNameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtDiaChiActionPerformed
+    }//GEN-LAST:event_txtLastNameActionPerformed
 
-    private void txtTenNVActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtTenNVActionPerformed
+    private void txtIdStaffActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtFirstNameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtTenNVActionPerformed
+    }//GEN-LAST:event_txtFirstNameActionPerformed
 
-    private void txtMaNVActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtMaNVActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtMaNVActionPerformed
+    public void setStaffData(NhanVienDTO nv) {
+        txtFirstName.setText(nv.getMaNV());
+        txtFirstName.setText(nv.getHo());
+        txtLastName.setText(nv.getTen());
+        // cbRoles.setSelectedItem();
 
-    public void setNhanVienData(NhanVienDTO nv) {
-        txtMaNV.setText(nv.getMaNV());
-        txtHoNV.setText(nv.getHo());
-        txtTenNV.setText(nv.getTen());
-        txtChucVu.setText(nv.getChucVu());
+        String roleSelected = Objects.requireNonNull(cbRoles.getSelectedItem()).toString();
+
         if (nv.getNgaySinh() != null) {
-            jDateChooser1.setDate(java.util.Date.from(nv.getNgaySinh().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()));
+            jDob.setDate(java.util.Date.from(nv.getNgaySinh().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()));
         } else {
-            jDateChooser1.setDate(null);
+            jDob.setDate(null);
         }
-        txtSoDienThoai.setText(nv.getSdt());
-        txtDiaChi.setText(nv.getDiaChi());
+        txtPhoneNumber.setText(nv.getSdt());
+        txtAddress.setText(nv.getDiaChi());
     }
 }

@@ -1,5 +1,9 @@
 package org.example.bus;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.example.dao.CTrinhKMDAO;
 import org.example.dao.KMHDDAO;
 import org.example.dao.KMTourDAO;
@@ -9,24 +13,16 @@ import org.example.dto.KMTourDTO;
 
 import java.util.*;
 
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CTrinhKMBUS {
-    public ArrayList<CTrinhKMDTO> dsCTrinhKM;
-    private CTrinhKMDAO dao;
+    ArrayList<CTrinhKMDTO> dsCTrinhKM;
+    CTrinhKMDAO dao;
 
     public CTrinhKMBUS() {
-        if (dsCTrinhKM == null) {
-            dao = new CTrinhKMDAO();
-            //khoit tao dsCTrinhKM tu database
-            dsCTrinhKM = dao.getDsCTrinhKM();
-        }
-    }
-
-    public ArrayList<CTrinhKMDTO> getDsCTrinhKM() {
-        return dsCTrinhKM;
-    }
-
-    public void setDsCTrinhKM(ArrayList<CTrinhKMDTO> dsCTrinhKM) {
-        this.dsCTrinhKM = dsCTrinhKM;
+        dao = new CTrinhKMDAO();
+        this.dsCTrinhKM = dao.getDsCTrinhKM();
     }
 
     public boolean timCTrinhKM(CTrinhKMDTO ct) {

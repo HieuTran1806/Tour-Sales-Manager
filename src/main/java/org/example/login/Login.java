@@ -9,6 +9,7 @@ import org.example.gui.panel.UIColors;
 
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Objects;
 import javax.swing.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -19,8 +20,6 @@ public class Login extends JFrame {
     JPasswordField txtPassword;
 
     final TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAO();
-    final SessionManager sessionManager = new SessionManager();
-
 
     public Login() {
         initComponents();
@@ -32,7 +31,7 @@ public class Login extends JFrame {
     private void initComponents() {
         // Set favicon
         try {
-            ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("logosgu.png"));
+            ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("logosgu.png")));
             setIconImage(icon.getImage());
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,7 +54,7 @@ public class Login extends JFrame {
 
         // Logo
         try {
-            ImageIcon originalIcon = new ImageIcon(getClass().getClassLoader().getResource("logo.png"));
+            ImageIcon originalIcon = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("logo.png")));
             Image scaledImage = originalIcon.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
             JLabel logoLabel = new JLabel(new ImageIcon(scaledImage));
             headerPanel.add(logoLabel);
@@ -77,8 +76,8 @@ public class Login extends JFrame {
         jlbPassword.setText("Mật khẩu:");
 
         // define login and logout function
-        login();
-        logout();
+        loginAccount();
+        logoutAccount();
 
         // main Panel
         JPanel mainPanel = new JPanel();
@@ -131,7 +130,7 @@ public class Login extends JFrame {
         pack();
     }
 
-    private void login(){
+    private void loginAccount(){
         loginBtn = createBtn("Đăng nhập", UIColors.SAVE);
         loginBtn.addActionListener(v -> {
             String username = txtUsername.getText().trim();
@@ -144,20 +143,20 @@ public class Login extends JFrame {
                 return;
             }
 
-            TaiKhoanDTO taiKhoan = taiKhoanDAO.dangNhap(username, password);
-            if (taiKhoan == null) {
+            TaiKhoanDTO account = taiKhoanDAO.dangNhap(username, password);
+            if (account == null) {
                 JOptionPane.showMessageDialog(this, "Sai tài khoản hoặc mật khẩu.");
                 return;
             }
 
-            sessionManager.loginAccount(taiKhoan);
-            MainFrame mainFrame = new MainFrame(taiKhoan);
+            SessionManager.loginAccount(account);
+            MainFrame mainFrame = new MainFrame(account);
             mainFrame.setVisible(true);
             this.dispose();
         });
     }
 
-    private void logout(){
+    private void logoutAccount(){
         logoutBtn = createBtn("Thoát", UIColors.CANCEL);
         logoutBtn.addActionListener(v -> {
             dispose();

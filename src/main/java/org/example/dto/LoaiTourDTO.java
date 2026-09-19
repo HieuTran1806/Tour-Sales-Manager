@@ -11,8 +11,8 @@ public class LoaiTourDTO {
     String maLoaiTour;
     String theLoai;
     String moTa;
-    int trangThai; // 1: Đang hoạt động, 0: Ngưng
-    
+    String trangThai;
+
     @Override
     public String toString(){
         return maLoaiTour + " - " + theLoai;
