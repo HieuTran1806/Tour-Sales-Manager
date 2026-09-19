@@ -271,6 +271,7 @@ public class NhanVienDialog extends JDialog {
     private void luu(){
         btnLuu = createBtn("Lưu", UIColors.SAVE);
         btnLuu.addActionListener(v -> {
+            // get data
             String idStaff = txtFirstName.getText().trim();
             String firstName = txtFirstName.getText().trim();
             String lastName = txtLastName.getText().trim();
