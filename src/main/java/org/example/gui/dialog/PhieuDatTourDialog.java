@@ -6,12 +6,11 @@ import org.example.bus.PhieuDatTourBUS;
 import org.example.dao.PhieuDatTourDAO;
 import org.example.dao.KhachHangDAO;
 import org.example.dao.KeHoachTourDAO;
-import org.example.dao.TourDAO;
 import org.example.dto.PhieuDatTourDTO;
 import org.example.dto.KhachHangDTO;
 import org.example.dto.KeHoachTourDTO;
-import org.example.gui.panel.PhieuDatTourPanel;
 import org.example.gui.panel.UIColors;
+import org.example.validate.ValidationException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,10 +19,13 @@ import java.awt.event.FocusEvent;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PhieuDatTourDialog extends JDialog {
-    JButton btnDong, btnLuu;
-    JLabel txtHo, txtTen, jlbMaKH, jlbMaKeHoachTour, jlbGia;
+    JButton closeBtn, saveBtn;
 
-    JTextField txtGiaVe, txtHoKH, txtMaKH, txtMaKHTour, txtTenKH;
+    JLabel lbFirstName, lbLastName, lbIdCustomer, lbIdTourPlan, lbPrice;
+
+    JTextField txtPrice, txtFirstName, txtIdCustomer, txtIdTourPlan, txtLastName;
+
+    JPanel formPanel, southPanel;
 
     public enum Mode {
         ADD, EDIT
@@ -31,8 +33,8 @@ public class PhieuDatTourDialog extends JDialog {
 
     Mode mode;
     PhieuDatTourDTO currentKHangKHTour;
+    PhieuDatTourBUS bus;
     KhachHangDAO dsKhachHang;
-    KeHoachTourDAO dsKeHoachTour;
 
     public PhieuDatTourDialog(Frame parent, boolean modal,
                               PhieuDatTourDAO ds, Mode mode, PhieuDatTourDTO khangkhtour) {
@@ -40,134 +42,72 @@ public class PhieuDatTourDialog extends JDialog {
         super(parent, modal);
         this.mode = mode;
         this.currentKHangKHTour = khangkhtour;
+        bus = new PhieuDatTourBUS();
 
         dsKhachHang = new KhachHangDAO();
-        dsKeHoachTour = new KeHoachTourDAO();
 
         initComponents();
         this.setLocationRelativeTo(null);
 
-        if (mode == Mode.EDIT && khangkhtour != null) {
-            setDataToFields();
-            setTitle("Sửa thông tin khách hàng - kế hoạch tour");
-        }else {
-            setTitle("Thêm khách hàng - kế hoạch tour");
-        }
+        setTitle(khangkhtour == null ? "Thêm phiếu đặt tour" : "Sửa phiếu đặt tour");
     }
 
     private void initComponents() {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-        btnLuu = new JButton("Lưu");
-        btnDong = new JButton("Đóng");
+        // 4 rows 2 cols
+        formPanel = new JPanel(new GridLayout(5, 2, 10, 15));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Căn lề padding 4 góc
 
-        jlbMaKH = new JLabel("Mã khách hàng:");
-        txtMaKH = new JTextField();
+        southPanel = new JPanel(new FlowLayout());
 
-        txtHo = new JLabel("Họ:");
-        txtHoKH = new JTextField();
-        txtHoKH.setEnabled(false);
+        // row id tour plan
+        lbIdTourPlan = new JLabel("Mã phiếu đặt tour");
+        lbIdTourPlan.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        formPanel.add(lbIdTourPlan);
+        txtIdTourPlan = new JTextField();
+        formPanel.add(txtIdTourPlan);
 
-        txtTen = new JLabel("Tên:");
-        txtTenKH = new JTextField();
-        txtTenKH.setEnabled(false);
+        // row firstName
+        lbFirstName = new JLabel("Họ: ");
+        lbFirstName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        formPanel.add(lbFirstName);
+        txtFirstName = new JTextField();
+        formPanel.add(txtFirstName);
 
-        jlbMaKeHoachTour = new JLabel("Mã kế hoạch - Tour:");
-        txtMaKHTour = new JTextField();
+        // row lastName
+        lbLastName = new JLabel("Tên: ");
+        lbLastName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        formPanel.add(lbLastName);
+        txtLastName = new JTextField();
+        formPanel.add(txtLastName);
 
-        jlbGia = new JLabel("Giá vé:");
-        txtGiaVe = new JTextField();
-        txtGiaVe.setEnabled(false);
+        // row id customer
+        lbIdCustomer = new JLabel("Mã khách hàng: ");
+        lbIdCustomer.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        formPanel.add(lbIdCustomer);
+        txtIdCustomer = new JTextField();
+        formPanel.add(txtIdCustomer);
+
+        // row price
+        lbPrice = new JLabel("Giá vé: ");
+        lbPrice.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        formPanel.add(lbPrice);
+        txtPrice = new JTextField();
+        txtPrice.setEnabled(false);
+        formPanel.add(txtPrice);
 
         // Events & Verifiers
         save();
         cancel();
 
-        txtMaKH.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) { txtMaKHFocusLost(evt); }
-        });
-        txtMaKH.addActionListener(this::txtMaKHActionPerformed);
-        txtMaKH.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                String text = txtMaKH.getText().trim();
-                if (text.isEmpty()) {
-                    JOptionPane.showMessageDialog(PhieuDatTourDialog.this, "Mã khách hàng không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-                for (KhachHangDTO kh : dsKhachHang.layDanhSachKHang()) {
-                    if (kh.getMaKH().equals(text)) return true;
-                }
-                JOptionPane.showMessageDialog(PhieuDatTourDialog.this, "Mã khách hàng không tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        });
-
-        txtMaKHTour.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) { txtMaKHTourFocusLost(evt); }
-        });
-        txtMaKHTour.addActionListener(this::txtMaKHTourActionPerformed);
-        txtMaKHTour.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                String text = txtMaKHTour.getText().trim();
-                if (text.isEmpty()) {
-                    JOptionPane.showMessageDialog(PhieuDatTourDialog.this, "Mã kế hoạch - Tour không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
-                for (KeHoachTourDTO kt : dsKeHoachTour.getAllKeHoachTours()) {
-                    if (kt.getMaKHTour().equals(text)) return true;
-                }
-                JOptionPane.showMessageDialog(PhieuDatTourDialog.this, "Mã kế hoạch - Tour không tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        });
-
-        txtGiaVe.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) { txtGiaVeFocusLost(evt); }
-        });
-        txtGiaVe.addActionListener(this::txtGiaVeActionPerformed);
-        txtHoKH.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) { txtHoKHFocusLost(evt); }
-        });
-
-        // main layout
-        setLayout(new BorderLayout(10, 10));
-
-        // 4 rows 2 cols
-        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 15));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Căn lề padding 4 góc
-
-        formPanel.add(jlbMaKH);
-        formPanel.add(txtMaKH);
-
-        JPanel hoPanel = new JPanel(new BorderLayout(5, 0));
-        hoPanel.add(txtHo, BorderLayout.WEST);
-        hoPanel.add(txtHoKH, BorderLayout.CENTER);
-
-        JPanel tenPanel = new JPanel(new BorderLayout(5, 0));
-        tenPanel.add(txtTen, BorderLayout.WEST);
-        tenPanel.add(txtTenKH, BorderLayout.CENTER);
-
-        JPanel namePanel = new JPanel(new GridLayout(1, 2, 10, 0));
-        namePanel.add(hoPanel);
-        namePanel.add(tenPanel);
-
-        formPanel.add(new JLabel("Họ và Tên khách:"));
-        formPanel.add(namePanel);
-
-        formPanel.add(jlbMaKeHoachTour);
-        formPanel.add(txtMaKHTour);
-
-        formPanel.add(jlbGia);
-        formPanel.add(txtGiaVe);
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
-        buttonPanel.add(btnLuu);
-        buttonPanel.add(btnDong);
+        southPanel.add(saveBtn);
+        southPanel.add(closeBtn);
+        southPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         add(formPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        add(southPanel, BorderLayout.SOUTH);
 
         pack();
         setLocationRelativeTo(null);
@@ -183,19 +123,34 @@ public class PhieuDatTourDialog extends JDialog {
     }
 
     private void save(){
-        btnLuu = createBtn("Lưu",  UIColors.SAVE);
-        btnLuu.addActionListener(v -> {
-            String maKH = txtMaKH.getText().trim();
-            String ho = txtHoKH.getText().trim();
-            String ten = txtTenKH.getText().trim();
-            String maKHTour = txtMaKHTour.getText().trim();
+        saveBtn = createBtn("Lưu",  UIColors.SAVE);
+        saveBtn.addActionListener(v -> {
+            // get data
+            String maKH = txtIdCustomer.getText().trim();
+            String ho = txtFirstName.getText().trim();
+            String ten = txtLastName.getText().trim();
+            String maKHTour = txtIdTourPlan.getText().trim();
 
-            if(txtGiaVe.getText().trim().isEmpty()){
+            try {
+                // validate
+                validateIdTourPlan(maKHTour);
+                validateIdCustomer(maKH);
+
+
+            }catch (ValidationException validationException) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        validationException.getMessage(),
+                        "Lỗi nhập liệu",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+            if(txtPrice.getText().trim().isEmpty()){
                 PhieuDatTourDAO dao = new PhieuDatTourDAO();
                 long gia = dao.layDonGiaTheoMaKHTour(maKHTour);
-                txtGiaVe.setText(String.valueOf(gia));
+                txtPrice.setText(String.valueOf(gia));
             }
-            long giaVe = Long.parseLong(txtGiaVe.getText().trim());
+            long giaVe = Long.parseLong(txtPrice.getText().trim());
             PhieuDatTourBUS khangkhtBUS = new PhieuDatTourBUS();
             if(mode==Mode.ADD) {
                 PhieuDatTourDTO newKHangKHTour = new PhieuDatTourDTO(maKHTour, maKH, giaVe);
@@ -210,66 +165,96 @@ public class PhieuDatTourDialog extends JDialog {
         });
     }
 
+    private void validateIdTourPlan(String id) throws ValidationException {
+        if (id.isEmpty()) throw new ValidationException("Mã phiếu đặt tour không được để trống!");
+
+        // if (!id.matches("^KH\\d{3}$"))  throw new ValidationException("Mã phiếu đặt tour phải có dạng KHxxx!");
+
+        if(isIdKHTDuplicated(id)) throw new ValidationException("Mã phiếu đặt tour đã tồn tại!");
+    }
+
+    private boolean isIdKHTDuplicated(String id){
+        for (PhieuDatTourDTO ls : bus.getAllPhieuDatTour()){
+            if (ls.getMaKHTour().equals(id))
+                return true;
+        }
+        return false;
+    }
+
+    private void validateIdCustomer(String id) throws ValidationException{
+        if (id.isEmpty()) throw new ValidationException("Mãk khách hàng không được để trống!");
+
+        if(isExistedIdCustomer(id)) throw new ValidationException("Mã khách hàng đã tồn tại.");
+    }
+
+    private boolean isExistedIdCustomer(String id){
+        for (KhachHangDTO kh : dsKhachHang.layDanhSachKHang()) {
+            if (kh.getMaKH().equals(id))
+                return true;
+        }
+        return false;
+    }
+
     private void cancel(){
-        btnDong = createBtn("Đóng", UIColors.CANCEL);
-        btnDong.addActionListener(v -> {
+        closeBtn = createBtn("Đóng", UIColors.CANCEL);
+        closeBtn.addActionListener(v -> {
             this.dispose();
         });
     }
 
-    private void txtMaKHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMaKHActionPerformed
+    private void txtIdCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIdCustomerActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtMaKHActionPerformed
+    }//GEN-LAST:event_txtIdCustomerActionPerformed
 
-    private void txtMaKHTourActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMaKHTourActionPerformed
+    private void txtIdTourPlanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIdTourPlanActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtMaKHTourActionPerformed
+    }//GEN-LAST:event_txtIdTourPlanActionPerformed
 
-    private void txtGiaVeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtGiaVeActionPerformed
+    private void txtPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPriceActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtGiaVeActionPerformed
+    }//GEN-LAST:event_txtPriceActionPerformed
 
-    private void txtMaKHFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMaKHFocusLost
+    private void txtIdCustomerFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtIdCustomerFocusLost
         // TODO add your handling code here:
-        String ma = txtMaKH.getText().trim();
+        String ma = txtIdCustomer.getText().trim();
         for(KhachHangDTO kh : dsKhachHang.layDanhSachKHang()) {
             if(kh.getMaKH().equals(ma)) {
-                txtHoKH.setText(kh.getHo());
-                txtTenKH.setText(kh.getTen());
+                txtFirstName.setText(kh.getHo());
+                txtLastName.setText(kh.getTen());
                 return;
             }
         }
         JOptionPane.showMessageDialog(PhieuDatTourDialog.this, "Mã khách hàng không tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-    }//GEN-LAST:event_txtMaKHFocusLost
+    }//GEN-LAST:event_txtIdCustomerFocusLost
 
-    private void txtMaKHTourFocusLost(FocusEvent evt) {
-        String maKHTour = txtMaKHTour.getText().trim();
+    private void txtIdTourPlanFocusLost(FocusEvent evt) {
+        String maKHTour = txtIdTourPlan.getText().trim();
 
         if(!maKHTour.isEmpty()){
             PhieuDatTourDAO dao = new PhieuDatTourDAO();
             long gia = dao.layDonGiaTheoMaKHTour(maKHTour);
 
-            txtGiaVe.setText(String.valueOf(gia));
+            txtPrice.setText(String.valueOf(gia));
         }
     }
 
-    private void txtHoKHFocusLost(FocusEvent evt) {
+    private void txtFirstNameFocusLost(FocusEvent evt) {
         // TODO add your handling code here:
     }
 
-    private void txtTenKHFocusLost(FocusEvent evt) {
+    private void txtLastNameFocusLost(FocusEvent evt) {
         // TODO add your handling code here:
     }
 
-    private void txtGiaVeFocusLost(FocusEvent evt) {
+    private void txtPriceFocusLost(FocusEvent evt) {
         // TODO add your handling code here:
     }
 
-    private void setDataToFields() {
+    private void loadData() {
         if (currentKHangKHTour != null) {
-            txtMaKH.setText(currentKHangKHTour.getMaKHang());
-            txtMaKHTour.setText(currentKHangKHTour.getMaKHTour());
-            txtGiaVe.setText(String.valueOf(currentKHangKHTour.getGiaVe()));
+            txtIdCustomer.setText(currentKHangKHTour.getMaKHang());
+            txtIdTourPlan.setText(currentKHangKHTour.getMaKHTour());
+            txtPrice.setText(String.valueOf(currentKHangKHTour.getGiaVe()));
         }
     }
 }

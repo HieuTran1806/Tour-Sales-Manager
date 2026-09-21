@@ -6,15 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PhieuDatTourBUS {
-    static ArrayList<PhieuDatTourDTO> dsKHKHTour;
-    static PhieuDatTourDAO dataKHKHTour = new PhieuDatTourDAO();
-    public PhieuDatTourBUS() {}
-    public void docDSKHKHTour() {
-        if (dsKHKHTour == null) {
-            dsKHKHTour = new ArrayList<PhieuDatTourDTO>();
-        }
-        dsKHKHTour = dataKHKHTour.layDanhSachKHang_KHTour();
+    ArrayList<PhieuDatTourDTO> dsKHKHTour;
+    PhieuDatTourDAO phieuDatTourDao;
+
+    public PhieuDatTourBUS() {
+        phieuDatTourDao = new PhieuDatTourDAO();
+        dsKHKHTour = phieuDatTourDao.layDanhSachKHang_KHTour();
     }
+
+    public ArrayList<PhieuDatTourDTO> getAllPhieuDatTour(){
+        return phieuDatTourDao.layDanhSachKHang_KHTour();
+    }
+
     public void them(PhieuDatTourDTO kht) {
         try{
             if (dsKHKHTour == null) {
@@ -31,7 +34,7 @@ public class PhieuDatTourBUS {
                     return;
                 }
             }
-            dataKHKHTour.themKHang_KHTour(kht);
+            phieuDatTourDao.themKHang_KHTour(kht);
             if (dsKHKHTour != null) {
                 dsKHKHTour.add(kht);
             }
@@ -45,7 +48,7 @@ public class PhieuDatTourBUS {
             if (dsKHKHTour == null) {
                 return;
             }
-            dataKHKHTour.xoaKHang_KHTour(maKHTour, maKHang);
+            phieuDatTourDao.xoaKHang_KHTour(maKHTour, maKHang);
             dsKHKHTour.removeIf(kht -> kht.getMaKHTour().equals(maKHTour) && kht.getMaKHang().equals(maKHang));
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,7 +63,7 @@ public class PhieuDatTourBUS {
             for (int i = 0; i < dsKHKHTour.size(); i++) {
                 PhieuDatTourDTO existingKHT = dsKHKHTour.get(i);
                 if (existingKHT.getMaKHTour().equals(kht.getMaKHTour()) && existingKHT.getMaKHang().equals(kht.getMaKHang())) {
-                    dataKHKHTour.capNhatKHang_KHTour(kht);
+                    phieuDatTourDao.capNhatKHang_KHTour(kht);
                     dsKHKHTour.set(i, kht);
                     return true;
                 }
@@ -75,10 +78,12 @@ public class PhieuDatTourBUS {
     public PhieuDatTourDTO timKiemKHang_KHTourTheoMaKHTour(String maKHTour) {
         try {
             if (dsKHKHTour == null || maKHTour == null) {
+                System.out.println("abcd");
                 return null;
             }
             for (PhieuDatTourDTO kht : dsKHKHTour) {
                 if (kht.getMaKHTour().equals(maKHTour)) {
+                    System.out.println("abc");
                     return kht;
                 }
             }

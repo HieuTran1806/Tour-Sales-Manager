@@ -1,4 +1,4 @@
-package org.example;
+package org.example.validate;
 
 public class ValidationException extends Exception{
     public ValidationException(String message){

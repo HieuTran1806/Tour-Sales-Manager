@@ -21,7 +21,7 @@ import org.example.login.SessionManager;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PhieuDatTourPanel extends JPanel {
-    JButton btnLamMoi, btnSua, btnThem, btnXoa;
+    JButton refreshBtn, editBtn, addBtn, deleteBtn;
 
     JComboBox<String> jComboBox2;
 
@@ -31,19 +31,19 @@ public class PhieuDatTourPanel extends JPanel {
 
     JScrollPane jScrollPane2;
 
-    JTable jTable2;
+    JTable table;
 
     JTextField txtSearch;
     PhieuDatTourDAO ds = new PhieuDatTourDAO();
     KhachHangDAO dsKH = new KhachHangDAO();
-    PhieuDatTourBUS khangkhtBUS = new PhieuDatTourBUS();
+    PhieuDatTourBUS khangkhtBUS;
     PhieuDatTourDialog phieuDatTourDialog;
 
     public PhieuDatTourPanel() {
         khangkhtBUS = new PhieuDatTourBUS();
         initComponents();
         if (!SessionManager.isAdmin()) {
-            btnXoa.setEnabled(false);
+            deleteBtn.setEnabled(false);
         }
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -69,6 +69,7 @@ public class PhieuDatTourPanel extends JPanel {
             }
         });
         loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
+        hasSelectedRow();
     }
 
     private void initComponents() {
@@ -79,12 +80,12 @@ public class PhieuDatTourPanel extends JPanel {
         jComboBox2 = new JComboBox<>();
         txtSearch = new JTextField();
         jScrollPane2 = new JScrollPane();
-        jTable2 = new JTable();
+        table = new JTable();
         jPanel3 = new JPanel();
-        btnThem = new JButton();
-        btnXoa = new JButton();
-        btnSua = new JButton();
-        btnLamMoi = new JButton();
+        addBtn = new JButton();
+        deleteBtn = new JButton();
+        editBtn = new JButton();
+        refreshBtn = new JButton();
 
         setLayout(new BorderLayout());
 
@@ -92,7 +93,7 @@ public class PhieuDatTourPanel extends JPanel {
 
         jLabel1.setFont(new Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setHorizontalAlignment(SwingConstants.CENTER);
-        jLabel1.setText("Quản lí khách hàng - kế hoạch tour");
+        jLabel1.setText("QUẢN LÝ PHIẾU ĐẶT TOUR");
         jLabel1.setHorizontalTextPosition(SwingConstants.CENTER);
         jPanel1.add(jLabel1, BorderLayout.CENTER);
 
@@ -110,7 +111,7 @@ public class PhieuDatTourPanel extends JPanel {
 
         add(jPanel1, BorderLayout.PAGE_START);
 
-        jTable2.setModel(new DefaultTableModel(
+        table.setModel(new DefaultTableModel(
                 new Object [][] {
                         {null, null, null, null, null},
                         {null, null, null, null, null},
@@ -130,21 +131,21 @@ public class PhieuDatTourPanel extends JPanel {
                 return types [columnIndex];
             }
         });
-        jScrollPane2.setViewportView(jTable2);
+        jScrollPane2.setViewportView(table);
         jScrollPane2.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         add(jScrollPane2, BorderLayout.CENTER);
 
         them();
-        jPanel3.add(btnThem);
+        jPanel3.add(addBtn);
 
         xoa();
-        jPanel3.add(btnXoa);
+        jPanel3.add(deleteBtn);
 
         sua();
-        jPanel3.add(btnSua);
+        jPanel3.add(editBtn);
 
         lamMoi();
-        jPanel3.add(btnLamMoi);
+        jPanel3.add(refreshBtn);
 
         add(jPanel3, BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
@@ -168,8 +169,8 @@ public class PhieuDatTourPanel extends JPanel {
     }
 
     private void them(){
-        btnThem = createBtn("Thêm", UIColors.ADD);
-        btnThem.addActionListener(v -> {
+        addBtn = createBtn("Thêm", UIColors.ADD);
+        addBtn.addActionListener(v -> {
             phieuDatTourDialog = new PhieuDatTourDialog(null, true, ds, PhieuDatTourDialog.Mode.ADD, null);
             phieuDatTourDialog.setVisible(true);
 
@@ -178,35 +179,39 @@ public class PhieuDatTourPanel extends JPanel {
     }
 
     private void xoa(){
-        btnXoa = createBtn("Xóa", UIColors.DELETE);
-        btnSua.setEnabled(false);
-        btnXoa.addActionListener(v -> {
+        deleteBtn = createBtn("Xóa", UIColors.DELETE);
+        editBtn.setEnabled(false);
+        deleteBtn.addActionListener(v -> {
             if (!SessionManager.isAdmin()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa dữ liệu.");
                 return;
             }
-            int i = jTable2.getSelectedRow();
+            int i = table.getSelectedRow();
             int result = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa?", "Xác nhận", JOptionPane.YES_NO_OPTION);
             if (result == JOptionPane.YES_OPTION && i >= 0) {
-                String maKHang = (String) jTable2.getValueAt(i, 0);
-                String maKHTour = (String) jTable2.getValueAt(i, 3);
+                String maKHang = (String) table.getValueAt(i, 0);
+                String maKHTour = (String) table.getValueAt(i, 3);
                 PhieuDatTourBUS khangkhtBUS = new PhieuDatTourBUS();
                 khangkhtBUS.xoaKHang_KHTour(maKHTour, maKHang);
-                DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
                 model.removeRow(i);
             }
         });
     }
 
     private void sua(){
-        btnSua = createBtn("Sửa", UIColors.EDIT);
-        btnSua.setEnabled(false);
-        btnSua.addActionListener(v -> {
-            int i = jTable2.getSelectedRow();
+        editBtn = createBtn("Sửa", UIColors.EDIT);
+        editBtn.setEnabled(false);
+        editBtn.addActionListener(v -> {
+            int row = table.getSelectedRow();
+            if (row == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn kế hoạch tour cần sửa");
+                return;
+            }
 
-            if (i >= 0) {
-                String maKHang = (String) jTable2.getValueAt(i, 0);
-                String maKHTour = (String) jTable2.getValueAt(i, 3);
+            if (row >= 0) {
+                String maKHang = (String) table.getValueAt(row, 0);
+                String maKHTour = (String) table.getValueAt(row, 3);
                 PhieuDatTourDTO khangkht = khangkhtBUS.timKiemKHang_KHTourTheoMaKHTour(maKHTour);
                 if (khangkht != null && khangkht.getMaKHang().equals(maKHang)) {
                     phieuDatTourDialog = new PhieuDatTourDialog(null, true, ds, PhieuDatTourDialog.Mode.EDIT, khangkht);
@@ -214,23 +219,19 @@ public class PhieuDatTourPanel extends JPanel {
 
                     loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
                 }
+                System.out.println(khangkht);
+                System.out.println(khangkht.getMaKHang());
+                System.out.println(maKHang);
             }
         });
     }
 
     private void lamMoi(){
-        btnLamMoi = createBtn("Làm mới", UIColors.REFRESH);
-        btnLamMoi.addActionListener(v -> {
+        refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
+        refreshBtn.addActionListener(v -> {
             loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
         });
     }
-
-    private void jTable2MouseClicked(MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
-        if (SessionManager.isAdmin()) {
-            btnXoa.setEnabled(true);
-        }
-        btnSua.setEnabled(true);
-    }//GEN-LAST:event_jTable2MouseClicked
 
     private void searchKHang_KHTour() {
         String keyword = txtSearch.getText().trim();
@@ -264,7 +265,7 @@ public class PhieuDatTourPanel extends JPanel {
     }
 
     private void loadKHang_KHTourToTable(List<PhieuDatTourDTO> khangkhtList) {
-        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
         for (PhieuDatTourDTO kht : khangkhtList) {
             for (KhachHangDTO kh : dsKH.layDanhSachKHang()) {
@@ -275,5 +276,15 @@ public class PhieuDatTourPanel extends JPanel {
                 }
             }
         }
+    }
+
+    private void hasSelectedRow(){
+        table.getSelectionModel().addListSelectionListener(e ->{
+            boolean hasSelected = table.getSelectedRow() != -1;
+            refreshBtn.setEnabled(hasSelected);
+            editBtn.setEnabled(hasSelected);
+            addBtn.setEnabled(hasSelected);
+            deleteBtn.setEnabled(hasSelected);
+        });
     }
 }

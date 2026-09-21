@@ -3,7 +3,7 @@ package org.example.gui.dialog;
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.ValidationException;
+import org.example.validate.ValidationException;
 import org.example.bus.KhachHangBUS;
 import org.example.dao.KhachHangDAO;
 import org.example.dto.KhachHangDTO;
@@ -49,7 +49,7 @@ public class KhachHangDialog extends JDialog {
             setDataCustomer(kh);
             txtIDCustomer.setEditable(false);
             txtFirstName.requestFocus();
-            setTitle("Sửa khách hàng");
+            setTitle("Sửa thông tin khách hàng");
         } else {
             setTitle("Thêm khách hàng");
         }
@@ -100,7 +100,6 @@ public class KhachHangDialog extends JDialog {
         lbDob = new JLabel("Ngày sinh");
         lbDob.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
         panelForm.add(lbDob);
-
         jDob = new JDateChooser();
         jDob.setDateFormatString("dd/MM/yyyy");
         jDob.setDate(valueOf(LocalDate.now()));

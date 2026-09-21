@@ -2,7 +2,6 @@ package org.example.gui.panel;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.bus.NhanVienBUS;
 import org.example.bus.KeHoachTourBUS;
 import org.example.bus.TourBUS;
 import org.example.dao.PhieuDatTourDAO;
