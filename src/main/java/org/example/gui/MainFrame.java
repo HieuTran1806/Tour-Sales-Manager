@@ -104,7 +104,7 @@ public class MainFrame extends JFrame {
         contentArea.add(new TourPanel(), "Tour");
         contentArea.add(new LoaiTourPanel(), "LoaiTour");
         contentArea.add(new KeHoachTourPanel(), "KeHoachTour");
-        contentArea.add(new PhieuDatTourPanel(), "PhieuDatTour");
+        contentArea.add(new TourBookingPanel(), "PhieuDatTour");
         contentArea.add(new HoaDonPanel(), "HoaDon");
         contentArea.add(new DiaDiemPanel(), "DiaDiem");
         contentArea.add(new NhanVienPanel(), "NhanVien");

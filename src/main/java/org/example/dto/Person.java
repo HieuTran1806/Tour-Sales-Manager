@@ -11,9 +11,9 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Person {
-    String ho;
-    String ten;
-    String diaChi;
-    String sdt;
+    String firstName;
+    String lastName;
+    String address;
+    String phoneNumber;
     LocalDate ngaySinh;
 }

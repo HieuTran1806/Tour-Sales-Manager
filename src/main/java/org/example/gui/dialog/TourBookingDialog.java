@@ -2,23 +2,20 @@ package org.example.gui.dialog;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.bus.PhieuDatTourBUS;
-import org.example.dao.PhieuDatTourDAO;
+import org.example.bus.TourBookingBUS;
+import org.example.dao.TourBookingDAO;
 import org.example.dao.KhachHangDAO;
-import org.example.dao.KeHoachTourDAO;
-import org.example.dto.PhieuDatTourDTO;
+import org.example.dto.TourBookingDTO;
 import org.example.dto.KhachHangDTO;
-import org.example.dto.KeHoachTourDTO;
 import org.example.gui.panel.UIColors;
 import org.example.validate.ValidationException;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PhieuDatTourDialog extends JDialog {
+public class TourBookingDialog extends JDialog {
     JButton closeBtn, saveBtn;
 
     JLabel lbFirstName, lbLastName, lbIdCustomer, lbIdTourPlan, lbPrice;
@@ -32,24 +29,26 @@ public class PhieuDatTourDialog extends JDialog {
     }
 
     Mode mode;
-    PhieuDatTourDTO currentKHangKHTour;
-    PhieuDatTourBUS bus;
+    TourBookingDTO currentKHangKHTour;
+    TourBookingBUS bus;
     KhachHangDAO dsKhachHang;
 
-    public PhieuDatTourDialog(Frame parent, boolean modal,
-                              PhieuDatTourDAO ds, Mode mode, PhieuDatTourDTO khangkhtour) {
+    public TourBookingDialog(Frame parent, boolean modal,
+                             TourBookingDAO ds, Mode mode, TourBookingDTO khangkhtour) {
 
         super(parent, modal);
         this.mode = mode;
         this.currentKHangKHTour = khangkhtour;
-        bus = new PhieuDatTourBUS();
+        bus = new TourBookingBUS();
 
         dsKhachHang = new KhachHangDAO();
 
         initComponents();
-        this.setLocationRelativeTo(null);
 
         setTitle(khangkhtour == null ? "Thêm phiếu đặt tour" : "Sửa phiếu đặt tour");
+        if(khangkhtour != null){
+            loadData();
+        }
     }
 
     private void initComponents() {
@@ -146,20 +145,21 @@ public class PhieuDatTourDialog extends JDialog {
                 );
             }
             if(txtPrice.getText().trim().isEmpty()){
-                PhieuDatTourDAO dao = new PhieuDatTourDAO();
-                long gia = dao.layDonGiaTheoMaKHTour(maKHTour);
+                TourBookingDAO dao = new TourBookingDAO();
+                long gia = dao.getPriceByIdTourPlan(maKHTour);
                 txtPrice.setText(String.valueOf(gia));
             }
             long giaVe = Long.parseLong(txtPrice.getText().trim());
-            PhieuDatTourBUS khangkhtBUS = new PhieuDatTourBUS();
+            TourBookingBUS bus = new TourBookingBUS();
+
             if(mode==Mode.ADD) {
-                PhieuDatTourDTO newKHangKHTour = new PhieuDatTourDTO(maKHTour, maKH, giaVe);
-                khangkhtBUS.them(newKHangKHTour);
+                TourBookingDTO newKHangKHTour = new TourBookingDTO(maKHTour, maKH, giaVe);
+                bus.addTourBooking(newKHangKHTour);
             } else if(mode==Mode.EDIT&&currentKHangKHTour!=null) {
-                currentKHangKHTour.setMaKHang(maKH);
+                currentKHangKHTour.setIdCustomer(maKH);
                 currentKHangKHTour.setMaKHTour(maKHTour);
                 currentKHangKHTour.setGiaVe(giaVe);
-                khangkhtBUS.suaKHang_KHTour(currentKHangKHTour);
+                bus.editTourBooking(currentKHangKHTour);
             }
             dispose();
         });
@@ -174,7 +174,7 @@ public class PhieuDatTourDialog extends JDialog {
     }
 
     private boolean isIdKHTDuplicated(String id){
-        for (PhieuDatTourDTO ls : bus.getAllPhieuDatTour()){
+        for (TourBookingDTO ls : bus.getAllTourBooking()){
             if (ls.getMaKHTour().equals(id))
                 return true;
         }
@@ -224,15 +224,15 @@ public class PhieuDatTourDialog extends JDialog {
                 return;
             }
         }
-        JOptionPane.showMessageDialog(PhieuDatTourDialog.this, "Mã khách hàng không tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(TourBookingDialog.this, "Mã khách hàng không tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
     }//GEN-LAST:event_txtIdCustomerFocusLost
 
     private void txtIdTourPlanFocusLost(FocusEvent evt) {
         String maKHTour = txtIdTourPlan.getText().trim();
 
         if(!maKHTour.isEmpty()){
-            PhieuDatTourDAO dao = new PhieuDatTourDAO();
-            long gia = dao.layDonGiaTheoMaKHTour(maKHTour);
+            TourBookingDAO dao = new TourBookingDAO();
+            long gia = dao.getPriceByIdTourPlan(maKHTour);
 
             txtPrice.setText(String.valueOf(gia));
         }
@@ -252,7 +252,7 @@ public class PhieuDatTourDialog extends JDialog {
 
     private void loadData() {
         if (currentKHangKHTour != null) {
-            txtIdCustomer.setText(currentKHangKHTour.getMaKHang());
+            txtIdCustomer.setText(currentKHangKHTour.getIdCustomer());
             txtIdTourPlan.setText(currentKHangKHTour.getMaKHTour());
             txtPrice.setText(String.valueOf(currentKHangKHTour.getGiaVe()));
         }

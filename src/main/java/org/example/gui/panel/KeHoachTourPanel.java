@@ -4,12 +4,12 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.bus.KeHoachTourBUS;
 import org.example.bus.TourBUS;
-import org.example.dao.PhieuDatTourDAO;
+import org.example.dao.TourBookingDAO;
 import org.example.dto.KeHoachTourDTO;
 import org.example.dto.TourDTO;
 import org.example.gui.dialog.KeHoachTourDetailDialog;
 import org.example.gui.dialog.KeHoachTourDialog;
-import org.example.gui.dialog.PhieuDatTourDialog;
+import org.example.gui.dialog.TourBookingDialog;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -40,8 +40,8 @@ public class KeHoachTourPanel extends JPanel {
 
     ArrayList<KeHoachTourDTO> lsKeHoachTours;
 
-    PhieuDatTourDialog phieuDatTourDialog;
-    PhieuDatTourDAO dao = new PhieuDatTourDAO();
+    TourBookingDialog tourBookingDialog;
+    TourBookingDAO dao = new TourBookingDAO();
 
     // formatter
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -191,8 +191,8 @@ public class KeHoachTourPanel extends JPanel {
     private void booking(){
         bookingBtn = createBtn("Booking", UIColors.BOOKING);
         bookingBtn.addActionListener(e -> {
-            phieuDatTourDialog = new PhieuDatTourDialog(null, true, dao, PhieuDatTourDialog.Mode.ADD, null);
-            phieuDatTourDialog.setVisible(true);
+            tourBookingDialog = new TourBookingDialog(null, true, dao, TourBookingDialog.Mode.ADD, null);
+            tourBookingDialog.setVisible(true);
         });
     }
 

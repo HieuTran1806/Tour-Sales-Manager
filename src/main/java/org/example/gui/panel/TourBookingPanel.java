@@ -2,7 +2,6 @@ package org.example.gui.panel;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -11,16 +10,16 @@ import javax.swing.table.DefaultTableModel;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.bus.PhieuDatTourBUS;
-import org.example.dao.PhieuDatTourDAO;
+import org.example.bus.TourBookingBUS;
+import org.example.dao.TourBookingDAO;
 import org.example.dao.KhachHangDAO;
-import org.example.dto.PhieuDatTourDTO;
+import org.example.dto.TourBookingDTO;
 import org.example.dto.KhachHangDTO;
-import org.example.gui.dialog.PhieuDatTourDialog;
+import org.example.gui.dialog.TourBookingDialog;
 import org.example.login.SessionManager;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PhieuDatTourPanel extends JPanel {
+public class TourBookingPanel extends JPanel {
     JButton refreshBtn, editBtn, addBtn, deleteBtn;
 
     JComboBox<String> jComboBox2;
@@ -34,13 +33,13 @@ public class PhieuDatTourPanel extends JPanel {
     JTable table;
 
     JTextField txtSearch;
-    PhieuDatTourDAO ds = new PhieuDatTourDAO();
+    TourBookingDAO ds = new TourBookingDAO();
     KhachHangDAO dsKH = new KhachHangDAO();
-    PhieuDatTourBUS khangkhtBUS;
-    PhieuDatTourDialog phieuDatTourDialog;
+    TourBookingBUS tourBookingBus;
+    TourBookingDialog tourBookingDialog;
 
-    public PhieuDatTourPanel() {
-        khangkhtBUS = new PhieuDatTourBUS();
+    public TourBookingPanel() {
+        tourBookingBus = new TourBookingBUS();
         initComponents();
         if (!SessionManager.isAdmin()) {
             deleteBtn.setEnabled(false);
@@ -49,7 +48,7 @@ public class PhieuDatTourPanel extends JPanel {
 
             private void search() {
                 String keyword = txtSearch.getText().trim();
-                List<PhieuDatTourDTO> list = khangkhtBUS.timKHang_KHTours(getColumnName(jComboBox2.getSelectedItem().toString()), keyword);
+                List<TourBookingDTO> list = tourBookingBus.timKHang_KHTours(getColumnName(jComboBox2.getSelectedItem().toString()), keyword);
                 loadKHang_KHTourToTable(list);
             }
 
@@ -68,7 +67,7 @@ public class PhieuDatTourPanel extends JPanel {
                 search();
             }
         });
-        loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
+        loadKHang_KHTourToTable(ds.getAllTourBooking());
         hasSelectedRow();
     }
 
@@ -171,10 +170,10 @@ public class PhieuDatTourPanel extends JPanel {
     private void them(){
         addBtn = createBtn("Thêm", UIColors.ADD);
         addBtn.addActionListener(v -> {
-            phieuDatTourDialog = new PhieuDatTourDialog(null, true, ds, PhieuDatTourDialog.Mode.ADD, null);
-            phieuDatTourDialog.setVisible(true);
+            tourBookingDialog = new TourBookingDialog(null, true, ds, TourBookingDialog.Mode.ADD, null);
+            tourBookingDialog.setVisible(true);
 
-            loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
+            loadKHang_KHTourToTable(ds.getAllTourBooking());
         });
     }
 
@@ -191,8 +190,8 @@ public class PhieuDatTourPanel extends JPanel {
             if (result == JOptionPane.YES_OPTION && i >= 0) {
                 String maKHang = (String) table.getValueAt(i, 0);
                 String maKHTour = (String) table.getValueAt(i, 3);
-                PhieuDatTourBUS khangkhtBUS = new PhieuDatTourBUS();
-                khangkhtBUS.xoaKHang_KHTour(maKHTour, maKHang);
+                TourBookingBUS tourBookingBus = new TourBookingBUS();
+                tourBookingBus.deleteTourBooking(maKHTour, maKHang);
                 DefaultTableModel model = (DefaultTableModel) table.getModel();
                 model.removeRow(i);
             }
@@ -212,15 +211,15 @@ public class PhieuDatTourPanel extends JPanel {
             if (row >= 0) {
                 String maKHang = (String) table.getValueAt(row, 0);
                 String maKHTour = (String) table.getValueAt(row, 3);
-                PhieuDatTourDTO khangkht = khangkhtBUS.timKiemKHang_KHTourTheoMaKHTour(maKHTour);
-                if (khangkht != null && khangkht.getMaKHang().equals(maKHang)) {
-                    phieuDatTourDialog = new PhieuDatTourDialog(null, true, ds, PhieuDatTourDialog.Mode.EDIT, khangkht);
-                    phieuDatTourDialog.setVisible(true);
+                TourBookingDTO khangkht = tourBookingBus.findTourBookingByIdTourPlan(maKHTour);
+                if (khangkht != null && khangkht.getIdCustomer().equals(maKHang)) {
+                    tourBookingDialog = new TourBookingDialog(null, true, ds, TourBookingDialog.Mode.EDIT, khangkht);
+                    tourBookingDialog.setVisible(true);
 
-                    loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
+                    loadKHang_KHTourToTable(ds.getAllTourBooking());
                 }
                 System.out.println(khangkht);
-                System.out.println(khangkht.getMaKHang());
+                System.out.println(khangkht.getIdCustomer());
                 System.out.println(maKHang);
             }
         });
@@ -229,20 +228,20 @@ public class PhieuDatTourPanel extends JPanel {
     private void lamMoi(){
         refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(v -> {
-            loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
+            loadKHang_KHTourToTable(ds.getAllTourBooking());
         });
     }
 
     private void searchKHang_KHTour() {
         String keyword = txtSearch.getText().trim();
         String selected = jComboBox2.getSelectedItem().toString();
-        List<PhieuDatTourDTO> list;
+        List<TourBookingDTO> list;
         if (keyword.isEmpty()) {
-            loadKHang_KHTourToTable(ds.layDanhSachKHang_KHTour());
+            loadKHang_KHTourToTable(ds.getAllTourBooking());
             return;
         } else {
             String column = getColumnName(selected);
-            list = khangkhtBUS.timKHang_KHTours(column, keyword);
+            list = tourBookingBus.timKHang_KHTours(column, keyword);
         }
         loadKHang_KHTourToTable(list);
     }
@@ -264,13 +263,13 @@ public class PhieuDatTourPanel extends JPanel {
         }
     }
 
-    private void loadKHang_KHTourToTable(List<PhieuDatTourDTO> khangkhtList) {
+    private void loadKHang_KHTourToTable(List<TourBookingDTO> khangkhtList) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
-        for (PhieuDatTourDTO kht : khangkhtList) {
+        for (TourBookingDTO kht : khangkhtList) {
             for (KhachHangDTO kh : dsKH.layDanhSachKHang()) {
-                if (kht.getMaKHang().equals(kh.getMaKH())) {
-                    Object[] row = {kht.getMaKHang(), kh.getHo(), kh.getTen(), kht.getMaKHTour(), kht.getGiaVe()};
+                if (kht.getIdCustomer().equals(kh.getMaKH())) {
+                    Object[] row = {kht.getIdCustomer(), kh.getHo(), kh.getTen(), kht.getMaKHTour(), kht.getGiaVe()};
                     model.addRow(row);
                     break;
                 }
