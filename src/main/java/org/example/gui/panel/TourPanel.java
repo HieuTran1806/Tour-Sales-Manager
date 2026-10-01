@@ -260,14 +260,14 @@ public class TourPanel extends JPanel {
 
         for(TourDTO t : tourBUS.getAllTours()){
             tableModel.addRow(new Object[]{
-                    t.getMaTour(),
-                    t.getTen(),
-                    t.getSoNgay(),
-                    t.getDonGia(),
-                    t.getSoCho(),
-                    t.getDiaDiemKhoiHanh(),
-                    t.getMaLoaiTour(),
-                    t.getMaDiaDiem()
+                    t.getIdTour(),
+                    t.getTourName(),
+                    t.getNumberOfDate(),
+                    t.getPrice(),
+                    t.getSeats(),
+                    t.getDepartureLocation(),
+                    t.getIdTourType(),
+                    t.getIdLocation()
             });
         }
     }
@@ -277,14 +277,14 @@ public class TourPanel extends JPanel {
 
         for(TourDTO t : list) {
             tableModel.addRow(new Object[]{
-                    t.getMaTour(),
-                    t.getTen(),
-                    t.getSoNgay(),
-                    t.getDonGia(),
-                    t.getSoCho(),
-                    t.getDiaDiemKhoiHanh(),
-                    t.getMaLoaiTour(),
-                    t.getMaDiaDiem()
+                    t.getIdTour(),
+                    t.getTourName(),
+                    t.getNumberOfDate(),
+                    t.getPrice(),
+                    t.getSeats(),
+                    t.getDepartureLocation(),
+                    t.getIdTourType(),
+                    t.getIdLocation()
             });
         }
     }

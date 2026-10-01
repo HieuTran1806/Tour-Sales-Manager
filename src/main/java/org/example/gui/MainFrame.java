@@ -2,7 +2,7 @@ package org.example.gui;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.dto.TaiKhoanDTO;
+import org.example.dto.AccountDTO;
 import org.example.gui.panel.*;
 import org.example.login.SessionManager;
 
@@ -21,7 +21,7 @@ public class MainFrame extends JFrame {
     JButton activeButton;
     SessionManager sessionManager;
 
-    public MainFrame(TaiKhoanDTO taiKhoanDangNhap) {
+    public MainFrame(AccountDTO taiKhoanDangNhap) {
         // Set favicon
         try {
             ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("logosgu.png")));
@@ -102,14 +102,14 @@ public class MainFrame extends JFrame {
         contentArea.setBackground(Color.cyan);
 
         contentArea.add(new TourPanel(), "Tour");
-        contentArea.add(new LoaiTourPanel(), "LoaiTour");
-        contentArea.add(new KeHoachTourPanel(), "KeHoachTour");
+        contentArea.add(new TourTypePanel(), "LoaiTour");
+        contentArea.add(new TourPlanPanel(), "KeHoachTour");
         contentArea.add(new TourBookingPanel(), "PhieuDatTour");
-        contentArea.add(new HoaDonPanel(), "HoaDon");
-        contentArea.add(new DiaDiemPanel(), "DiaDiem");
-        contentArea.add(new NhanVienPanel(), "NhanVien");
-        contentArea.add(new KhachHangPanel(), "KhachHang");
-        contentArea.add(new CTrinhKMPanel(), "CTrinhKM");
+        contentArea.add(new InvoicePanel(), "HoaDon");
+        contentArea.add(new LocationPanel(), "DiaDiem");
+        contentArea.add(new StaffPanel(), "NhanVien");
+        contentArea.add(new CustomerPanel(), "KhachHang");
+        contentArea.add(new PromotionPanel(), "CTrinhKM");
         contentArea.add(new CalendarKMPanel(), "CalendarKM");
         contentArea.add(new StatisticsPanel(), "ThongKe");
 

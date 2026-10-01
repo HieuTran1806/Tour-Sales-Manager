@@ -2,19 +2,19 @@ package org.example.gui.panel;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.List;
+import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.bus.TourBookingBUS;
-import org.example.dao.TourBookingDAO;
-import org.example.dao.KhachHangDAO;
+import org.example.bus.TourPlanBUS;
 import org.example.dto.TourBookingDTO;
-import org.example.dto.KhachHangDTO;
 import org.example.gui.dialog.TourBookingDialog;
 import org.example.login.SessionManager;
 
@@ -22,131 +22,111 @@ import org.example.login.SessionManager;
 public class TourBookingPanel extends JPanel {
     JButton refreshBtn, editBtn, addBtn, deleteBtn;
 
-    JComboBox<String> jComboBox2;
+    JTextField txtSearch;
 
-    JLabel jLabel1, jLabel2;
+    // comboBox
+    JComboBox<String> cmbSearchType;
 
-    JPanel jPanel1, jPanel2, jPanel3;
+    JPanel northPanel, southPanel, searchPanel;
 
-    JScrollPane jScrollPane2;
+    JScrollPane scrollPane;
+    DefaultTableModel tableModel;
+    TableRowSorter<DefaultTableModel> rowSorter;
 
     JTable table;
 
-    JTextField txtSearch;
-    TourBookingDAO ds = new TourBookingDAO();
-    KhachHangDAO dsKH = new KhachHangDAO();
     TourBookingBUS tourBookingBus;
+    TourBookingDTO tourBookingDTO;
+    TourPlanBUS tourPlanBUS;
     TourBookingDialog tourBookingDialog;
 
-    public TourBookingPanel() {
+    public TourBookingPanel()  {
         tourBookingBus = new TourBookingBUS();
+        tourBookingDTO = new TourBookingDTO();
+        tourPlanBUS = new TourPlanBUS();
+
+        scrollPane = new JScrollPane();
+
         initComponents();
         if (!SessionManager.isAdmin()) {
             deleteBtn.setEnabled(false);
         }
-        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void search() {
-                String keyword = txtSearch.getText().trim();
-                List<TourBookingDTO> list = tourBookingBus.timKHang_KHTours(getColumnName(jComboBox2.getSelectedItem().toString()), keyword);
-                loadKHang_KHTourToTable(list);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                search();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                search();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                search();
-            }
-        });
-        loadKHang_KHTourToTable(ds.getAllTourBooking());
+        loadTourBookingData(tourBookingBus.getAllTourBooking());
         hasSelectedRow();
     }
 
     private void initComponents() {
-        jPanel1 = new JPanel();
-        jLabel1 = new JLabel();
-        jPanel2 = new JPanel();
-        jLabel2 = new JLabel();
-        jComboBox2 = new JComboBox<>();
-        txtSearch = new JTextField();
-        jScrollPane2 = new JScrollPane();
-        table = new JTable();
-        jPanel3 = new JPanel();
-        addBtn = new JButton();
-        deleteBtn = new JButton();
-        editBtn = new JButton();
-        refreshBtn = new JButton();
-
         setLayout(new BorderLayout());
 
-        jPanel1.setLayout(new BorderLayout());
+        // northPanel
+        northPanel = new JPanel(new BorderLayout());
+        JLabel jlbTitle = new JLabel("QUẢN LÝ PHIẾU ĐẶT TOUR", JLabel.CENTER);
+        jlbTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        northPanel.add(jlbTitle, BorderLayout.NORTH); // northPanel add components
 
-        jLabel1.setFont(new Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel1.setHorizontalAlignment(SwingConstants.CENTER);
-        jLabel1.setText("QUẢN LÝ PHIẾU ĐẶT TOUR");
-        jLabel1.setHorizontalTextPosition(SwingConstants.CENTER);
-        jPanel1.add(jLabel1, BorderLayout.CENTER);
+        // Search panel (define)
+        searchPanel = new JPanel(new GridBagLayout());
+        searchPanel.setBackground(Color.WHITE);
 
-        jLabel2.setText("Tìm kiếm");
-        jPanel2.add(jLabel2);
+        // titleBorder
+        TitledBorder titleSearch = BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.CYAN, 2), " TÌM KIẾM PHIẾU ĐẶT TOUR "
+        );
+        titleSearch.setTitleFont(new Font("Arial", Font.BOLD, 14));
+        titleSearch.setTitleColor(new Color(0, 102, 204));
+        searchPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(20, 10, 20, 10),
+                titleSearch)
+        );
 
-        jComboBox2.setModel(new DefaultComboBoxModel<>(new String[] { "Mã khách hàng", "Họ", "Tên", "Mã kế hoạch tour", "Giá vé" }));
-        jComboBox2.addActionListener(this::jComboBox2ActionPerformed);
-        jPanel2.add(jComboBox2);
 
-        txtSearch.setPreferredSize(new Dimension(360, 22));
-        jPanel2.add(txtSearch);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10); // Khoảng cách giữa các ô
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        jPanel1.add(jPanel2, BorderLayout.PAGE_END);
+        // column 1 : type label
+        gbc.gridx = 0; gbc.gridy = 0;
+        searchPanel.add(new JLabel("Loại:"), gbc);
 
-        add(jPanel1, BorderLayout.PAGE_START);
-
-        table.setModel(new DefaultTableModel(
-                new Object [][] {
-                        {null, null, null, null, null},
-                        {null, null, null, null, null},
-                        {null, null, null, null, null},
-                        {null, null, null, null, null},
-                        {null, null, null, null, null}
-                },
-                new String [] {
-                        "Mã khách hàng", "Họ", "Tên khách hàng", "Mã kế hoạch tour", "Giá vé"
-                }
-        ) {
-            Class[] types = new Class [] {
-                    String.class, String.class, String.class, String.class, Long.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
+        // column 2 : cmbSearch By Type
+        cmbSearchType = new JComboBox<>(new String[]{
+                " Tất cả", " Tên Tour", " Địa điểm khởi hành"
         });
-        jScrollPane2.setViewportView(table);
-        jScrollPane2.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-        add(jScrollPane2, BorderLayout.CENTER);
+        cmbSearchType.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridx = 1;
+        searchPanel.add(cmbSearchType, gbc);
 
-        them();
-        jPanel3.add(addBtn);
+        // column 3 : keyWord label
+        gbc.gridx = 2;
+        searchPanel.add(new JLabel("Từ khóa:"), gbc);
 
-        xoa();
-        jPanel3.add(deleteBtn);
+        // column 4 : keyWord txtField
+        txtSearch = new JTextField(15);
+        txtSearch.addCaretListener(e -> searchByType());
+        gbc.gridx = 3; gbc.weightx = 1.0;
+        searchPanel.add(txtSearch, gbc);
 
-        sua();
-        jPanel3.add(editBtn);
 
-        lamMoi();
-        jPanel3.add(refreshBtn);
+        // southPanel contains btns
+        southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        setAddBtn();
+        setEditBtn();
+        setDeleteBtn();
+        setRefreshBtn();
+        southPanel.add(addBtn);
+        southPanel.add(editBtn);
+        southPanel.add(deleteBtn);
+        southPanel.add(refreshBtn);
 
-        add(jPanel3, BorderLayout.PAGE_END);
+        northPanel.add(searchPanel, BorderLayout.CENTER);
+
+
+        add(northPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
+        add(southPanel, BorderLayout.SOUTH);
+
+        initTable();
+
     }// </editor-fold>//GEN-END:initComponents
     private void jComboBox2ActionPerformed(ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
         // TODO add your handling code here:
@@ -167,17 +147,32 @@ public class TourBookingPanel extends JPanel {
         return btn;
     }
 
-    private void them(){
+    public void initTable(){
+        String[] columns = {"Mã phiếu đặt", "Mã khách hàng", "Mã kế hoạch tour", "Thời gian đặt", "Số vé", "Đơn giá", "Tổng tiền", "Trạng thái", "Ghi chú"};
+
+        tableModel = new DefaultTableModel(columns, 0);
+        table = new JTable(tableModel);
+        table.setDefaultEditor(Object.class, null);
+
+        rowSorter = new TableRowSorter<>(tableModel);
+        table.setRowSorter(rowSorter);
+
+        scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+    }
+
+
+    private void setAddBtn(){
         addBtn = createBtn("Thêm", UIColors.ADD);
         addBtn.addActionListener(v -> {
-            tourBookingDialog = new TourBookingDialog(null, true, ds, TourBookingDialog.Mode.ADD, null);
+            tourBookingDialog = new TourBookingDialog(null, true, TourBookingDialog.Mode.ADD, tourBookingDTO, tourPlanBUS);
             tourBookingDialog.setVisible(true);
 
-            loadKHang_KHTourToTable(ds.getAllTourBooking());
+            loadTourBookingData(tourBookingBus.getAllTourBooking());
         });
     }
 
-    private void xoa(){
+    private void setDeleteBtn(){
         deleteBtn = createBtn("Xóa", UIColors.DELETE);
         editBtn.setEnabled(false);
         deleteBtn.addActionListener(v -> {
@@ -198,7 +193,7 @@ public class TourBookingPanel extends JPanel {
         });
     }
 
-    private void sua(){
+    private void setEditBtn(){
         editBtn = createBtn("Sửa", UIColors.EDIT);
         editBtn.setEnabled(false);
         editBtn.addActionListener(v -> {
@@ -213,37 +208,20 @@ public class TourBookingPanel extends JPanel {
                 String maKHTour = (String) table.getValueAt(row, 3);
                 TourBookingDTO khangkht = tourBookingBus.findTourBookingByIdTourPlan(maKHTour);
                 if (khangkht != null && khangkht.getIdCustomer().equals(maKHang)) {
-                    tourBookingDialog = new TourBookingDialog(null, true, ds, TourBookingDialog.Mode.EDIT, khangkht);
+                    tourBookingDialog = new TourBookingDialog(null, true, TourBookingDialog.Mode.EDIT, tourBookingDTO, tourPlanBUS);
                     tourBookingDialog.setVisible(true);
 
-                    loadKHang_KHTourToTable(ds.getAllTourBooking());
+                    loadTourBookingData(tourBookingBus.getAllTourBooking());
                 }
-                System.out.println(khangkht);
-                System.out.println(khangkht.getIdCustomer());
-                System.out.println(maKHang);
             }
         });
     }
 
-    private void lamMoi(){
+    private void setRefreshBtn(){
         refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(v -> {
-            loadKHang_KHTourToTable(ds.getAllTourBooking());
+            loadTourBookingData(tourBookingBus.getAllTourBooking());
         });
-    }
-
-    private void searchKHang_KHTour() {
-        String keyword = txtSearch.getText().trim();
-        String selected = jComboBox2.getSelectedItem().toString();
-        List<TourBookingDTO> list;
-        if (keyword.isEmpty()) {
-            loadKHang_KHTourToTable(ds.getAllTourBooking());
-            return;
-        } else {
-            String column = getColumnName(selected);
-            list = tourBookingBus.timKHang_KHTours(column, keyword);
-        }
-        loadKHang_KHTourToTable(list);
     }
 
     private String getColumnName(String selected) {
@@ -263,17 +241,21 @@ public class TourBookingPanel extends JPanel {
         }
     }
 
-    private void loadKHang_KHTourToTable(List<TourBookingDTO> khangkhtList) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        model.setRowCount(0);
-        for (TourBookingDTO kht : khangkhtList) {
-            for (KhachHangDTO kh : dsKH.layDanhSachKHang()) {
-                if (kht.getIdCustomer().equals(kh.getMaKH())) {
-                    Object[] row = {kht.getIdCustomer(), kh.getHo(), kh.getTen(), kht.getMaKHTour(), kht.getGiaVe()};
-                    model.addRow(row);
-                    break;
-                }
-            }
+    private void loadTourBookingData(ArrayList<TourBookingDTO> ls) {
+        tableModel.setRowCount(0);
+
+        for (TourBookingDTO dto : ls) {
+            tableModel.addRow(new Object[]{
+                    dto.getIdTourPlan(),
+                    dto.getIdCustomer(),
+                    dto.getIdTourPlan(),
+                    dto.getBookingDate(),
+                    dto.getTickets(),
+                    dto.getPrice(),
+                    dto.getCostTotal(),
+                    dto.getBookingStatus(),
+                    dto.getNote()
+            });
         }
     }
 
@@ -285,5 +267,38 @@ public class TourBookingPanel extends JPanel {
             addBtn.setEnabled(hasSelected);
             deleteBtn.setEnabled(hasSelected);
         });
+    }
+
+    private void searchByType(){
+        String keyWord = txtSearch.getText().trim().toLowerCase();
+        String searchType = (String) cmbSearchType.getSelectedItem();
+
+        RowFilter<DefaultTableModel, Object> rf = new RowFilter<DefaultTableModel, Object>() {
+            @Override
+            public boolean include(Entry<? extends DefaultTableModel, ? extends Object> entry) {
+                if(!keyWord.isEmpty()){
+                    boolean found = false;
+                    switch (searchType) {
+                        case " Tên Tour":
+                            found = entry.getStringValue(1).toLowerCase().contains(keyWord);
+                            break;
+                        case " Địa điểm khởi hành":
+                            found = entry.getStringValue(5).toLowerCase().contains(keyWord);
+                            break;
+                        default: // Tất cả
+                            for (int i = 0; i < entry.getValueCount(); i++) {
+                                if (entry.getStringValue(i).toLowerCase().contains(keyWord)) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                    }
+                    if(!found) return false;
+                }
+
+                return true;
+            }
+        };
+        rowSorter.setRowFilter(rf);
     }
 }

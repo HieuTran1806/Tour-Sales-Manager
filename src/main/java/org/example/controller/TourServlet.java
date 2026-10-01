@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 @WebServlet(urlPatterns = {"/Tour"})
@@ -66,7 +67,7 @@ public class TourServlet extends HttpServlet {
         String maTour = request.getParameter("maTour");
         String ten = request.getParameter("ten");
         int soNgay = Integer.parseInt(request.getParameter("soNgay"));
-        long donGia = Long.parseLong(request.getParameter("donGia"));
+        BigDecimal donGia = BigDecimal.valueOf(Long.parseLong(request.getParameter("donGia")));
         int soCho = Integer.parseInt(request.getParameter("soCho"));
         String ddKhoiHanh = request.getParameter("diaDiemKhoiHanh");
         String imgLink = request.getParameter("imgLink");

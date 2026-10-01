@@ -97,45 +97,45 @@ public class TourBookingBUS {
         }
     }
 
-    public List<TourBookingDTO> timKHang_KHTours(String column, String value) {
-        try {
-            if (dsKHKHTour == null || column == null || value == null) {
-                return new ArrayList<>();
-            }
-            List<TourBookingDTO> result = new ArrayList<>();
-            for (TourBookingDTO kht : dsKHKHTour) {
-                switch (column) {
-                    case "MaKHTour":
-                        if (kht.getIdTourPlan().equalsIgnoreCase(value)) {
-                            result.add(kht);
-                        }
-                        break;
-                    case "MaKHang":
-                        if (kht.getIdCustomer().equalsIgnoreCase(value)) {
-                            result.add(kht);
-                        }
-                        break;
-                    case "GiaVe":
-                        try {
-                            BigDecimal giaVeValue = BigDecimal.valueOf(Long.parseLong(value));
-                            if (Objects.equals(kht.getPrice(), giaVeValue)) {
-                                result.add(kht);
-                            }
-                        } catch (NumberFormatException e) {
-                            // Ignore invalid number format
-                        }
-                        break;
-                    default:
-                        // Invalid column name
-                        return new ArrayList<>();
-                }
-            }
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
+    // public ArrayList<TourBookingDTO> timKHang_KHTours(String column, String value) {
+    //     try {
+    //         if (dsKHKHTour == null || column == null || value == null) {
+    //             return new ArrayList<>();
+    //         }
+    //         ArrayList<TourBookingDTO> result = new ArrayList<>();
+    //         for (TourBookingDTO kht : dsKHKHTour) {
+    //             switch (column) {
+    //                 case "MaKHTour":
+    //                     if (kht.getIdTourPlan().equalsIgnoreCase(value)) {
+    //                         result.add(kht);
+    //                     }
+    //                     break;
+    //                 case "MaKHang":
+    //                     if (kht.getIdCustomer().equalsIgnoreCase(value)) {
+    //                         result.add(kht);
+    //                     }
+    //                     break;
+    //                 case "GiaVe":
+    //                     try {
+    //                         BigDecimal giaVeValue = BigDecimal.valueOf(Long.parseLong(value));
+    //                         if (Objects.equals(kht.getPrice(), giaVeValue)) {
+    //                             result.add(kht);
+    //                         }
+    //                     } catch (NumberFormatException e) {
+    //                         // Ignore invalid number format
+    //                     }
+    //                     break;
+    //                 default:
+    //                     // Invalid column name
+    //                     return new ArrayList<>();
+    //             }
+    //         }
+    //         return result;
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //         return new ArrayList<>();
+    //     }
+    // }
 
     public List<TourBookingDTO> timKHang_KHToursTheoHo(String ho) {
         try {
@@ -172,5 +172,13 @@ public class TourBookingBUS {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public BigDecimal getPriceByIdTourPlan(
+            String idTourPlan
+    ) {
+        return tourBookingDao.getPriceByIdTourPlan(
+                idTourPlan
+        );
     }
 }

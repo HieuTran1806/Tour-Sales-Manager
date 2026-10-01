@@ -1,52 +1,80 @@
 package org.example.gui.dialog;
 
+import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.example.bus.CustomerBUS;
 import org.example.bus.TourBookingBUS;
-import org.example.dao.TourBookingDAO;
-import org.example.dao.KhachHangDAO;
+import org.example.bus.TourPlanBUS;
 import org.example.dto.TourBookingDTO;
-import org.example.dto.KhachHangDTO;
+import org.example.dto.CustomerDTO;
+import org.example.dto.TourPlanDTO;
 import org.example.gui.panel.UIColors;
 import org.example.validate.ValidationException;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusEvent;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Objects;
+
+import static java.sql.Date.valueOf;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TourBookingDialog extends JDialog {
-    JButton closeBtn, saveBtn;
+    JButton closeBtn, saveBtn, searchCustomerBtn;
 
-    JLabel lbFirstName, lbLastName, lbIdCustomer, lbIdTourPlan, lbPrice;
+    JTextField txtCustomerSearch, txtPrice, txtFirstName, txtIdCustomer, txtLastName, txtCostTotal, txtAddress, txtPhoneNumber, txtTickets;
 
-    JTextField txtPrice, txtFirstName, txtIdCustomer, txtIdTourPlan, txtLastName;
+    JTextArea txtNote;
 
-    JPanel formPanel, southPanel;
+    JRadioButton rbExistingCustomer, rbNewCustomer;
+
+    JDateChooser jBookingDate, dateCustomerDob;;
+
+    JPanel formPanel, southPanel, buttonPanel;
 
     public enum Mode {
         ADD, EDIT
     }
 
+    enum CustomerMode {
+        EXISTING,
+        NEW
+    }
+
+    String formatter = "dd/MM/yyyy";
+
+    CustomerMode customerMode;
+    CustomerBUS customerBUS;
+
     Mode mode;
-    TourBookingDTO currentKHangKHTour;
-    TourBookingBUS bus;
-    KhachHangDAO dsKhachHang;
+    TourBookingDTO tourBookingDTO;
+    TourBookingBUS tourBookingBUS;
+    TourPlanBUS tourPlanBUS;
 
-    public TourBookingDialog(Frame parent, boolean modal,
-                             TourBookingDAO ds, Mode mode, TourBookingDTO khangkhtour) {
+    DefaultComboBoxModel<TourPlanDTO> tourPlanModel;
+    JComboBox<TourPlanDTO> tourPlanCombo;
+    JComboBox<String> tourBookingStatusCombo;
+    JComboBox<String> cbCustomerSearchType;
 
+    public TourBookingDialog(Frame parent, boolean modal, Mode mode, TourBookingDTO tourBookingDTO, TourPlanBUS tourPlanBUS) {
         super(parent, modal);
         this.mode = mode;
-        this.currentKHangKHTour = khangkhtour;
-        bus = new TourBookingBUS();
+        this.tourBookingDTO = tourBookingDTO;
+        this.tourBookingBUS = new TourBookingBUS();
+        this.tourPlanBUS = tourPlanBUS;
+        this.customerBUS = new CustomerBUS();
 
-        dsKhachHang = new KhachHangDAO();
+        this.tourPlanModel = new DefaultComboBoxModel<>();
+        tourPlanCombo = new JComboBox<>();
 
         initComponents();
 
-        setTitle(khangkhtour == null ? "Thêm phiếu đặt tour" : "Sửa phiếu đặt tour");
-        if(khangkhtour != null){
+        setTitle(tourBookingDTO == null ? "Thêm phiếu đặt tour" : "Sửa phiếu đặt tour");
+        if(tourBookingDTO != null){
             loadData();
         }
     }
@@ -56,54 +84,129 @@ public class TourBookingDialog extends JDialog {
         setLayout(new BorderLayout(10, 10));
 
         // 4 rows 2 cols
-        formPanel = new JPanel(new GridLayout(5, 2, 10, 15));
+        formPanel = new JPanel(new GridLayout(0, 2, 10, 15));
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Căn lề padding 4 góc
 
         southPanel = new JPanel(new FlowLayout());
 
-        // row id tour plan
-        lbIdTourPlan = new JLabel("Mã phiếu đặt tour");
-        lbIdTourPlan.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(lbIdTourPlan);
-        txtIdTourPlan = new JTextField();
-        formPanel.add(txtIdTourPlan);
 
-        // row firstName
-        lbFirstName = new JLabel("Họ: ");
-        lbFirstName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(lbFirstName);
-        txtFirstName = new JTextField();
-        formPanel.add(txtFirstName);
+        JLabel lblCustomerMode = new JLabel("Khách hàng:");
+        lblCustomerMode.setBorder(
+                BorderFactory.createEmptyBorder(5, 5, 5, 0)
+        );
 
-        // row lastName
-        lbLastName = new JLabel("Tên: ");
-        lbLastName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(lbLastName);
-        txtLastName = new JTextField();
-        formPanel.add(txtLastName);
+        rbExistingCustomer = new JRadioButton("Khách hàng cũ");
+        rbNewCustomer = new JRadioButton("Khách hàng mới");
+
+        ButtonGroup customerModeGroup = new ButtonGroup();
+        customerModeGroup.add(rbExistingCustomer);
+        customerModeGroup.add(rbNewCustomer);
+
+        JPanel customerModePanel = new JPanel(
+                new FlowLayout(FlowLayout.LEFT, 10, 0)
+        );
+
+        customerModePanel.add(rbExistingCustomer);
+        customerModePanel.add(rbNewCustomer);
+
+        // Thêm đúng hai component vào một hàng của GridLayout
+        formPanel.add(lblCustomerMode);
+        formPanel.add(customerModePanel);
+        rbExistingCustomer.setSelected(true);
+        customerMode = CustomerMode.EXISTING;
+
+        // row find customer
+        cbCustomerSearchType = new JComboBox<>(
+                new String[] {
+                        "Mã khách hàng",
+                        "Tên khách hàng",
+                        "Số điện thoại"
+                }
+        );
+
+        txtCustomerSearch = new JTextField();
+
+        searchCustomerBtn = new JButton("Tìm");
+
+        JPanel customerSearchPanel = new JPanel(new BorderLayout(5, 0));
+
+        cbCustomerSearchType.setPreferredSize(new Dimension(140, 30));
+
+        searchCustomerBtn.setPreferredSize(new Dimension(70, 30));
+
+        customerSearchPanel.add(cbCustomerSearchType, BorderLayout.WEST);
+        customerSearchPanel.add(txtCustomerSearch, BorderLayout.CENTER);
+        customerSearchPanel.add(searchCustomerBtn, BorderLayout.EAST);
+
+        addFormRow(formPanel, "Tìm khách hàng:", customerSearchPanel);
 
         // row id customer
-        lbIdCustomer = new JLabel("Mã khách hàng: ");
-        lbIdCustomer.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(lbIdCustomer);
         txtIdCustomer = new JTextField();
-        formPanel.add(txtIdCustomer);
+        addFormRow(formPanel, "Mã khách hàng", txtIdCustomer);
+
+        txtFirstName = new JTextField();
+        addFormRow(formPanel, "Họ: ", txtFirstName);
+
+        txtLastName = new JTextField();
+        addFormRow(formPanel, "Tên: ", txtLastName);
+
+        txtAddress = new JTextField();
+        addFormRow(formPanel, "Địa chỉ: ", txtAddress);
+
+        txtPhoneNumber = new JTextField();
+        addFormRow(formPanel, "Số điện thoại: ", txtPhoneNumber);
+
+        dateCustomerDob = new JDateChooser();
+        dateCustomerDob.setDateFormatString(formatter);
+        addFormRow(formPanel, "Ngày sinh: ", dateCustomerDob);
+
+        // row id tour plan
+        loadTourPlans();
+        tourPlanCombo.setModel(tourPlanModel);
+        addFormRow(formPanel, "Mã kế hoạch tour:", tourPlanCombo);
+
+        // row booking date
+        jBookingDate = new JDateChooser();
+        jBookingDate.setDateFormatString(formatter);
+        jBookingDate.setDate(valueOf(LocalDate.now()));
+        addFormRow(formPanel, "Ngày đặt: ",jBookingDate);
+
+        // row tickets
+        txtTickets = new JTextField();
+        addFormRow(formPanel, "Số lượng vé: ", txtTickets);
+
 
         // row price
-        lbPrice = new JLabel("Giá vé: ");
-        lbPrice.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(lbPrice);
         txtPrice = new JTextField();
-        txtPrice.setEnabled(false);
-        formPanel.add(txtPrice);
+        txtPrice.setEditable(false);
+        addFormRow(formPanel, "Giá vé: ",txtPrice);
+
+
+        // row cost total
+        txtCostTotal = new JTextField();
+        txtCostTotal.setEditable(false);
+        addFormRow(formPanel, "Tổng số tiền: ",txtCostTotal);
+
+        // row booking status
+        String[]  tourBookingStatus = {"Chờ xác nhận", "Đã xác nhận", "Đã hủy", "Hoàn thành", "Hết hạn"};
+        // hết hạn khi khách hàng không thanh toán/ xác nhận đúng hạn
+        tourBookingStatusCombo = new JComboBox<>(tourBookingStatus);
+        addFormRow(formPanel, "Trạng thái phiếu đặt: ",tourBookingStatusCombo);
+
+
+        // row mo ta
+        txtNote = new JTextArea();
+        addFormRow(formPanel, "Ghi chú: ",txtNote);
+
+
+        southPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
 
         // Events & Verifiers
-        save();
-        cancel();
-
+        handleSave();
         southPanel.add(saveBtn);
+        cancel();
         southPanel.add(closeBtn);
-        southPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         add(formPanel, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
@@ -112,29 +215,130 @@ public class TourBookingDialog extends JDialog {
         setLocationRelativeTo(null);
     }
 
+    private void loadTourPlans() {
+        tourPlanModel.removeAllElements();
+
+        ArrayList<TourPlanDTO> tourPlanList =
+                tourPlanBUS.getAllKeHoachTours();
+
+        for (TourPlanDTO tourPlan : tourPlanList) {
+            if (tourPlan != null) {
+                tourPlanModel.addElement(tourPlan);
+            }
+        }
+    }
+
+    private void addFormRow(JPanel formPanel, String labelText, JComponent component) {
+        JLabel label = new JLabel(labelText);
+
+        label.setBorder(
+                BorderFactory.createEmptyBorder(
+                        5, 5, 5, 0
+                )
+        );
+
+        formPanel.add(label);
+        formPanel.add(component);
+    }
+
+    private void initEvents() {
+        saveBtn.addActionListener(e ->
+                handleSave()
+        );
+
+        closeBtn.addActionListener(e ->
+                dispose()
+        );
+
+        rbExistingCustomer.addActionListener(e ->
+                changeCustomerMode(
+                        CustomerMode.EXISTING
+                )
+        );
+
+        rbNewCustomer.addActionListener(e ->
+                changeCustomerMode(
+                        CustomerMode.NEW
+                )
+        );
+
+        // searchCustomerBtn.addActionListener(e ->
+        //         searchCustomer()
+        // );
+
+        tourPlanCombo.addActionListener(e ->
+                handleTourPlanChanged()
+        );
+
+        // txtTickets.getDocument().addDocumentListener(
+        //         new SimpleDocumentListener(
+        //                 this::calculateTotal
+        //         )
+        // );
+    }
+
     private JButton createBtn(String text, Color color){
         JButton btn = new JButton(text);
         btn.setBackground(color);
         btn.setForeground(Color.WHITE);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
+
         return btn;
     }
 
-    private void save(){
+    private void handleSave(){
         saveBtn = createBtn("Lưu",  UIColors.SAVE);
         saveBtn.addActionListener(v -> {
             // get data
-            String maKH = txtIdCustomer.getText().trim();
-            String ho = txtFirstName.getText().trim();
-            String ten = txtLastName.getText().trim();
-            String maKHTour = txtIdTourPlan.getText().trim();
+            String idCustomer = txtIdCustomer.getText().trim();
+            String firstName = txtFirstName.getText().trim();
+            String lastName = txtLastName.getText().trim();
+            LocalDateTime bookingDate = LocalDateTime.now();
+            int tickets = Integer.parseInt(txtTickets.getText().trim());
+            BigDecimal price = BigDecimal.valueOf(Long.parseLong(txtPrice.getText().trim()));
+            String note = txtNote.getText().trim();
+
+            String idTourPlan;
+            try {
+                idTourPlan = getSelectedTourPlanId();
+            } catch (ValidationException e) {
+                throw new RuntimeException(e);
+            }
+            if(txtPrice.getText().trim().isEmpty()){
+                BigDecimal gia = tourBookingBUS.getPriceByIdTourPlan(idTourPlan);
+                txtPrice.setText(String.valueOf(gia));
+            }
+            BigDecimal giaVe = BigDecimal.valueOf(Long.parseLong(txtPrice.getText().trim()));
 
             try {
-                // validate
-                validateIdTourPlan(maKHTour);
-                validateIdCustomer(maKH);
+                validateIdTourPlan(idTourPlan);
+                validateCustomerId(idCustomer);
 
+                BigDecimal total = price.multiply(BigDecimal.valueOf(tickets));
+                String status = getSelectedStatus();
+
+
+                if(mode==Mode.ADD) {
+                    TourBookingDTO newTourBooking = new TourBookingDTO(idCustomer, idTourPlan, bookingDate, tickets,
+                            price, total, status, note);
+
+                    tourBookingBUS.addTourBooking(newTourBooking);
+                } else if(mode==Mode.EDIT&&tourBookingDTO!=null) {
+                    tourBookingDTO.setIdCustomer(idCustomer);
+                    tourBookingDTO.setIdTourPlan(idTourPlan);
+                    tourBookingDTO.setBookingDate(bookingDate);
+                    tourBookingDTO.setTickets(tickets);
+                    tourBookingDTO.setPrice(price);
+                    tourBookingDTO.setCostTotal(total);
+                    tourBookingDTO.setBookingStatus(status);
+                    tourBookingDTO.setNote(note);
+
+                    tourBookingBUS.editTourBooking(tourBookingDTO);
+
+
+                }
+                dispose();
 
             }catch (ValidationException validationException) {
                 JOptionPane.showMessageDialog(
@@ -143,53 +347,80 @@ public class TourBookingDialog extends JDialog {
                         "Lỗi nhập liệu",
                         JOptionPane.ERROR_MESSAGE
                 );
+                return;
             }
-            if(txtPrice.getText().trim().isEmpty()){
-                TourBookingDAO dao = new TourBookingDAO();
-                long gia = dao.getPriceByIdTourPlan(maKHTour);
-                txtPrice.setText(String.valueOf(gia));
-            }
-            long giaVe = Long.parseLong(txtPrice.getText().trim());
-            TourBookingBUS bus = new TourBookingBUS();
-
-            if(mode==Mode.ADD) {
-                TourBookingDTO newKHangKHTour = new TourBookingDTO(maKHTour, maKH, giaVe);
-                bus.addTourBooking(newKHangKHTour);
-            } else if(mode==Mode.EDIT&&currentKHangKHTour!=null) {
-                currentKHangKHTour.setIdCustomer(maKH);
-                currentKHangKHTour.setMaKHTour(maKHTour);
-                currentKHangKHTour.setGiaVe(giaVe);
-                bus.editTourBooking(currentKHangKHTour);
-            }
-            dispose();
         });
     }
+
+
 
     private void validateIdTourPlan(String id) throws ValidationException {
         if (id.isEmpty()) throw new ValidationException("Mã phiếu đặt tour không được để trống!");
 
         // if (!id.matches("^KH\\d{3}$"))  throw new ValidationException("Mã phiếu đặt tour phải có dạng KHxxx!");
-
-        if(isIdKHTDuplicated(id)) throw new ValidationException("Mã phiếu đặt tour đã tồn tại!");
     }
 
-    private boolean isIdKHTDuplicated(String id){
-        for (TourBookingDTO ls : bus.getAllTourBooking()){
-            if (ls.getMaKHTour().equals(id))
-                return true;
+    private void validateCustomerId(String id)
+            throws ValidationException {
+
+        if (id == null || id.isBlank()) {
+            throw new ValidationException(
+                    "Mã khách hàng không được để trống"
+            );
         }
-        return false;
+
+        boolean existed =
+                isExistedIdCustomer(id);
+
+        if (customerMode == CustomerMode.EXISTING
+                && !existed) {
+
+            throw new ValidationException(
+                    "Mã khách hàng không tồn tại"
+            );
+        }
+
+        if (customerMode == CustomerMode.NEW
+                && existed) {
+
+            throw new ValidationException(
+                    "Mã khách hàng đã tồn tại"
+            );
+        }
     }
 
-    private void validateIdCustomer(String id) throws ValidationException{
-        if (id.isEmpty()) throw new ValidationException("Mãk khách hàng không được để trống!");
 
-        if(isExistedIdCustomer(id)) throw new ValidationException("Mã khách hàng đã tồn tại.");
+    private void changeCustomerMode(
+            CustomerMode mode
+    ) {
+        customerMode = mode;
+
+        boolean existing =
+                mode == CustomerMode.EXISTING;
+
+        cbCustomerSearchType.setEnabled(existing);
+        txtCustomerSearch.setEnabled(existing);
+        searchCustomerBtn.setEnabled(existing);
+
+        txtIdCustomer.setEditable(!existing);
+        txtFirstName.setEditable(!existing);
+        txtLastName.setEditable(!existing);
+        txtAddress.setEditable(!existing);
+        txtPhoneNumber.setEditable(!existing);
+        dateCustomerDob.setEnabled(!existing);
+
+        clearCustomerFields();
+
+        if (existing) {
+            txtCustomerSearch.requestFocus();
+        } else {
+            txtIdCustomer.requestFocus();
+        }
     }
 
     private boolean isExistedIdCustomer(String id){
-        for (KhachHangDTO kh : dsKhachHang.layDanhSachKHang()) {
-            if (kh.getMaKH().equals(id))
+        for (CustomerDTO kh : customerBUS.getAllCustomers()) {
+            if (kh.getIdCustomer().equals(id))
                 return true;
         }
         return false;
@@ -202,59 +433,200 @@ public class TourBookingDialog extends JDialog {
         });
     }
 
-    private void txtIdCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIdCustomerActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtIdCustomerActionPerformed
+    private void loadData() {
+        if (tourBookingDTO == null) {
+            return;
+        }
+        txtIdCustomer.setText(
+                tourBookingDTO.getIdCustomer()
+        );
 
-    private void txtIdTourPlanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIdTourPlanActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtIdTourPlanActionPerformed
+        loadCustomerInformation(
+                tourBookingDTO.getIdCustomer()
+        );
 
-    private void txtPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPriceActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtPriceActionPerformed
+        selectTourPlan(
+                tourBookingDTO.getIdTourPlan()
+        );
 
-    private void txtIdCustomerFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtIdCustomerFocusLost
-        // TODO add your handling code here:
-        String ma = txtIdCustomer.getText().trim();
-        for(KhachHangDTO kh : dsKhachHang.layDanhSachKHang()) {
-            if(kh.getMaKH().equals(ma)) {
-                txtFirstName.setText(kh.getHo());
-                txtLastName.setText(kh.getTen());
+        txtTickets.setText(
+                String.valueOf(
+                        tourBookingDTO.getTickets()
+                )
+        );
+
+        if(tourBookingDTO.getPrice() != null){
+            txtPrice.setText(
+                    tourBookingDTO.getPrice()
+                            .toPlainString()
+            );
+        }
+
+        BigDecimal costTotal = Objects.requireNonNullElse(tourBookingDTO.getCostTotal(), BigDecimal.ZERO);
+        txtCostTotal.setText(costTotal.toPlainString());
+
+        tourBookingStatusCombo.setSelectedItem(
+                tourBookingDTO.getBookingStatus()
+        );
+
+        txtNote.setText(
+                tourBookingDTO.getNote() == null
+                        ? ""
+                        : tourBookingDTO.getNote()
+        );
+
+        customerMode = CustomerMode.EXISTING;
+        rbExistingCustomer.setSelected(true);
+
+        setCustomerFieldsEditable(false);
+    }
+
+    private void setCustomerFieldsEditable(boolean editable) {
+        txtIdCustomer.setEditable(editable);
+        txtFirstName.setEditable(editable);
+        txtLastName.setEditable(editable);
+        txtAddress.setEditable(editable);
+        txtPhoneNumber.setEditable(editable);
+
+        // JDateChooser không có setEditable trực tiếp
+        dateCustomerDob.setEnabled(editable);
+    }
+
+    private void selectTourPlan(String idTourPlan) {
+        for (int i = 0;
+             i < tourPlanModel.getSize();
+             i++) {
+
+            TourPlanDTO dto =
+                    tourPlanModel.getElementAt(i);
+
+            if (dto.getIdTourPlan()
+                    .equals(idTourPlan)) {
+
+                tourPlanCombo.setSelectedIndex(i);
                 return;
             }
         }
-        JOptionPane.showMessageDialog(TourBookingDialog.this, "Mã khách hàng không tồn tại.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-    }//GEN-LAST:event_txtIdCustomerFocusLost
 
-    private void txtIdTourPlanFocusLost(FocusEvent evt) {
-        String maKHTour = txtIdTourPlan.getText().trim();
+        tourPlanCombo.setSelectedIndex(-1);
+    }
 
-        if(!maKHTour.isEmpty()){
-            TourBookingDAO dao = new TourBookingDAO();
-            long gia = dao.getPriceByIdTourPlan(maKHTour);
+    private String getSelectedTourPlanId() throws ValidationException{
+        TourPlanDTO tourPlanSelected = (TourPlanDTO) tourPlanCombo.getSelectedItem();
 
-            txtPrice.setText(String.valueOf(gia));
+        if(tourPlanSelected != null){
+            return tourPlanSelected.getIdTourPlan();
+        }
+
+        throw new ValidationException("Vui lòng chọn kế hoạch tour");
+    }
+
+    private String getSelectedStatus(){
+        return Objects.requireNonNull(tourPlanCombo.getSelectedItem()).toString();
+    }
+
+    private void loadCustomerInformation(
+            String customerId
+    ) {
+        for (CustomerDTO customer
+                : customerBUS.getAllCustomers()) {
+
+            if (customer.getIdCustomer()
+                    .equals(customerId)) {
+
+                txtFirstName.setText(
+                        customer.getFirstName()
+                );
+
+                txtLastName.setText(
+                        customer.getLastName()
+                );
+
+                txtAddress.setText(
+                        customer.getAddress()
+                );
+
+                txtPhoneNumber.setText(
+                        customer.getPhoneNumber()
+                );
+
+                if (customer.getDob() != null) {
+                    dateCustomerDob.setDate(
+                            java.sql.Date.valueOf(
+                                    customer.getDob()
+                            )
+                    );
+                }
+
+                return;
+            }
         }
     }
 
-    private void txtFirstNameFocusLost(FocusEvent evt) {
-        // TODO add your handling code here:
+    private void clearCustomerFields() {
+        txtIdCustomer.setText("");
+        txtFirstName.setText("");
+        txtLastName.setText("");
+        txtAddress.setText("");
+        txtPhoneNumber.setText("");
+        dateCustomerDob.setDate(null);
     }
 
-    private void txtLastNameFocusLost(FocusEvent evt) {
-        // TODO add your handling code here:
+    private void handleTourPlanChanged() {
+        TourPlanDTO selectedPlan =
+                (TourPlanDTO)
+                        tourPlanCombo.getSelectedItem();
+
+        if (selectedPlan == null) {
+            txtPrice.setText("");
+            txtCostTotal.setText("");
+            return;
+        }
+
+        BigDecimal price =
+                tourBookingBUS.getPriceByIdTourPlan(
+                        selectedPlan.getIdTourPlan()
+                );
+
+        if (price == null) {
+            txtPrice.setText("");
+            txtCostTotal.setText("");
+            return;
+        }
+
+        txtPrice.setText(
+                price.toPlainString()
+        );
+
+        calculateTotal();
     }
 
-    private void txtPriceFocusLost(FocusEvent evt) {
-        // TODO add your handling code here:
-    }
+    private void calculateTotal() {
+        try {
+            String ticketText = txtTickets.getText().trim();
 
-    private void loadData() {
-        if (currentKHangKHTour != null) {
-            txtIdCustomer.setText(currentKHangKHTour.getIdCustomer());
-            txtIdTourPlan.setText(currentKHangKHTour.getMaKHTour());
-            txtPrice.setText(String.valueOf(currentKHangKHTour.getGiaVe()));
+            String priceText = txtPrice.getText().trim();
+
+            if (ticketText.isEmpty() || priceText.isEmpty()) {
+                txtCostTotal.setText("");
+                return;
+            }
+
+            int tickets = Integer.parseInt(ticketText);
+
+            if (tickets <= 0) {
+                txtCostTotal.setText("");
+                return;
+            }
+
+            BigDecimal price = new BigDecimal(priceText);
+
+            BigDecimal total = price.multiply(BigDecimal.valueOf(tickets));
+
+            txtCostTotal.setText(total.toPlainString());
+
+        } catch (NumberFormatException e) {
+            txtCostTotal.setText("");
         }
     }
 }

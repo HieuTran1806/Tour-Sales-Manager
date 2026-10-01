@@ -2,19 +2,18 @@
 package org.example.gui.dialog;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.bus.CTHoaDonBUS;
-import org.example.bus.HoaDonBUS;
-import org.example.bus.KhachHangBUS;
+import org.example.bus.InvoiceDetailBUS;
+import org.example.bus.InvoiceBUS;
+import org.example.bus.CustomerBUS;
 import org.example.dto.*;
-import org.example.dto.CTietHDDTO;
+import org.example.dto.InvoiceDetailDTO;
 import org.example.gui.panel.UIColors;
 
 import javax.swing.*;
@@ -25,9 +24,12 @@ import javax.swing.table.TableColumn;
 public class NhapCTHD extends JDialog {
     String mahd;
     int soluong;
-    CTHoaDonBUS bus;
+    JComboBox<String> customerCombo;
 
-    HoaDonBUS hdbus;
+    InvoiceDetailBUS bus;
+    CustomerBUS customerBUS;
+
+    InvoiceBUS hdbus;
 
     JButton btnluu;
     JScrollPane jScrollPane1;
@@ -37,8 +39,11 @@ public class NhapCTHD extends JDialog {
         super(parent, modal);
         this.soluong=soluong;
         this.mahd=mahd;
-        bus=new CTHoaDonBUS();
-        hdbus=new HoaDonBUS();
+        bus=new InvoiceDetailBUS();
+        hdbus=new InvoiceBUS();
+        customerBUS = new CustomerBUS();
+
+
         this.setTitle("Nhập chi tiết hóa đơn");
         this.setLocationRelativeTo(null);
         initComponents();
@@ -49,7 +54,7 @@ public class NhapCTHD extends JDialog {
     public NhapCTHD(String ma) {
         this.soluong=soluong;
         this.mahd=mahd;
-        bus=new org.example.bus.CTHoaDonBUS();
+        bus=new InvoiceDetailBUS();
         this.setTitle("Chi tiết hóa đơn của hóa đơn: "+ma);
         this.setLocationRelativeTo(null);
         initComponents();
@@ -59,19 +64,15 @@ public class NhapCTHD extends JDialog {
     }
 
     private void setupComboBoxKhachHang() {
-        JComboBox<String> cbKhachHang = new JComboBox<>();
+        customerCombo = new JComboBox<>();
 
-        KhachHangBUS khBus = new KhachHangBUS();
-        if (KhachHangBUS.dsKH == null) {
-            khBus.docDSKH();
-        }
-
-        for (KhachHangDTO kh : KhachHangBUS.dsKH) {
-            cbKhachHang.addItem(kh.getMaKH());
+        ArrayList<CustomerDTO> ls = customerBUS.getAllCustomers();
+        for (CustomerDTO kh : ls) {
+            customerCombo.addItem(kh.getIdCustomer());
         }
 
         TableColumn khColumn = tblnhapct.getColumnModel().getColumn(1);
-        khColumn.setCellEditor(new DefaultCellEditor(cbKhachHang));
+        khColumn.setCellEditor(new DefaultCellEditor(customerCombo));
     }
 
     private void loaddata(){
@@ -80,17 +81,17 @@ public class NhapCTHD extends JDialog {
         model.setRowCount(0);
 
         for(int i=0;i<soluong;i++){
-            model.addRow(new Object[]{mahd,"",bus.layGia(mahd)});
+            model.addRow(new Object[]{mahd,"",bus.getPrice(mahd)});
         }
     }
     private void loaddata(String mahd){
         DefaultTableModel model=(DefaultTableModel) tblnhapct.getModel();
         model.setRowCount(0);
 
-        ArrayList<CTietHDDTO> ds=bus.getDstheoma(mahd);
-        for(CTietHDDTO cthddto: ds){
+        ArrayList<InvoiceDetailDTO> ds=bus.getListWithIdInvoice(mahd);
+        for(InvoiceDetailDTO cthddto: ds){
             model.addRow(new Object[]{
-                    cthddto.getMaHD(),cthddto.getMaKHDi(),String.valueOf(cthddto.getGiaVe())
+                    cthddto.getIdInvoice(),cthddto.getIdCustomer(),String.valueOf(cthddto.getPrice())
             });
         }
     }
@@ -173,13 +174,14 @@ public class NhapCTHD extends JDialog {
             boolean loi=false;
             String mahd =model.getValueAt(0, 0).toString().trim();
 
-            bus.capNhatSoluong(soluong,hdbus.timHd(mahd).getMaKHTour());
+            bus.capNhatSoluong(soluong,hdbus.timHd(mahd).getIdTourPlan());
             for(int i=0;i<soluong;i++){
                 mahd =model.getValueAt(i, 0).toString().trim();
                 String makh =model.getValueAt(i, 1).toString().trim();
-                float giave= Float.parseFloat(model.getValueAt(i, 2).toString().trim());
-                CTietHDDTO cthd=new CTietHDDTO(mahd,makh,giave);
-                if(!bus.themCTietHd(cthd)){
+                BigDecimal giave= (BigDecimal) model.getValueAt(i, 2);
+
+                InvoiceDetailDTO cthd=new InvoiceDetailDTO(mahd,makh,giave);
+                if(!bus.addInvoiceDetail(cthd)){
                     loi=true;
                     break;
                 }

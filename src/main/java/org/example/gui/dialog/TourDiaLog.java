@@ -2,17 +2,18 @@ package org.example.gui.dialog;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.bus.DiaDiemBUS;
-import org.example.bus.LoaiTourBUS;
+import org.example.bus.LocationBUS;
+import org.example.bus.TourTypeBUS;
 import org.example.bus.TourBUS;
-import org.example.dto.DiaDiemDTO;
-import org.example.dto.LoaiTourDTO;
+import org.example.dto.LocationDTO;
+import org.example.dto.TourTypeDTO;
 import org.example.dto.TourDTO;
 import org.example.gui.panel.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -33,16 +34,20 @@ public class TourDiaLog extends JDialog {
 
     TourBUS tourBUS;
     TourDTO tourDTO;
-    LoaiTourBUS loaiTourBUS;
-    DiaDiemBUS diaDiemBUS;
-    JComboBox<LoaiTourDTO> cbLoaiTours;
-    JComboBox<DiaDiemDTO> cbDiaDiem;
+    TourTypeBUS tourTypeBUS;
+    LocationBUS locationBUS;
+
+    DefaultComboBoxModel<TourTypeDTO> loaiToursModel;
+    JComboBox<TourTypeDTO> cbLoaiTours;
+
+    DefaultComboBoxModel<LocationDTO> diaDiemModel;
+    JComboBox<LocationDTO> cbDiaDiem;
 
     public TourDiaLog(TourBUS tourBUS, TourDTO tourDTO){
         this.tourDTO = tourDTO;
-        this.tourBUS = tourBUS;
-        loaiTourBUS = new LoaiTourBUS();
-        diaDiemBUS = new DiaDiemBUS();
+        // this.tourBUS = tourBUS;
+        tourTypeBUS = new TourTypeBUS();
+        locationBUS = new LocationBUS();
         cbLoaiTours = new JComboBox<>();
         cbDiaDiem = new JComboBox<>();
 
@@ -120,9 +125,9 @@ public class TourDiaLog extends JDialog {
         jlbMaLoaiTour.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
         formPanel.add(jlbMaLoaiTour);
 
-        ArrayList<LoaiTourDTO> lsCate = loaiTourBUS.getAllLoaiTour();
-        DefaultComboBoxModel<LoaiTourDTO> loaiToursModel = new DefaultComboBoxModel<>();
-        for(LoaiTourDTO lt : lsCate){
+        ArrayList<TourTypeDTO> lsCate = tourTypeBUS.getAllLoaiTour();
+        loaiToursModel = new DefaultComboBoxModel<>();
+        for(TourTypeDTO lt : lsCate){
             loaiToursModel.addElement(lt);
         }
         cbLoaiTours.setModel(loaiToursModel);
@@ -151,18 +156,17 @@ public class TourDiaLog extends JDialog {
         jlbMaDiaDiem.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
         formPanel.add(jlbMaDiaDiem);
 
-        ArrayList<DiaDiemDTO> lsDiaDiem = diaDiemBUS.getDs();
-        diaDiemBUS.DocDs();
-        DefaultComboBoxModel<DiaDiemDTO> diaDiemModel = new DefaultComboBoxModel<>();
-        for(DiaDiemDTO dd : lsDiaDiem){
+        ArrayList<LocationDTO> lsDiaDiem = locationBUS.getAllLocations();
+        diaDiemModel = new DefaultComboBoxModel<>();
+        for(LocationDTO dd : lsDiaDiem){
             diaDiemModel.addElement(dd);
         }
         cbDiaDiem.setModel(diaDiemModel);
         // set txt DiaDiemKhoiHanh when init
         cbDiaDiem.addActionListener(e -> {
-            DiaDiemDTO selected = (DiaDiemDTO) cbDiaDiem.getSelectedItem();
+            LocationDTO selected = (LocationDTO) cbDiaDiem.getSelectedItem();
             if(selected != null){
-                txtDiaDiemKhoiHanh.setText(selected.getDiaChi());
+                txtDiaDiemKhoiHanh.setText(selected.getAddress());
             }
         });
         formPanel.add(cbDiaDiem);
@@ -173,34 +177,34 @@ public class TourDiaLog extends JDialog {
 
     private void loadData(){
         // load txt
-        txtMaTour.setText(tourDTO.getMaTour());
+        txtMaTour.setText(tourDTO.getIdTour());
         txtMaTour.setEnabled(false);
 
-        txtTen.setText(tourDTO.getTen());
-        txtSoNgay.setText(tourDTO.getSoNgay() + "");
-        txtDonGia.setText(tourDTO.getDonGia() + "");
-        txtSoCho.setText(tourDTO.getSoCho() + "");
+        txtTen.setText(tourDTO.getTourName());
+        txtSoNgay.setText(tourDTO.getNumberOfDate() + "");
+        txtDonGia.setText(tourDTO.getPrice() + "");
+        txtSoCho.setText(tourDTO.getSeats() + "");
 
         //field diaDiemKhoihanh
         for(int i = 0; i < cbDiaDiem.getItemCount(); i++){
-            DiaDiemDTO dd = cbDiaDiem.getItemAt(i);
-            if(dd.getMaDiaDiem().equalsIgnoreCase(tourDTO.getMaDiaDiem())){
+            LocationDTO dd = cbDiaDiem.getItemAt(i);
+            if(dd.getIdLocation().equalsIgnoreCase(tourDTO.getIdLocation())){
                 cbDiaDiem.setSelectedIndex(i);
-                txtDiaDiemKhoiHanh.setText(dd.getDiaChi());
+                txtDiaDiemKhoiHanh.setText(dd.getAddress());
                 break;
             }
         }
 
         //field maLoaiTour
         for(int i = 0; i < cbLoaiTours.getItemCount(); i++){
-            LoaiTourDTO lt = cbLoaiTours.getItemAt(i);
-            if(lt.getMaLoaiTour().equalsIgnoreCase(tourDTO.getMaLoaiTour())){
+            TourTypeDTO lt = cbLoaiTours.getItemAt(i);
+            if(lt.getIdTourType().equalsIgnoreCase(tourDTO.getIdTourType())){
                 cbLoaiTours.setSelectedIndex(i);
                 break;
             }
         }
-        LoaiTourDTO selectedLoaiTour = (LoaiTourDTO) cbLoaiTours.getSelectedItem();
-        tourDTO.setMaLoaiTour(selectedLoaiTour.getMaLoaiTour());
+        TourTypeDTO selectedLoaiTour = (TourTypeDTO) cbLoaiTours.getSelectedItem();
+        tourDTO.setIdTourType(selectedLoaiTour.getIdTourType());
 
         // load image
         txtImgLink.setText(tourDTO.getImgLink());
@@ -217,8 +221,8 @@ public class TourDiaLog extends JDialog {
 
         //field maDiaDiem
         for(int i = 0; i < cbDiaDiem.getItemCount(); i++){
-            DiaDiemDTO dd = cbDiaDiem.getItemAt(i);
-            if(dd.getMaDiaDiem().equalsIgnoreCase(tourDTO.getMaDiaDiem())){
+            LocationDTO dd = cbDiaDiem.getItemAt(i);
+            if(dd.getIdLocation().equalsIgnoreCase(tourDTO.getIdLocation())){
                 cbDiaDiem.setSelectedIndex(i);
                 break;
             }
@@ -260,14 +264,14 @@ public class TourDiaLog extends JDialog {
                 if(tourBUS.existedTourWithID(txtMaTour.getText())){
                     JOptionPane.showMessageDialog(null, "Mã tour đã tồn tại, vui lòng nhập mã khác!");
                 }else{
-                    LoaiTourDTO selectedLoaiTour = (LoaiTourDTO) cbLoaiTours.getSelectedItem();
-                    String maLoaiTour = selectedLoaiTour.getMaLoaiTour();
-                    DiaDiemDTO selectedLocation = (DiaDiemDTO) cbDiaDiem.getSelectedItem();
-                    String maDiaDiem = selectedLocation.getMaDiaDiem();
+                    TourTypeDTO selectedLoaiTour = (TourTypeDTO) cbLoaiTours.getSelectedItem();
+                    String maLoaiTour = selectedLoaiTour.getIdTourType();
+                    LocationDTO selectedLocation = (LocationDTO) cbDiaDiem.getSelectedItem();
+                    String maDiaDiem = selectedLocation.getIdLocation();
 
                     TourDTO tourMoi = new TourDTO(
                             txtMaTour.getText(), txtTen.getText(),
-                            soNgay, donGia, soCho, txtDiaDiemKhoiHanh.getText(),
+                            soNgay,BigDecimal.valueOf(donGia), soCho, txtDiaDiemKhoiHanh.getText(),
                             txtImgLink.getText(), maLoaiTour, maDiaDiem
                     );
                     boolean result = tourBUS.addTour(tourMoi);
@@ -279,22 +283,22 @@ public class TourDiaLog extends JDialog {
                     }
                 }
             }else{
-                tourDTO.setTen(txtTen.getText());
-                tourDTO.setSoNgay(soNgay);
-                tourDTO.setDonGia(donGia);
-                tourDTO.setSoCho(soCho);
-                tourDTO.setDiaDiemKhoiHanh(txtDiaDiemKhoiHanh.getText());
+                tourDTO.setTourName(txtTen.getText());
+                tourDTO.setNumberOfDate(soNgay);
+                tourDTO.setPrice(BigDecimal.valueOf(donGia));
+                tourDTO.setSeats(soCho);
+                tourDTO.setDepartureLocation(txtDiaDiemKhoiHanh.getText());
                 tourDTO.setImgLink(txtImgLink.getText());
 
                 // field maLoaiTour
-                LoaiTourDTO selectedLoaiTour = (LoaiTourDTO) cbLoaiTours.getSelectedItem();
-                String maLoaiTour = selectedLoaiTour.getMaLoaiTour();
-                tourDTO.setMaLoaiTour(maLoaiTour);
+                TourTypeDTO selectedLoaiTour = (TourTypeDTO) cbLoaiTours.getSelectedItem();
+                String maLoaiTour = selectedLoaiTour.getIdTourType();
+                tourDTO.setIdTourType(maLoaiTour);
 
                 // field maLoaiTour
-                DiaDiemDTO selectedLocation = (DiaDiemDTO) cbDiaDiem.getSelectedItem();
-                String maDiaDiem = selectedLocation.getMaDiaDiem();
-                tourDTO.setMaDiaDiem(maDiaDiem);
+                LocationDTO selectedLocation = (LocationDTO) cbDiaDiem.getSelectedItem();
+                String maDiaDiem = selectedLocation.getIdLocation();
+                tourDTO.setIdLocation(maDiaDiem);
 
                 boolean result = tourBUS.editTour(tourDTO);
                 if(result){

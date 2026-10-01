@@ -2,8 +2,8 @@ package org.example.gui.dialog;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.bus.LoaiTourBUS;
-import org.example.dto.LoaiTourDTO;
+import org.example.bus.TourTypeBUS;
+import org.example.dto.TourTypeDTO;
 import org.example.dto.TourDTO;
 import org.example.gui.panel.UIColors;
 
@@ -24,7 +24,7 @@ public class TourDetailDialog extends JDialog {
 
     // defined tourDTO
     TourDTO tourDTO;
-    LoaiTourBUS loaiTourBUS = new LoaiTourBUS();
+    TourTypeBUS tourTypeBUS = new TourTypeBUS();
 
     public TourDetailDialog(TourDTO tourDTO){
         this.tourDTO = tourDTO;
@@ -34,7 +34,7 @@ public class TourDetailDialog extends JDialog {
     }
 
     private void init(){
-        setTitle("TOUR " + tourDTO.getMaTour());
+        setTitle("TOUR " + tourDTO.getIdTour());
         setPreferredSize(new Dimension(360,520));
         pack();
         setLocationRelativeTo(null);
@@ -184,16 +184,16 @@ public class TourDetailDialog extends JDialog {
     }
 
     private void fillData(TourDTO tour){
-        txtMaTour.setText(tour.getMaTour());
-        txtTen.setText(tour.getTen());
-        txtSoNgay.setText(tour.getSoNgay() + "");
-        txtDonGia.setText(tour.getDonGia() + "");
-        txtSoCho.setText(tour.getSoCho() + "");
-        txtDiaDiemKhoiHanh.setText(tour.getDiaDiemKhoiHanh());
+        txtMaTour.setText(tour.getIdTour());
+        txtTen.setText(tour.getTourName());
+        txtSoNgay.setText(tour.getNumberOfDate() + "");
+        txtDonGia.setText(tour.getPrice() + "");
+        txtSoCho.setText(tour.getSeats() + "");
+        txtDiaDiemKhoiHanh.setText(tour.getDepartureLocation());
 
-        String maLoaiTour = tour.getMaLoaiTour();
-        LoaiTourDTO lt = loaiTourBUS.getById(maLoaiTour);
-        txtLoaiTour.setText(lt.getTheLoai());
+        String maLoaiTour = tour.getIdTourType();
+        TourTypeDTO lt = tourTypeBUS.getById(maLoaiTour);
+        txtLoaiTour.setText(lt.getTypeOfTour());
 
         System.out.println(tour.getImgLink());
         loadImage(tour.getImgLink());

@@ -8,13 +8,13 @@ import java.util.ArrayList;
 public class TourBUS {
     private ArrayList<TourDTO> lsTour;
     private TourDAO tourDAO;
-    private KeHoachTourBUS keHoachTourBUS;
+    private TourPlanBUS tourPlanBUS;
 
     //constructor
     public TourBUS(){
         tourDAO = new TourDAO();
         lsTour = new ArrayList<>();
-        keHoachTourBUS = new KeHoachTourBUS();
+        tourPlanBUS = new TourPlanBUS();
     }
 
     public ArrayList<TourDTO> getAllTours(){
@@ -25,7 +25,7 @@ public class TourBUS {
     public boolean addTour(TourDTO t){
         if(t == null) return false;
 
-        if(t.getSoNgay() <= 0 || t.getSoCho() < 0){
+        if(t.getNumberOfDate() <= 0 || t.getSeats() < 0){
             return false;
         }
 
@@ -36,7 +36,7 @@ public class TourBUS {
     }
 
     public boolean editTour(TourDTO t){
-        if(t.getSoNgay() <= 0 || t.getSoCho() < 0)
+        if(t.getNumberOfDate() <= 0 || t.getSeats() < 0)
             return false;
 
         return tourDAO.editTour(t);
@@ -49,7 +49,7 @@ public class TourBUS {
     public ArrayList<TourDTO> search(String keyWord){
         ArrayList<TourDTO> list = new ArrayList<>();
         for (TourDTO lt : lsTour){
-            if(lt.getTen().trim().toLowerCase().contains(keyWord)){
+            if(lt.getTourName().trim().toLowerCase().contains(keyWord)){
                 list.add(lt);
             }
         }
@@ -59,7 +59,7 @@ public class TourBUS {
     public TourDTO getByID(String maTour){
         TourDTO tour = new TourDTO();
         for (TourDTO t : lsTour){
-            if(t.getMaTour().trim().equalsIgnoreCase(maTour)){
+            if(t.getIdTour().trim().equalsIgnoreCase(maTour)){
                 tour = t;
                 break;
             }
@@ -69,7 +69,7 @@ public class TourBUS {
 
     public boolean existedTourWithID(String maTour){
         for (TourDTO t : lsTour){
-            if(t.getMaTour().trim().equalsIgnoreCase(maTour))
+            if(t.getIdTour().trim().equalsIgnoreCase(maTour))
                 return true;
         }
         return false;
@@ -86,7 +86,7 @@ public class TourBUS {
     public int getVacantSpot(String maTour){
         TourDTO t = getByID(maTour);
         if(t != null){
-            return t.getSoCho();
+            return t.getSeats();
         }
 
         return 0;

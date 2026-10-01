@@ -2,8 +2,8 @@ package org.example.gui.panel;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.bus.CTrinhKMBUS;
-import org.example.dto.CTrinhKMDTO;
+import org.example.bus.PromotionBUS;
+import org.example.dto.PromotionDTO;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -24,17 +24,17 @@ public class CalendarKMPanel extends JPanel {
     int month;
     int year;
 
-    ArrayList<CTrinhKMDTO> listKM = new ArrayList<>();
-    ArrayList<CTrinhKMDTO> filteredList = new ArrayList<>();
+    ArrayList<PromotionDTO> listKM = new ArrayList<>();
+    ArrayList<PromotionDTO> filteredList = new ArrayList<>();
 
-    CTrinhKMBUS bus;
+    PromotionBUS promotionBUS;
 
     int currentIndex = -1;
 
     public CalendarKMPanel() {
         setLayout(new BorderLayout(10,10));
 
-        bus = new CTrinhKMBUS();
+        promotionBUS = new PromotionBUS();
 
         JPanel header = new JPanel(new BorderLayout());
 
@@ -136,25 +136,24 @@ public class CalendarKMPanel extends JPanel {
 
     private void loadCalendar(){
 
-        bus.docDsCTrinhKM();
-        listKM = bus.getDsCTrinhKM();
+        listKM = promotionBUS.getAllPromotions();
 
         String keyword = normalize(txtSearch.getText().trim());
 
         // FILTER LIST
         filteredList.clear();
 
-        for(CTrinhKMDTO km : listKM){
+        for(PromotionDTO km : listKM){
 
-            String maKM = normalize(km.getMaKM());
-            String tenKM = normalize(km.getTenKM());
+            String maKM = normalize(km.getIdPromotion());
+            String tenKM = normalize(km.getPromotionName());
 
             LocalDate now = LocalDate.now();
             String trangThai;
 
-            if(now.isBefore(km.getNgayBD())){
+            if(now.isBefore(km.getStartDate())){
                 trangThai = "sap";
-            } else if(now.isAfter(km.getNgayKT())){
+            } else if(now.isAfter(km.getEndDate())){
                 trangThai = "het";
             } else {
                 trangThai = "dang";
@@ -173,8 +172,8 @@ public class CalendarKMPanel extends JPanel {
 
         // AUTO JUMP KHI SEARCH
         if(!filteredList.isEmpty() && !keyword.isEmpty()){
-            month = filteredList.get(0).getNgayBD().getMonthValue();
-            year = filteredList.get(0).getNgayBD().getYear();
+            month = filteredList.get(0).getStartDate().getMonthValue();
+            year = filteredList.get(0).getStartDate().getYear();
             currentIndex = 0;
         }
 
@@ -235,19 +234,19 @@ public class CalendarKMPanel extends JPanel {
         JPanel kmPanel = new JPanel();
         kmPanel.setLayout(new BoxLayout(kmPanel, BoxLayout.Y_AXIS));
 
-        for(CTrinhKMDTO km : listKM){
+        for(PromotionDTO km : listKM){
 
-            if(isInRange(date, km.getNgayBD(), km.getNgayKT())){
+            if(isInRange(date, km.getStartDate(), km.getEndDate())){
 
-                String maKM = normalize(km.getMaKM());
-                String tenKM = normalize(km.getTenKM());
+                String maKM = normalize(km.getIdPromotion());
+                String tenKM = normalize(km.getPromotionName());
 
                 LocalDate now = LocalDate.now();
 
                 String trangThai;
-                if(now.isBefore(km.getNgayBD())){
+                if(now.isBefore(km.getStartDate())){
                     trangThai = "sap";
-                } else if(now.isAfter(km.getNgayKT())){
+                } else if(now.isAfter(km.getEndDate())){
                     trangThai = "het";
                 } else {
                     trangThai = "dang";
@@ -261,7 +260,7 @@ public class CalendarKMPanel extends JPanel {
 
                 if(match){
 
-                    JLabel lbl = new JLabel("• " + km.getTenKM());
+                    JLabel lbl = new JLabel("• " + km.getPromotionName());
                     lbl.setFont(new Font("Arial", Font.PLAIN, 11));
 
                     if(trangThai.equals("dang")) lbl.setForeground(new Color(0,150,0));
@@ -277,9 +276,9 @@ public class CalendarKMPanel extends JPanel {
 
         // HIGHLIGHT KM ĐANG CHỌN
         if(currentIndex >= 0 && currentIndex < filteredList.size()){
-            CTrinhKMDTO currentKM = filteredList.get(currentIndex);
+            PromotionDTO currentKM = filteredList.get(currentIndex);
 
-            if(isInRange(date, currentKM.getNgayBD(), currentKM.getNgayKT())){
+            if(isInRange(date, currentKM.getStartDate(), currentKM.getEndDate())){
                 panel.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
             }
         }
@@ -293,9 +292,9 @@ public class CalendarKMPanel extends JPanel {
         return panel;
     }
 
-    private void jumpToKM(CTrinhKMDTO km){
-        month = km.getNgayBD().getMonthValue();
-        year = km.getNgayBD().getYear();
+    private void jumpToKM(PromotionDTO km){
+        month = km.getStartDate().getMonthValue();
+        year = km.getStartDate().getYear();
         loadCalendar();
     }
 
@@ -313,9 +312,9 @@ public class CalendarKMPanel extends JPanel {
     private void showDetail(LocalDate date){
         StringBuilder detail = new StringBuilder("📅 Khuyến mãi ngày " + date + ":\n\n");
 
-        for(CTrinhKMDTO km : listKM){
-            if(isInRange(date, km.getNgayBD(), km.getNgayKT())){
-                detail.append("- ").append(km.getTenKM()).append("\n");
+        for(PromotionDTO km : listKM){
+            if(isInRange(date, km.getStartDate(), km.getEndDate())){
+                detail.append("- ").append(km.getPromotionName()).append("\n");
             }
         }
         JOptionPane.showMessageDialog(this, detail.toString());

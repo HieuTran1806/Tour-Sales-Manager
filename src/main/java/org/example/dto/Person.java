@@ -15,5 +15,5 @@ public class Person {
     String lastName;
     String address;
     String phoneNumber;
-    LocalDate ngaySinh;
+    LocalDate dob;
 }

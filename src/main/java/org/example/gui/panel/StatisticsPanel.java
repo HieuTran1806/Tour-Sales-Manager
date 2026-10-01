@@ -22,7 +22,7 @@ public class StatisticsPanel extends JPanel {
 
     // define BUS
     TourBUS tourBUS;
-    HoaDonBUS hoaDonBus;
+    InvoiceBUS invoiceBus;
 
     JPanel cardsPanel;
     JPanel chartsPanel;
@@ -30,7 +30,7 @@ public class StatisticsPanel extends JPanel {
 
     public StatisticsPanel() {
         tourBUS = new TourBUS();
-        hoaDonBus = new HoaDonBUS();
+        invoiceBus = new InvoiceBUS();
 
         setLayout(new BorderLayout());
         init();
@@ -52,16 +52,20 @@ public class StatisticsPanel extends JPanel {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         filterPanel.setBackground(Color.WHITE);
 
+        Dimension dateSize = new Dimension(130, 30);
+
         filterPanel.add(new JLabel("Ngày bắt đầu:"));
         dateFrom = new JDateChooser();
         dateFrom.setDateFormatString("dd/MM/yyyy");
         dateFrom.setDate(valueOf(LocalDate.now().minusMonths(1)));
+        dateFrom.setPreferredSize(dateSize);
         filterPanel.add(dateFrom);
 
         filterPanel.add(new JLabel("Đến ngày:"));
         dateTo = new JDateChooser();
         dateTo.setDateFormatString("dd/MM/yyyy");
         dateTo.setDate(valueOf(LocalDate.now()));
+        dateTo.setPreferredSize(dateSize);
         filterPanel.add(dateTo);
 
         btnFilter = createBtn("Lọc", new Color(33, 150, 243));
@@ -131,10 +135,10 @@ public class StatisticsPanel extends JPanel {
             LocalDate fromDate = dateFrom.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate toDate = dateTo.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-            hoaDonBus.docDs();
+            invoiceBus.docDs();
 
-            float totalIncome = hoaDonBus.getTongThuDuKien(fromDate, toDate);
-            float totalExpenditure = hoaDonBus.getTongchiDuKien(fromDate, toDate);
+            float totalIncome = invoiceBus.getTongThuDuKien(fromDate, toDate);
+            float totalExpenditure = invoiceBus.getTongchiDuKien(fromDate, toDate);
 
 
             float profit = totalIncome - totalExpenditure;
@@ -159,7 +163,7 @@ public class StatisticsPanel extends JPanel {
         chartsPanel.removeAll();
         try {
             int selectedYear = (Integer) cbYear.getSelectedItem();
-            int[] monthlyIncomeInt = hoaDonBus.getTongThuTungThang(selectedYear);
+            int[] monthlyIncomeInt = invoiceBus.getTongThuTungThang(selectedYear);
             float[] monthlyIncome = new float[12]; // Lưu doanh thu 12 tháng
 
             for (int i = 0; i < 12; i++) {
@@ -281,8 +285,8 @@ public class StatisticsPanel extends JPanel {
         try {
             int selectedYear = (Integer) cbYear.getSelectedItem();
 
-            int[] monthlyIncome =hoaDonBus.getTongThuTungThang(selectedYear);
-            int[] monthlyCost = hoaDonBus.getTongChiTungThang(selectedYear);
+            int[] monthlyIncome = invoiceBus.getTongThuTungThang(selectedYear);
+            int[] monthlyCost = invoiceBus.getTongChiTungThang(selectedYear);
             float totalIncomeYear = 0;
             float totalCostYear=0;
 

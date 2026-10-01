@@ -1,13 +1,11 @@
 package org.example.login;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-import org.example.dto.TaiKhoanDTO;
+import org.example.dto.AccountDTO;
 
 public class SessionManager {
-    private static TaiKhoanDTO currentTaiKhoan;
+    private static AccountDTO currentTaiKhoan;
 
-    public static void loginAccount(TaiKhoanDTO account) {
+    public static void loginAccount(AccountDTO account) {
         currentTaiKhoan = account;
     }
     
@@ -15,7 +13,7 @@ public class SessionManager {
         currentTaiKhoan = null;
     }
 
-    public static TaiKhoanDTO getCurrentAccount() {
+    public static AccountDTO getCurrentAccount() {
         return currentTaiKhoan;
     }
 

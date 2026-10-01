@@ -2,8 +2,8 @@ package org.example.login;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.example.dao.TaiKhoanDAO;
-import org.example.dto.TaiKhoanDTO;
+import org.example.dao.AccountDAO;
+import org.example.dto.AccountDTO;
 import org.example.gui.MainFrame;
 import org.example.gui.panel.UIColors;
 
@@ -19,7 +19,7 @@ public class Login extends JFrame {
     JTextField txtUsername;
     JPasswordField txtPassword;
 
-    final TaiKhoanDAO taiKhoanDAO = new TaiKhoanDAO();
+    final AccountDAO accountDAO = new AccountDAO();
 
     public Login() {
         initComponents();
@@ -143,7 +143,7 @@ public class Login extends JFrame {
                 return;
             }
 
-            TaiKhoanDTO account = taiKhoanDAO.dangNhap(username, password);
+            AccountDTO account = accountDAO.loginAccount(username, password);
             if (account == null) {
                 JOptionPane.showMessageDialog(this, "Sai tài khoản hoặc mật khẩu.");
                 return;

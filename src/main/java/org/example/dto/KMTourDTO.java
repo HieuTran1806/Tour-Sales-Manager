@@ -9,7 +9,7 @@ import java.util.ArrayList;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class KMTourDTO extends CTrinhKMDTO {
+public class KMTourDTO extends PromotionDTO {
     ArrayList<String> dsMaTour;
 
     public KMTourDTO() {

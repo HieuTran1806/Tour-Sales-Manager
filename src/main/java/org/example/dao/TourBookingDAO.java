@@ -1,6 +1,7 @@
 package org.example.dao;
 import org.example.dto.TourBookingDTO;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -187,7 +188,7 @@ public class TourBookingDAO {
         }
     }
 
-    public long getPriceByIdTourPlan(String maKHTour){
+    public BigDecimal getPriceByIdTourPlan(String maKHTour){
         String sql = """
         SELECT DonGia
         FROM tour t
@@ -202,13 +203,13 @@ public class TourBookingDAO {
             ResultSet rs = ps.executeQuery();
 
             if(rs.next()){
-                return rs.getLong("DonGia");
+                return rs.getBigDecimal("DonGia");
             }
 
         }catch(Exception e){
             e.printStackTrace();
         }
-        return 0;
+        return null;
     }
 
     private TourBookingDTO mapResultSetToDTO(ResultSet rs)

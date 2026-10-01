@@ -2,6 +2,7 @@ package org.example.dao;
 
 import org.example.dto.TourDTO;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ public class TourDAO {
                         rs.getString(1),
                         rs.getString(2),
                         rs.getInt(3),
-                        rs.getLong(4),
+                        rs.getBigDecimal(4),
                         rs.getInt(5),
                         rs.getString(6),
                         rs.getString(7),
@@ -48,15 +49,15 @@ public class TourDAO {
         try {
             PreparedStatement pst = c.prepareStatement(sql); // use PreparedStatement
 
-            pst.setString(1, t.getMaTour());
-            pst.setString(2, t.getTen());
-            pst.setInt(3, t.getSoNgay());
-            pst.setLong(4, t.getDonGia());
-            pst.setInt(5, t.getSoCho());
-            pst.setString(6, t.getDiaDiemKhoiHanh());
+            pst.setString(1, t.getIdTour());
+            pst.setString(2, t.getTourName());
+            pst.setInt(3, t.getNumberOfDate());
+            pst.setBigDecimal(4, t.getPrice());
+            pst.setInt(5, t.getSeats());
+            pst.setString(6, t.getDepartureLocation());
             pst.setString(7, t.getImgLink());
-            pst.setString(8, t.getMaLoaiTour());
-            pst.setString(9, t.getMaDiaDiem());
+            pst.setString(8, t.getIdTourType());
+            pst.setString(9, t.getIdLocation());
 
             int rowAffected = pst.executeUpdate();
             return rowAffected > 0;
@@ -84,15 +85,15 @@ public class TourDAO {
         String sql = "UPDATE tour SET ten=?, songay=?, dongia=?, socho=?, ddkhoihanh=?, imglink=?, maloaitour=?, madiadiem=? WHERE matour=?";
         try {
             PreparedStatement pst = c.prepareStatement(sql);
-            pst.setString(1, t.getTen());
-            pst.setInt(2, t.getSoNgay());
-            pst.setLong(3, t.getDonGia());
-            pst.setInt(4, t.getSoCho());
-            pst.setString(5, t.getDiaDiemKhoiHanh());
+            pst.setString(1, t.getTourName());
+            pst.setInt(2, t.getNumberOfDate());
+            pst.setBigDecimal(3, t.getPrice());
+            pst.setInt(4, t.getSeats());
+            pst.setString(5, t.getDepartureLocation());
             pst.setString(6, t.getImgLink());
-            pst.setString(7, t.getMaLoaiTour());
-            pst.setString(8, t.getMaDiaDiem());
-            pst.setString(9, t.getMaTour());
+            pst.setString(7, t.getIdTourType());
+            pst.setString(8, t.getIdLocation());
+            pst.setString(9, t.getIdTour());
 
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -124,7 +125,7 @@ public class TourDAO {
         String maTour = rs.getString("matour");
         String ten = rs.getString("ten");
         int soNgay = rs.getInt("songay");
-        long donGia =rs.getLong("dongia");
+        BigDecimal donGia =rs.getBigDecimal("dongia");
         int soCho =rs.getInt("soCho");
         String ddKhoiHanh =rs.getString("ddkhoihanh");
         String imgLink =rs.getString("imglink");
