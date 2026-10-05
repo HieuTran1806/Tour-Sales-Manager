@@ -3,6 +3,7 @@ import java.time.LocalDate;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.enums.Role;
 
 @Getter
 @Setter
@@ -10,12 +11,11 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffDTO extends Person {
     String idStaff;
-    String role;
+    Role role;
 
-    public StaffDTO(String maNV, String role, String ho, String ten, String diaChi, String sdt, LocalDate ngaySinh) {
+    public StaffDTO(String idStaff, String ho, String ten, String diaChi, String sdt, LocalDate ngaySinh) {
         super(ho, ten, diaChi, sdt, ngaySinh);
-        this.idStaff = maNV;
-        this.role = role;
+        this.idStaff = idStaff;
     }
 
     @Override

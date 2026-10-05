@@ -2,6 +2,7 @@ package org.example.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.enums.Role;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -9,12 +10,15 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AccountDTO {
+    int idAccount;
     String username;
     String password;
-    String position;
+    Role role;
+    String status;
 
-    public enum Role{
-        ADMIN,
-        STAFF,
-    }
+    // Tài khoản nhân viên thì có idStaff
+    String idStaff;
+
+    // Tài khoản khách hàng thì có idCustomer
+    String idCustomer;
 }

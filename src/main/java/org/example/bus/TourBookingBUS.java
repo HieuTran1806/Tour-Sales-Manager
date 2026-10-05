@@ -1,6 +1,10 @@
 package org.example.bus;
 import org.example.dao.TourBookingDAO;
+import org.example.dto.AccountDTO;
 import org.example.dto.TourBookingDTO;
+import org.example.enums.Permission;
+import org.example.enums.Role;
+import org.example.login.SessionManager;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -97,46 +101,6 @@ public class TourBookingBUS {
         }
     }
 
-    // public ArrayList<TourBookingDTO> timKHang_KHTours(String column, String value) {
-    //     try {
-    //         if (dsKHKHTour == null || column == null || value == null) {
-    //             return new ArrayList<>();
-    //         }
-    //         ArrayList<TourBookingDTO> result = new ArrayList<>();
-    //         for (TourBookingDTO kht : dsKHKHTour) {
-    //             switch (column) {
-    //                 case "MaKHTour":
-    //                     if (kht.getIdTourPlan().equalsIgnoreCase(value)) {
-    //                         result.add(kht);
-    //                     }
-    //                     break;
-    //                 case "MaKHang":
-    //                     if (kht.getIdCustomer().equalsIgnoreCase(value)) {
-    //                         result.add(kht);
-    //                     }
-    //                     break;
-    //                 case "GiaVe":
-    //                     try {
-    //                         BigDecimal giaVeValue = BigDecimal.valueOf(Long.parseLong(value));
-    //                         if (Objects.equals(kht.getPrice(), giaVeValue)) {
-    //                             result.add(kht);
-    //                         }
-    //                     } catch (NumberFormatException e) {
-    //                         // Ignore invalid number format
-    //                     }
-    //                     break;
-    //                 default:
-    //                     // Invalid column name
-    //                     return new ArrayList<>();
-    //             }
-    //         }
-    //         return result;
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //         return new ArrayList<>();
-    //     }
-    // }
-
     public List<TourBookingDTO> timKHang_KHToursTheoHo(String ho) {
         try {
             if (dsKHKHTour == null || ho == null) {
@@ -179,6 +143,21 @@ public class TourBookingBUS {
     ) {
         return tourBookingDao.getPriceByIdTourPlan(
                 idTourPlan
+        );
+    }
+
+    public List<TourBookingDTO> getVisibleBookings(){
+        AccountDTO accountDTO = SessionManager.getCurrentAccount();
+
+        if(accountDTO.getRole() == Role.CUSTOMER){
+            return tourBookingDao.findByCustomer(accountDTO.getIdCustomer());
+        }
+
+        if(SessionManager.hasPermission(Permission.VIEW_BOOKING)){
+            return tourBookingDao.getAllTourBooking();
+        }
+        throw new SecurityException(
+                "Bạn không có quyền xem phiếu đặt tour"
         );
     }
 }

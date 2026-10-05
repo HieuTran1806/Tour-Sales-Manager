@@ -62,23 +62,24 @@ public class TourBookingDAO {
         }
     }
 
-    // public PhieuDatTourDTO timtourbookingTheoMaTour(String MaKHTour) {
-    //     String sql = "SELECT * FROM tourbooking WHERE MaKHTour = ?";
-    //     try (Connection conn = MyConnection.getConnection();
-    //          PreparedStatement pstmt = conn.prepareStatement(sql)) {
-    //         pstmt.setString(1, MaKHTour);
-    //         try (ResultSet rs = pstmt.executeQuery()) {
-    //             if (rs.next()) {
-    //                 String MaKHang = rs.getString("MaKHang");
-    //                 long GiaVe = rs.getLong("GiaVe");
-    //                 return new PhieuDatTourDTO(MaKHTour, MaKHang, GiaVe);
-    //             }
-    //         }
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    //     return null;
-    // }
+    public ArrayList<TourBookingDTO> findByCustomer(String idCustomer) {
+        String sql = "SELECT * FROM tourbooking WHERE idCustomer = ?";
+
+        ArrayList<TourBookingDTO> ls = new ArrayList<>();
+
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    ls.add(mapResultSetToDTO(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ls;
+    }
 
     // public List<PhieuDatTourDTO> timtourbookings(String column, String value) {
     //     List<PhieuDatTourDTO> results = new ArrayList<>();

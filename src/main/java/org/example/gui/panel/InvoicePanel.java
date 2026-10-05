@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.dto.*;
 import org.example.bus.*;
+import org.example.gui.component.ButtonFactory;
 import org.example.gui.dialog.*;
 import org.example.gui.helper.DateHelper;
 import org.example.gui.helper.ExcelHelper;
@@ -222,23 +223,8 @@ public class InvoicePanel extends JPanel {
         add(pnltable, BorderLayout.CENTER);
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // in south panel
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
-    }
-
     private void them(){
-        btnthem = createBtn("Thêm", UIColors.ADD);
+        btnthem = ButtonFactory.create("Thêm", UIColors.ADD);
         btnthem.addActionListener(v -> {
             openDiaLog(invoiceDTO);
         });
@@ -252,7 +238,7 @@ public class InvoicePanel extends JPanel {
     }
 
     private void xoa(){
-        btnxoa = createBtn("Xóa", UIColors.DELETE);
+        btnxoa = ButtonFactory.create("Xóa", UIColors.DELETE);
         btnxoa.setEnabled(false);
         btnxoa.addActionListener(v -> {
             try{
@@ -283,7 +269,7 @@ public class InvoicePanel extends JPanel {
     }
 
     private void sua(){
-        btnsua = createBtn("Chỉnh sửa", UIColors.EDIT);
+        btnsua = ButtonFactory.create("Chỉnh sửa", UIColors.EDIT);
         btnsua.setEnabled(false);
         btnsua.addActionListener(v -> {
 
@@ -306,7 +292,7 @@ public class InvoicePanel extends JPanel {
     }
 
     private void xemChiTiet(){
-        btnchitiet = createBtn("Xem chi tiết", UIColors.VIEW);
+        btnchitiet = ButtonFactory.create("Xem chi tiết", UIColors.VIEW);
         btnchitiet.addActionListener(v -> {
             int row=tblhoadon.getSelectedRow();
             String ma =tblhoadon.getValueAt(row, 0).toString().trim();
@@ -320,14 +306,14 @@ public class InvoicePanel extends JPanel {
     }
 
     private void lamMoi(){
-        btnreset = createBtn("Làm mới", UIColors.REFRESH);
+        btnreset = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         btnreset.addActionListener(v -> {
             loadData();
         });
     }
 
     private void xuatExcel(){
-        btnxuat = createBtn("Xuất excel", UIColors.EXPORT_EXCEL);
+        btnxuat = ButtonFactory.create("Xuất excel", UIColors.EXPORT_EXCEL);
         btnxuat.addActionListener(v -> {
             ExcelHelper.xuatExcel(tblhoadon, this, "Danh sách hóa đơn");
         });

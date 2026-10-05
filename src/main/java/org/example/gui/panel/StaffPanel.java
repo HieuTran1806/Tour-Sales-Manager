@@ -3,8 +3,9 @@ package org.example.gui.panel;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.bus.StaffBUS;
-import org.example.dao.StaffDAO;
 import org.example.dto.StaffDTO;
+import org.example.enums.Permission;
+import org.example.gui.component.ButtonFactory;
 import org.example.gui.dialog.StaffDialog;
 import org.example.login.SessionManager;
 
@@ -14,12 +15,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -41,41 +41,15 @@ public class StaffPanel extends JPanel {
     //formatter
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    StaffDAO staffDAO = new StaffDAO();
-    StaffBUS nvBUS = new StaffBUS();
+    StaffBUS staffBus = new StaffBUS();
 
     public StaffPanel() {
-        nvBUS = new StaffBUS();
+        staffBus = new StaffBUS();
         initComponents();
-        if (!SessionManager.isAdmin()) {
-            btnThem.setEnabled(false);
-            btnXoa.setEnabled(false);
-            btnSua.setEnabled(false);
-        }
-        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+        applyPermission();
 
-            private void search() {
-                String keyword = txtSearch.getText().trim();
-                List<StaffDTO> list = nvBUS.timNhanVien(getColumnName(jComboBox1.getSelectedItem().toString()), keyword);
-                loadNhanVienToTable(list);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                search();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                search();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                search();
-            }
-        });
-        loadNhanVienToTable(staffDAO.getAllStaffs());
+        txtSearch.addActionListener(e -> search());
+        reloadStaffTable();
     }
 
     @SuppressWarnings("unchecked")
@@ -168,23 +142,8 @@ public class StaffPanel extends JPanel {
         add(jPanel3, BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // in south panel
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
-    }
-
     private void them(){
-        btnThem = createBtn("Thêm", UIColors.ADD);
+        btnThem = ButtonFactory.create("Thêm", UIColors.ADD);
         btnThem.addActionListener(v -> {
             if (!SessionManager.isAdmin()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền thao tác với nhân viên.");
@@ -194,19 +153,17 @@ public class StaffPanel extends JPanel {
             StaffDialog dialog = new StaffDialog(
                     null,
                     true,
-                    staffDAO,
                     StaffDialog.Mode.ADD,
                     null
             );
 
             dialog.setVisible(true);
-
-            loadNhanVienToTable(staffDAO.getAllStaffs());
+            reloadStaffTable();
         });
     }
 
     private void sua(){
-        btnSua = createBtn("Sửa", UIColors.EDIT);
+        btnSua = ButtonFactory.create("Sửa", UIColors.EDIT);
         btnSua.setEnabled(false);
         btnSua.addActionListener(v -> {
             if (!SessionManager.isAdmin()) {
@@ -217,21 +174,21 @@ public class StaffPanel extends JPanel {
 
             if (i >= 0) {
                 String maNV = jTable1.getValueAt(i, 0).toString();
-                StaffDTO nv = nvBUS.timNhanVienTheoMa(maNV);
+                StaffDTO nv = staffBus.timNhanVienTheoMa(maNV);
                 System.err.println(nv.getIdStaff());
                 StaffDialog dialog = new StaffDialog(
-                        null, true, staffDAO,
+                        null, true,
                         StaffDialog.Mode.EDIT,
                         nv);
 
                 dialog.setVisible(true);
-                loadNhanVienToTable(staffDAO.getAllStaffs());
+                reloadStaffTable();
             }
         });
     }
 
     private void xoa(){
-        btnXoa = createBtn("Xóa", UIColors.DELETE);
+        btnXoa = ButtonFactory.create("Xóa", UIColors.DELETE);
         btnXoa.setEnabled(false);
         btnXoa.addActionListener(v -> {
             if (!SessionManager.isAdmin()) {
@@ -242,8 +199,8 @@ public class StaffPanel extends JPanel {
             int result = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa nhân viên này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
             if (result == JOptionPane.YES_OPTION && i >= 0) {
                 String maNV = jTable1.getValueAt(i, 0).toString();
-                StaffBUS nvBUS = new StaffBUS();
-                nvBUS.xoaNhanVien(maNV);
+                StaffBUS staffBus = new StaffBUS();
+                staffBus.deleteStaff(maNV);
                 DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
                 model.removeRow(i);
             }
@@ -251,9 +208,9 @@ public class StaffPanel extends JPanel {
     }
 
     private void lamMoi(){
-        btnLamMoi = createBtn("Làm mới", UIColors.REFRESH);
+        btnLamMoi = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         btnLamMoi.addActionListener(v -> {
-            loadNhanVienToTable(staffDAO.getAllStaffs());
+            reloadStaffTable();
         });
     }
 
@@ -291,27 +248,65 @@ public class StaffPanel extends JPanel {
         }
     }
 
-    private void loadNhanVienToTable(List<StaffDTO> list) {
+    private void loadNhanVienToTable(List<StaffDTO> ls) {
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
         model.setRowCount(0); // Xóa dữ liệu cũ trong bảng
 
-        for(StaffDTO nv : list){
-            Date date = java.sql.Date.valueOf(nv.getDob());
+        for(StaffDTO item : ls){
+
+            Date date = java.sql.Date.valueOf(item.getDob());
+
             String ngaySinhStr = "";
             if(date!=null){
                 LocalDate localDate = ((java.sql.Date) date).toLocalDate();
                 ngaySinhStr = localDate.format(formatter);
             }
 
+            String roleText =
+                    item.getRole()== null
+                            ? "Chưa có tài khoản"
+                            : item.getRole().toString();
+
             model.addRow(new Object[]{
-                    nv.getIdStaff(),
-                    nv.getFirstName(),
-                    nv.getFirstName(),
-                    nv.getRole(),
+                    item.getIdStaff(),
+                    item.getFirstName(),
+                    item.getLastName(),
+                    roleText,
                     ngaySinhStr,
-                    nv.getPhoneNumber(),
-                    nv.getAddress()
+                    item.getPhoneNumber(),
+                    item.getAddress()
             });
         }
+    }
+
+    private void applyPermission(){
+        boolean canManage = SessionManager.hasPermission(Permission.MANAGE_STAFF);
+
+        btnThem.setVisible(canManage);
+        btnSua.setVisible(canManage);
+        btnXoa.setVisible(canManage);
+    }
+
+    private void reloadStaffTable(){
+        ArrayList<StaffDTO> ls =
+                staffBus.getAllStaffWithRole();
+
+        loadNhanVienToTable(ls);
+    }
+
+    private void search() {
+        String keyword = txtSearch.getText().trim();
+        String searchType =
+                String.valueOf(jComboBox1.getSelectedItem());
+
+        List<StaffDTO> ls;
+
+        if (keyword.isBlank()) {
+            ls = staffBus.getAllStaffWithRole();
+        } else {
+            ls = staffBus.timNhanVien(searchType, keyword);
+        }
+
+        loadNhanVienToTable(ls);
     }
 }

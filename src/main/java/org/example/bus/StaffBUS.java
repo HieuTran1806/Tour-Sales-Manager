@@ -1,8 +1,12 @@
 package org.example.bus;
 import java.util.ArrayList;
+import java.util.List;
+
 import org.example.dao.StaffDAO;
 import org.example.dto.StaffDTO;
-import java.util.List;
+import org.example.enums.Permission;
+import org.example.enums.Role;
+import org.example.login.SessionManager;
 
 public class StaffBUS {
     public ArrayList<StaffDTO> dsNV;
@@ -18,10 +22,10 @@ public class StaffBUS {
         return dao.getAllStaffs();
     }
 
-    public void them(StaffDTO nv) {
+    public void them(StaffDTO nv, Role role) {
         try{
             if (dsNV == null) {
-                dsNV = new ArrayList<StaffDTO>();
+                dsNV = new ArrayList<>();
             }
             if (nv == null) {
                 return;
@@ -34,7 +38,7 @@ public class StaffBUS {
                     return;
                 }
             }
-            dao.themNhanVien(nv);
+            dao.themNhanVien(nv, role);
             if (dsNV != null) {
                 dsNV.add(nv);
             }
@@ -42,7 +46,7 @@ public class StaffBUS {
             e.printStackTrace();
         }
     }
-    public void xoaNhanVien(String maNV) {
+    public void deleteStaff(String maNV) {
         try {
             if (dsNV == null) {
                 return;
@@ -67,17 +71,37 @@ public class StaffBUS {
         return null;
     }
 
+    public ArrayList<StaffDTO> getAllStaffWithRole() {
 
-    public List<StaffDTO> timNhanVien(String type, String keyword) {
-        return dao.timNhanVien(type, keyword);
+        if (!SessionManager.hasPermission(
+                Permission.VIEW_STAFF
+        )) {
+            throw new SecurityException(
+                    "Bạn không có quyền xem nhân viên"
+            );
+        }
+
+        return dao.getAllStaffWithRole();
     }
 
-    public boolean suaNhanVien(StaffDTO nv) {
+
+    public List<StaffDTO> timNhanVien(String type, String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return getAllStaffWithRole();
+        }
+
+        return dao.timNhanVien(
+                type,
+                keyword.trim()
+        );
+    }
+
+    public boolean updateStaff(StaffDTO nv, Role role) {
         try {
             if (dsNV == null) {
                 return false;
             }
-            boolean success = dao.suaNhanVien(nv);
+            boolean success = dao.updateStaff(nv, role);
             if (success) {
                 for (int i = 0; i < dsNV.size(); i++) {
                     if (dsNV.get(i).getIdStaff().equals(nv.getIdStaff())) {

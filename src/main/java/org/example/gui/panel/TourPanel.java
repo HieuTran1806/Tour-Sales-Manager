@@ -3,6 +3,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.bus.TourBUS;
 import org.example.dto.TourDTO;
+import org.example.gui.component.ButtonFactory;
 import org.example.gui.dialog.TourDetailDialog;
 import org.example.gui.dialog.TourDiaLog;
 
@@ -132,21 +133,6 @@ public class TourPanel extends JPanel {
         scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
-    }
-
     private void searchByType(){
         String keyWord = txtSearch.getText().trim().toLowerCase();
         String searchType = (String) cmbSearchType.getSelectedItem();
@@ -181,7 +167,7 @@ public class TourPanel extends JPanel {
     }
 
     private void add(){
-        addBtn = createBtn("Thêm Tour", UIColors.ADD);
+        addBtn = ButtonFactory.create("Thêm Tour", UIColors.ADD);
         addBtn.addActionListener(e -> openDiaLog(null));
     }
 
@@ -192,7 +178,7 @@ public class TourPanel extends JPanel {
     }
 
     private void delete(){
-        deleteBtn = createBtn("Xóa tour", UIColors.DELETE);
+        deleteBtn = ButtonFactory.create("Xóa tour", UIColors.DELETE);
         deleteBtn.setEnabled(false);
         deleteBtn.addActionListener(e ->{
             int row = table.getSelectedRow();
@@ -215,7 +201,7 @@ public class TourPanel extends JPanel {
     }
 
     private void edit(){
-        editBtn = createBtn("Chỉnh sửa", UIColors.EDIT);
+        editBtn = ButtonFactory.create("Chỉnh sửa", UIColors.EDIT);
         editBtn.setEnabled(false);
         editBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
@@ -230,7 +216,7 @@ public class TourPanel extends JPanel {
     }
 
     private void viewDetail(){
-        detailBtn = createBtn("Xem chi tiết", UIColors.VIEW);
+        detailBtn = ButtonFactory.create("Xem chi tiết", UIColors.VIEW);
         detailBtn.setEnabled(false);
         detailBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
@@ -247,7 +233,7 @@ public class TourPanel extends JPanel {
     }
 
     private void refresh(){
-        refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
+        refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(e -> {
             String keyWord = txtSearch.getText().trim().toLowerCase();
             ArrayList<TourDTO> lsTour = tourBUS.search(keyWord);

@@ -3,10 +3,12 @@ package org.example.gui;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.dto.AccountDTO;
+import org.example.enums.Permission;
 import org.example.gui.panel.*;
 import org.example.login.SessionManager;
 
 import java.awt.*;
+import java.util.List;
 import java.util.Objects;
 
 import javax.swing.*;
@@ -19,9 +21,21 @@ public class MainFrame extends JFrame {
     CardLayout cardLayout;
     JPanel contentArea;
     JButton activeButton;
-    SessionManager sessionManager;
 
-    public MainFrame(AccountDTO taiKhoanDangNhap) {
+    private record MenuItem(
+            String label,
+            String cardName,
+            Permission permission
+    ) {
+    }
+
+    public MainFrame() {
+        AccountDTO account = SessionManager.getCurrentAccount();
+
+        System.out.println(account.getIdAccount());
+        System.out.println(account.getRole());
+
+
         // Set favicon
         try {
             ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("logosgu.png")));
@@ -47,45 +61,39 @@ public class MainFrame extends JFrame {
 
     private JPanel buildSideBar(){
         JPanel sidebar = new JPanel();
+
         sidebar.setBackground(new Color(30, 90, 160));
         sidebar.setPreferredSize(new Dimension(240, 0));
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
 
         //menu items: label, cardName
-        String[][] menus;
-        if (sessionManager.isAdmin()) {
-            menus = new String[][]{
-                    {"Tour", "Tour"},
-                    {"Loại Tour", "LoaiTour"},
-                    {"Kế Hoạch Tour", "KeHoachTour"},
-                    {"Phiếu Đặt Tour", "PhieuDatTour"},
-                    {"Hóa đơn", "HoaDon"},
-                    {"Địa điểm", "DiaDiem"},
-                    {"Nhân viên", "NhanVien"},
-                    {"Khách hàng", "KhachHang"},
-                    {"Chương trình khuyến mãi", "CTrinhKM"},
-                    {"Lịch khuyến mãi", "CalendarKM"},
-                    {"Thống kê", "ThongKe"},
-            };
-        } else {
-            menus = new String[][]{
-                    {"Tour", "Tour"},
-                    {"Loại Tour", "LoaiTour"},
-                    {"Kế Hoạch Tour", "KeHoachTour"},
-                    {"Phiếu Đặt Tour", "PhieuDatTour"},
-                    {"Hóa đơn", "HoaDon"},
-                    {"Địa điểm", "DiaDiem"},
-                    {"Khách hàng", "KhachHang"},
-                    {"Chương trình khuyến mãi", "CTrinhKM"},
-                    {"Lịch khuyến mãi", "CalendarKM"},
-            };
-        }
+        List<MenuItem> menus = List.of(
+                new MenuItem("Tour", "Tour", Permission.VIEW_TOUR),
+                new MenuItem("Loại Tour", "LoaiTour", Permission.VIEW_TOUR_TYPE),
+                new MenuItem("Kế Hoạch Tour", "KeHoachTour", Permission.VIEW_TOUR_PLAN),
+                new MenuItem("PhieuDatTour", "PhieuDatTour", Permission.VIEW_BOOKING),
+                new MenuItem("Hóa đơn", "HoaDon", Permission.VIEW_INVOICE),
+                new MenuItem("Địa điểm", "DiaDiem", Permission.VIEW_LOCATION),
+                new MenuItem("Nhân viên", "NhanVien", Permission.VIEW_STAFF),
+                new MenuItem("Khách hàng", "KhachHang", Permission.VIEW_CUSTOMER),
+                new MenuItem("Chương trình khuyến mãi", "CTrinhKM", Permission.VIEW_PROMOTION),
+                new MenuItem("Lịch khuyến mãi", "CalendarKM", Permission.VIEW_PROMOTION_CALENDAR),
+                new MenuItem("Thống kê", "ThongKe", Permission.VIEW_STATISTICS)
 
-        for(String[] m : menus){
-            JButton btn = createMenuButton(m[0], m[1], null);
-            sidebar.add(btn);
+        );
+
+        for(MenuItem menu : menus){
+            if(!SessionManager.hasPermission(menu.permission)){
+                continue;
+            }
+            System.out.println(menu.permission);
+
+            JButton button = createMenuButton(menu.label, menu.cardName, null);
+            sidebar.add(button);
+
             sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
         }
+
         sidebar.add(Box.createVerticalGlue());
 
         JButton logoutBtn = createMenuButton("Đăng xuất", null, Color.RED);
@@ -132,7 +140,6 @@ public class MainFrame extends JFrame {
                 super.paintComponent(g);
             }
         };
-
 
         btn.setOpaque(false);
         btn.setContentAreaFilled(false);

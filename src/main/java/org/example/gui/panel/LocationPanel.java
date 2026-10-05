@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.example.gui.component.ButtonFactory;
 import org.example.gui.dialog.LocationDialog;
 import org.example.bus.*;
 import org.example.dto.*;
@@ -179,18 +180,8 @@ public class LocationPanel extends JPanel {
         add(pnltable, BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-
-        return btn;
-    }
-
     private void them(){
-        btnthem = createBtn("Thêm", UIColors.ADD);
+        btnthem = ButtonFactory.create("Thêm", UIColors.ADD);
         btnthem.addActionListener(v -> {
             LocationDialog ddd=new LocationDialog();
             ddd.setModal(true);
@@ -200,7 +191,7 @@ public class LocationPanel extends JPanel {
     }
 
     private void sua(){
-        btnsua = createBtn("Sửa", UIColors.EDIT);
+        btnsua = ButtonFactory.create("Sửa", UIColors.EDIT);
         btnsua.setEnabled(false);
         btnsua.addActionListener(v -> {
             int row=tbldd.getSelectedRow();
@@ -218,7 +209,7 @@ public class LocationPanel extends JPanel {
     }
 
     private void xoa(){
-        btnxoa = createBtn("Xóa", UIColors.DELETE);
+        btnxoa = ButtonFactory.create("Xóa", UIColors.DELETE);
         btnxoa.setEnabled(false);
         btnxoa.addActionListener(v -> {
             int row=tbldd.getSelectedRow();
@@ -244,7 +235,7 @@ public class LocationPanel extends JPanel {
     }
 
     private void lamMoi(){
-        btnreset = createBtn("Làm mới", UIColors.REFRESH);
+        btnreset = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         btnreset.addActionListener(v -> {
             loadData();
         });

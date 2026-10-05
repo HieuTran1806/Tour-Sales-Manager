@@ -4,6 +4,7 @@ import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.bus.*;
+import org.example.gui.component.ButtonFactory;
 import org.example.gui.helper.ExcelHelper;
 
 import javax.swing.*;
@@ -21,7 +22,6 @@ public class StatisticsPanel extends JPanel {
     JComboBox<Integer> cbYear; // Thêm ComboBox chọn năm
 
     // define BUS
-    TourBUS tourBUS;
     InvoiceBUS invoiceBus;
 
     JPanel cardsPanel;
@@ -29,7 +29,6 @@ public class StatisticsPanel extends JPanel {
     JButton btnFilter;
 
     public StatisticsPanel() {
-        tourBUS = new TourBUS();
         invoiceBus = new InvoiceBUS();
 
         setLayout(new BorderLayout());
@@ -68,7 +67,7 @@ public class StatisticsPanel extends JPanel {
         dateTo.setPreferredSize(dateSize);
         filterPanel.add(dateTo);
 
-        btnFilter = createBtn("Lọc", new Color(33, 150, 243));
+        btnFilter = ButtonFactory.create("Lọc", new Color(33, 150, 243));
         btnFilter.addActionListener(e -> updateCards()); // Nút lọc chỉ update Cards
         filterPanel.add(btnFilter);
 
@@ -93,7 +92,7 @@ public class StatisticsPanel extends JPanel {
         cbYear.addActionListener(e -> updateChart()); // Khi đổi năm -> tự động update biểu đồ
 
         // Trong hàm init() của StatisticsPanel:
-        JButton btnExportExcel = createBtn("Xuất Excel", new Color(76, 175, 80)); // Màu xanh lá đặc trưng của Excel
+        JButton btnExportExcel = ButtonFactory.create("Xuất Excel", new Color(76, 175, 80)); // Màu xanh lá đặc trưng của Excel
         filterPanel.add(btnExportExcel);
 
         btnExportExcel.addActionListener(e->xuatThongke());
@@ -111,21 +110,6 @@ public class StatisticsPanel extends JPanel {
         centerPanel.add(chartsPanel, BorderLayout.CENTER);
 
         add(centerPanel, BorderLayout.CENTER);
-    }
-
-    private JButton createBtn(String text, Color color) {
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
     }
 
     //  logic statistic card

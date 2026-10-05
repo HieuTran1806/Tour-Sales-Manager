@@ -35,11 +35,7 @@ public class TourPlanDetailDialog extends JDialog {
 
     TourPlanDetailBUS bus;
 
-    String idTourPlan;
-
-
     public TourPlanDetailDialog(String idTourPlan){
-        this.idTourPlan = idTourPlan;
         bus = new TourPlanDetailBUS();
         today = LocalDate.now();
 

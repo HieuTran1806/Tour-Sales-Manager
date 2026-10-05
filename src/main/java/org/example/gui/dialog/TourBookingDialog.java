@@ -211,6 +211,7 @@ public class TourBookingDialog extends JDialog {
         add(formPanel, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
 
+        initEvents();
         pack();
         setLocationRelativeTo(null);
     }
@@ -335,8 +336,6 @@ public class TourBookingDialog extends JDialog {
                     tourBookingDTO.setNote(note);
 
                     tourBookingBUS.editTourBooking(tourBookingDTO);
-
-
                 }
                 dispose();
 
@@ -525,14 +524,10 @@ public class TourBookingDialog extends JDialog {
         return Objects.requireNonNull(tourPlanCombo.getSelectedItem()).toString();
     }
 
-    private void loadCustomerInformation(
-            String customerId
-    ) {
-        for (CustomerDTO customer
-                : customerBUS.getAllCustomers()) {
-
-            if (customer.getIdCustomer()
-                    .equals(customerId)) {
+    private void loadCustomerInformation(String customerId) {
+        ArrayList<CustomerDTO> ls = customerBUS.getAllCustomers();
+        for (CustomerDTO customer : ls) {
+            if (customer.getIdCustomer().equals(customerId)) {
 
                 txtFirstName.setText(
                         customer.getFirstName()

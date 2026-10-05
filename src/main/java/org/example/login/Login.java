@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.dao.AccountDAO;
 import org.example.dto.AccountDTO;
 import org.example.gui.MainFrame;
+import org.example.gui.component.ButtonFactory;
 import org.example.gui.panel.UIColors;
 
 import java.awt.*;
@@ -29,13 +30,8 @@ public class Login extends JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        // Set favicon
-        try {
-            ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("logosgu.png")));
-            setIconImage(icon.getImage());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        initLogoWithLink("logosgu.png");
+
         //set title
         setTitle("Đăng Nhập - Tour Management System");
 
@@ -131,7 +127,7 @@ public class Login extends JFrame {
     }
 
     private void loginAccount(){
-        loginBtn = createBtn("Đăng nhập", UIColors.SAVE);
+        loginBtn = ButtonFactory.create("Đăng nhập", UIColors.SAVE);
         loginBtn.addActionListener(v -> {
             String username = txtUsername.getText().trim();
             char[] passwordChars = txtPassword.getPassword();
@@ -150,30 +146,26 @@ public class Login extends JFrame {
             }
 
             SessionManager.loginAccount(account);
-            MainFrame mainFrame = new MainFrame(account);
+            MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
             this.dispose();
         });
     }
 
     private void logoutAccount(){
-        logoutBtn = createBtn("Thoát", UIColors.CANCEL);
+        logoutBtn = ButtonFactory.create("Thoát", UIColors.CANCEL);
         logoutBtn.addActionListener(v -> {
             dispose();
         });
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // in south panel
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-        return btn;
+    private void initLogoWithLink(String link){
+        // Set favicon
+        try {
+            ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource(link)));
+            setIconImage(icon.getImage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

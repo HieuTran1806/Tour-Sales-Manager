@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.bus.StaffBUS;
 import org.example.dao.StaffDAO;
 import org.example.dto.StaffDTO;
+import org.example.enums.Role;
 import org.example.gui.panel.UIColors;
 
 import javax.swing.*;
@@ -40,13 +41,12 @@ public class StaffDialog extends JDialog {
         EDIT
     }
 
-    public StaffDialog(java.awt.Frame parent, boolean modal,
-                       StaffDAO ds, Mode mode,
+    public StaffDialog(java.awt.Frame parent, boolean modal, Mode mode,
                        StaffDTO nv) {
         super(parent, modal);
-        this.ds = ds;
         this.mode = mode;
         this.currentNhanVien = nv;
+        this.bus = new StaffBUS();
         cbRoles = new JComboBox<>();
 
         initComponents();
@@ -275,7 +275,7 @@ public class StaffDialog extends JDialog {
             String idStaff = txtFirstName.getText().trim();
             String firstName = txtFirstName.getText().trim();
             String lastName = txtLastName.getText().trim();
-            String role = Objects.requireNonNull(cbRoles.getSelectedItem()).toString();
+            Role role = Role.valueOf(Objects.requireNonNull(cbRoles.getSelectedItem()).toString());
             LocalDate dob = jDob.getDate() != null ? jDob.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate() : null;
             String phoneNumber = txtPhoneNumber.getText().trim();
             String address = txtAddress.getText().trim();
@@ -298,19 +298,18 @@ public class StaffDialog extends JDialog {
                 }
             }
 
-            bus = new StaffBUS();
             if (mode == Mode.ADD) {
-                StaffDTO newStaff = new StaffDTO(idStaff, role, firstName, lastName, address, phoneNumber, dob);
-                bus.them(newStaff);
+                // String idStaff, String ho, String ten, String diaChi, String sdt, LocalDate ngaySinh
+                StaffDTO newStaff = new StaffDTO(idStaff, firstName, lastName, address, phoneNumber, dob);
+                bus.them(newStaff, role);
             } else if (mode == Mode.EDIT && currentNhanVien != null) {
                 currentNhanVien.setFirstName(firstName);
                 currentNhanVien.setLastName(lastName);
-                currentNhanVien.setRole(role);
-                currentNhanVien.setDob(dob);
-                currentNhanVien.setPhoneNumber(phoneNumber);
                 currentNhanVien.setAddress(address);
+                currentNhanVien.setPhoneNumber(phoneNumber);
+                currentNhanVien.setDob(dob);
 
-                bus.suaNhanVien(currentNhanVien);
+                bus.updateStaff(currentNhanVien, role);
             }
 
             JOptionPane.showMessageDialog(this, "Đã lưu TK là mà nhân viên, MK: 123"   );

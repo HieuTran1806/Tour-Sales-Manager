@@ -9,6 +9,7 @@ import org.example.bus.TourBUS;
 import org.example.dto.StaffDTO;
 import org.example.dto.TourPlanDTO;
 import org.example.dto.TourDTO;
+import org.example.gui.component.ButtonFactory;
 import org.example.gui.panel.UIColors;
 import org.example.validate.ValidationException;
 
@@ -54,7 +55,7 @@ public class TourPlanDialog extends JDialog {
     String maTour;
 
     // formatter
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    String formatter = ("dd/MM/yyyy");
 
     public TourPlanDialog(TourPlanBUS tourPlanBUS, TourPlanDTO tourPlanDTO, TourBUS tourBUS, String maTour) {
         this.tourPlanBUS = tourPlanBUS;
@@ -82,7 +83,6 @@ public class TourPlanDialog extends JDialog {
             int soChoMacDinh = tourBUS.getVacantSpot(maTour);
             txtSoVeConLai.setText(String.valueOf(soChoMacDinh));
         }
-
     }
 
     private void init(){
@@ -112,7 +112,7 @@ public class TourPlanDialog extends JDialog {
         jlbNgayKhoiHanh.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
         formPanel.add(jlbNgayKhoiHanh);
         jDepartureDate = new JDateChooser();
-        jDepartureDate.setDateFormatString("dd/MM/yyyy");
+        jDepartureDate.setDateFormatString(formatter);
         jDepartureDate.setDate(valueOf(LocalDate.now()));
         formPanel.add(jDepartureDate);
 
@@ -121,7 +121,7 @@ public class TourPlanDialog extends JDialog {
         jlbNgayKetThuc.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
         formPanel.add(jlbNgayKetThuc);
         jEndDate = new JDateChooser();
-        jEndDate.setDateFormatString("dd/MM/yyyy");
+        jEndDate.setDateFormatString(formatter);
         jEndDate.setDate(valueOf(LocalDate.now()));
         formPanel.add(jEndDate);
 
@@ -298,17 +298,8 @@ public class TourPlanDialog extends JDialog {
         cbStatus = new JComboBox<>(statusModel);
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-        return btn;
-    }
-
     public void save(){
-        saveBtn = createBtn("Lưu", UIColors.SAVE);
+        saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(e -> {
             //get all data
             String idKHT = txtMaKHTour.getText().trim();
@@ -449,7 +440,7 @@ public class TourPlanDialog extends JDialog {
     }
 
     public void cancel(){
-        cancelBtn = createBtn("Hủy", UIColors.CANCEL);
+        cancelBtn = ButtonFactory.create("Hủy", UIColors.CANCEL);
         cancelBtn.addActionListener(e -> {
             dispose();
         });

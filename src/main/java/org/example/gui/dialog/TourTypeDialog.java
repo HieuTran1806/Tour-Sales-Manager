@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.bus.TourTypeBUS;
 import org.example.dto.TourTypeDTO;
+import org.example.gui.component.ButtonFactory;
 import org.example.gui.panel.UIColors;
 
 import javax.swing.*;
@@ -102,18 +103,8 @@ public class TourTypeDialog extends JDialog{
         add(jpBtn, BorderLayout.SOUTH);
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-
-        return btn;
-    }
-
     public void save(){
-        saveBtn = createBtn("Lưu", UIColors.SAVE);
+        saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(e -> {
             if(txtMaLoaiTour.getText().trim().isEmpty() || txtTheLoai.getText().trim().isEmpty()){
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin");
@@ -146,7 +137,7 @@ public class TourTypeDialog extends JDialog{
     }
 
     public void cancel(){
-        cancelBtn = createBtn("Hủy", UIColors.CANCEL);
+        cancelBtn = ButtonFactory.create("Hủy", UIColors.CANCEL);
         cancelBtn.addActionListener(e -> {
             dispose();
         });
