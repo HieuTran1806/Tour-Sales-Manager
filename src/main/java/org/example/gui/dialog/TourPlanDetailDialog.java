@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.bus.TourPlanDetailBUS;
 import org.example.dto.TourPlanDetailDTO;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;

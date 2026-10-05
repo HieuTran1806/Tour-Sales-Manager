@@ -5,6 +5,7 @@ import org.example.bus.PromotionBUS;
 import org.example.dto.PromotionDTO;
 import org.example.gui.dialog.PromotionDialog;
 import org.example.gui.helper.ExcelHelper;
+import org.example.gui.helper.UIColors;
 
 
 import javax.swing.*;

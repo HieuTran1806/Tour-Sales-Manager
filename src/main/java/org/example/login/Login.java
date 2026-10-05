@@ -6,7 +6,7 @@ import org.example.dao.AccountDAO;
 import org.example.dto.AccountDTO;
 import org.example.gui.MainFrame;
 import org.example.gui.component.ButtonFactory;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 
 import java.awt.*;
 import java.util.Arrays;

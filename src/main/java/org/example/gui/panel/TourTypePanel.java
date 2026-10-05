@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.bus.TourTypeBUS;
 import org.example.dto.TourTypeDTO;
 import org.example.gui.dialog.TourTypeDialog;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;

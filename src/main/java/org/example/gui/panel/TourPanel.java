@@ -6,6 +6,7 @@ import org.example.dto.TourDTO;
 import org.example.gui.component.ButtonFactory;
 import org.example.gui.dialog.TourDetailDialog;
 import org.example.gui.dialog.TourDiaLog;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;

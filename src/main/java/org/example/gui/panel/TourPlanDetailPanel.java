@@ -1,24 +1,16 @@
 package org.example.gui.panel;
 
-import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.bus.*;
-import org.example.dao.InvoiceDAO;
 import org.example.dto.*;
-import org.example.gui.dialog.NhapCTHD;
 import org.example.gui.dialog.TourPlanDetailDialog;
-import org.example.gui.helper.DateHelper;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TourPlanDetailPanel extends JDialog {

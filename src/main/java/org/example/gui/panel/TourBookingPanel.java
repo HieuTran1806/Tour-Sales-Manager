@@ -5,8 +5,6 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -16,6 +14,7 @@ import org.example.bus.TourBookingBUS;
 import org.example.bus.TourPlanBUS;
 import org.example.dto.TourBookingDTO;
 import org.example.gui.dialog.TourBookingDialog;
+import org.example.gui.helper.UIColors;
 import org.example.login.SessionManager;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)

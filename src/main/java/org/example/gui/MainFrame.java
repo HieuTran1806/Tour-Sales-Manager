@@ -109,17 +109,38 @@ public class MainFrame extends JFrame {
         contentArea = new JPanel(cardLayout);
         contentArea.setBackground(Color.cyan);
 
-        contentArea.add(new TourPanel(), "Tour");
-        contentArea.add(new TourTypePanel(), "LoaiTour");
-        contentArea.add(new TourPlanPanel(), "KeHoachTour");
-        contentArea.add(new TourBookingPanel(), "PhieuDatTour");
-        contentArea.add(new InvoicePanel(), "HoaDon");
-        contentArea.add(new LocationPanel(), "DiaDiem");
-        contentArea.add(new StaffPanel(), "NhanVien");
-        contentArea.add(new CustomerPanel(), "KhachHang");
-        contentArea.add(new PromotionPanel(), "CTrinhKM");
-        contentArea.add(new CalendarKMPanel(), "CalendarKM");
-        contentArea.add(new StatisticsPanel(), "ThongKe");
+        if(SessionManager.hasPermission(Permission.VIEW_TOUR))
+            contentArea.add(new TourPanel(), "Tour");
+
+        if(SessionManager.hasPermission(Permission.VIEW_TOUR_TYPE))
+            contentArea.add(new TourTypePanel(), "LoaiTour");
+
+        if(SessionManager.hasPermission(Permission.VIEW_TOUR_PLAN))
+            contentArea.add(new TourPlanPanel(), "KeHoachTour");
+
+        if(SessionManager.hasPermission(Permission.VIEW_BOOKING))
+            contentArea.add(new TourBookingPanel(), "PhieuDatTour");
+
+        if(SessionManager.hasPermission(Permission.VIEW_INVOICE))
+            contentArea.add(new InvoicePanel(), "HoaDon");
+
+        if(SessionManager.hasPermission(Permission.VIEW_LOCATION))
+            contentArea.add(new LocationPanel(), "DiaDiem");
+
+        if(SessionManager.hasPermission(Permission.VIEW_STAFF))
+            contentArea.add(new StaffPanel(), "NhanVien");
+
+        if(SessionManager.hasPermission(Permission.VIEW_CUSTOMER))
+            contentArea.add(new CustomerPanel(), "KhachHang");
+
+        if(SessionManager.hasPermission(Permission.VIEW_PROMOTION))
+            contentArea.add(new PromotionPanel(), "CTrinhKM");
+
+        if(SessionManager.hasPermission(Permission.VIEW_PROMOTION_CALENDAR))
+            contentArea.add(new CalendarKMPanel(), "CalendarKM");
+
+        if(SessionManager.hasPermission(Permission.VIEW_STATISTICS))
+            contentArea.add(new StatisticsPanel(), "ThongKe");
 
         return contentArea;
     }

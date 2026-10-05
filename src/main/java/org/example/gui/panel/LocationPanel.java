@@ -13,6 +13,7 @@ import org.example.gui.component.ButtonFactory;
 import org.example.gui.dialog.LocationDialog;
 import org.example.bus.*;
 import org.example.dto.*;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

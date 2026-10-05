@@ -14,7 +14,7 @@ import org.example.bus.InvoiceBUS;
 import org.example.bus.CustomerBUS;
 import org.example.dto.*;
 import org.example.dto.InvoiceDetailDTO;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

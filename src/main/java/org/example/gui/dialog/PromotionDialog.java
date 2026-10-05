@@ -10,7 +10,7 @@ import org.example.dto.PromotionalInvoiceDTO;
 import org.example.dto.KMTourDTO;
 import org.example.dto.TourDTO;
 import org.example.gui.helper.DateHelper;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;

@@ -9,7 +9,7 @@ import org.example.dao.InvoiceDAO;
 import org.example.dto.*;
 import org.example.gui.helper.DateHelper;
 import org.example.gui.panel.InvoiceDetailPanel;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,17 +58,6 @@ public class InvoiceDialog extends JDialog {
         }
 
 
-    }
-
-    private void loadData(){
-        txtmahd.setText(invoiceDTO.getIdInvoice());
-
-        cbmakh.setSelectedItem(invoiceDTO.getIdCustomer());
-        cbmakht.setSelectedItem(invoiceDTO.getIdTourPlan());
-        cbmanv.setSelectedItem(invoiceDTO.getIdStaff());
-        txtsoluong.setText(String.valueOf(invoiceDTO.getTickets()));
-        txttongtien.setText(String.format("%.0f", invoiceDTO.getCostTotal()));
-        txtngay.setDate(DateHelper.toUtilDate(invoiceDTO.getDate()));
     }
 
     public InvoiceDialog(InvoiceDTO hd) {

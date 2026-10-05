@@ -10,7 +10,7 @@ import org.example.dto.StaffDTO;
 import org.example.dto.TourPlanDTO;
 import org.example.dto.TourDTO;
 import org.example.gui.component.ButtonFactory;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 import org.example.validate.ValidationException;
 
 import javax.swing.*;
@@ -20,7 +20,6 @@ import java.awt.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Objects;
 

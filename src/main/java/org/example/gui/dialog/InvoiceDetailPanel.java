@@ -11,7 +11,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.example.bus.*;
 import org.example.dto.*;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 

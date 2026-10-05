@@ -7,7 +7,7 @@ import org.example.validate.ValidationException;
 import org.example.bus.CustomerBUS;
 import org.example.dao.CustomerDAO;
 import org.example.dto.CustomerDTO;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;

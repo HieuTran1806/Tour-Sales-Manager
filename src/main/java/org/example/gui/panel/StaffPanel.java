@@ -7,6 +7,7 @@ import org.example.dto.StaffDTO;
 import org.example.enums.Permission;
 import org.example.gui.component.ButtonFactory;
 import org.example.gui.dialog.StaffDialog;
+import org.example.gui.helper.UIColors;
 import org.example.login.SessionManager;
 
 import java.awt.*;
@@ -47,15 +48,12 @@ public class StaffPanel extends JPanel {
         staffBus = new StaffBUS();
         initComponents();
         applyPermission();
-
-        txtSearch.addActionListener(e -> search());
         reloadStaffTable();
     }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-
         jPanel1 = new JPanel();
         jLabel1 = new JLabel();
         jPanel2 = new JPanel();
@@ -90,6 +88,7 @@ public class StaffPanel extends JPanel {
         txtSearch.setPreferredSize(new Dimension(360, 22));
         txtSearch.addActionListener(this::txtSearchActionPerformed);
         jPanel2.add(txtSearch);
+        txtSearch.addActionListener(e -> search());
 
         jPanel1.add(jPanel2,BorderLayout.PAGE_END);
 
@@ -138,6 +137,7 @@ public class StaffPanel extends JPanel {
 
         lamMoi();
         jPanel3.add(btnLamMoi);
+
 
         add(jPanel3, BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents

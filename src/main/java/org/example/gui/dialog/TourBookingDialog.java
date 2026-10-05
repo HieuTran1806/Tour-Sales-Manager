@@ -9,7 +9,7 @@ import org.example.bus.TourPlanBUS;
 import org.example.dto.TourBookingDTO;
 import org.example.dto.CustomerDTO;
 import org.example.dto.TourPlanDTO;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 import org.example.validate.ValidationException;
 
 import javax.swing.*;

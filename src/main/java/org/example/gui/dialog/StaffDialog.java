@@ -7,7 +7,7 @@ import org.example.bus.StaffBUS;
 import org.example.dao.StaffDAO;
 import org.example.dto.StaffDTO;
 import org.example.enums.Role;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;

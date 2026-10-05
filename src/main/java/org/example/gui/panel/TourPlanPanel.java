@@ -10,6 +10,7 @@ import org.example.dto.TourDTO;
 import org.example.gui.dialog.TourPlanDetailDialog;
 import org.example.gui.dialog.TourPlanDialog;
 import org.example.gui.dialog.TourBookingDialog;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

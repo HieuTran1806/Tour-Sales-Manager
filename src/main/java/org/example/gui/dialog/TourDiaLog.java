@@ -8,7 +8,7 @@ import org.example.bus.TourBUS;
 import org.example.dto.LocationDTO;
 import org.example.dto.TourTypeDTO;
 import org.example.dto.TourDTO;
-import org.example.gui.panel.UIColors;
+import org.example.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;

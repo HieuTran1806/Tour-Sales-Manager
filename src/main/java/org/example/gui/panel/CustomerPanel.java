@@ -15,6 +15,7 @@ import org.example.bus.CustomerBUS;
 import org.example.dao.CustomerDAO;
 import org.example.dto.CustomerDTO;
 import org.example.gui.dialog.CustomerDialog;
+import org.example.gui.helper.UIColors;
 import org.example.login.SessionManager;
 
 import javax.swing.*;

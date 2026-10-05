@@ -1,4 +1,4 @@
-package org.example.gui.panel;
+package org.example.gui.helper;
 
 import java.awt.*;
 
