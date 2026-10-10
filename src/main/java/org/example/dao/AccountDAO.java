@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class AccountDAO {
 
@@ -111,5 +112,12 @@ public class AccountDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public void registerCustomer(String username, String password, String firstName, String lastName, String address, String phoneNumber, LocalDate dob, Role role) {
+    }
+
+    public boolean existsByUsername(String username) {
+        return false;
     }
 }

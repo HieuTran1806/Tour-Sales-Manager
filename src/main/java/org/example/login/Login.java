@@ -2,10 +2,12 @@ package org.example.login;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.example.bus.AccountBUS;
 import org.example.dao.AccountDAO;
 import org.example.dto.AccountDTO;
 import org.example.gui.MainFrame;
 import org.example.gui.component.ButtonFactory;
+import org.example.gui.dialog.RegisterDialog;
 import org.example.gui.helper.UIColors;
 
 import java.awt.*;
@@ -15,12 +17,11 @@ import javax.swing.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Login extends JFrame {
-    JButton loginBtn, logoutBtn;
+    JButton loginBtn, logoutBtn, registerBtn;
     JLabel jlbAccount, jlbPassword;
     JTextField txtUsername;
     JPasswordField txtPassword;
-
-    final AccountDAO accountDAO = new AccountDAO();
+    AccountBUS accountBUS;
 
     public Login() {
         initComponents();
@@ -37,10 +38,13 @@ public class Login extends JFrame {
 
         jlbAccount = new JLabel();
         jlbPassword = new JLabel();
+
         loginBtn = new JButton();
         logoutBtn = new JButton();
-        txtUsername = new JTextField();
-        txtPassword = new JPasswordField();
+        registerBtn = new JButton();
+
+        txtUsername = new JTextField(20);
+        txtPassword = new JPasswordField(20);
         txtPassword.setEchoChar('*');
 
         // Header Panel
@@ -71,59 +75,84 @@ public class Login extends JFrame {
 
         jlbPassword.setText("Mật khẩu:");
 
+
+
+        // main Panel
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 15));
+        mainPanel.setBorder(
+                BorderFactory.createEmptyBorder(25, 30, 15, 30)
+        );
+        JPanel formPanel = new JPanel(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        formPanel.add(jlbAccount, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(txtUsername, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        formPanel.add(jlbPassword, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(txtPassword, gbc);
+
+
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(
+                new BoxLayout(southPanel, BoxLayout.Y_AXIS)
+        );
+
+        JPanel actionPanel = new JPanel(
+                new FlowLayout(FlowLayout.CENTER, 25, 5)
+        );
+
         // define login and logout function
         loginAccount();
         logoutAccount();
+        registerAccount();
 
-        // main Panel
-        JPanel mainPanel = new JPanel();
-        GroupLayout layout = new GroupLayout(mainPanel);
-        mainPanel.setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(10, 10, 10))
-                                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                .addGap(106, 106, 106)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                                        .addComponent(jlbAccount)
-                                                        .addComponent(jlbPassword))
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                        .addComponent(txtUsername)
-                                                        .addComponent(txtPassword, GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE))))
-                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(82, 82, 82)
-                                .addComponent(loginBtn)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 77, Short.MAX_VALUE)
-                                .addComponent(logoutBtn)
-                                .addGap(80, 80, 80))
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGap(50, 50, 50)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jlbAccount)
-                                        .addComponent(txtUsername, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jlbPassword)
-                                        .addComponent(txtPassword, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(loginBtn)
-                                        .addComponent(logoutBtn))
-                                .addGap(20, 20, 20))
+        actionPanel.add(loginBtn);
+        actionPanel.add(logoutBtn);
+
+        JPanel registerPanel = new JPanel(
+                new FlowLayout(FlowLayout.CENTER, 8, 5)
         );
 
-        add(headerPanel, BorderLayout.NORTH);
-        add(mainPanel, BorderLayout.CENTER);
+        JLabel lblRegisterQuestion =
+                new JLabel("Bạn chưa có tài khoản?");
+
+
+        registerPanel.add(lblRegisterQuestion);
+        registerPanel.add(registerBtn);
+
+        southPanel.add(actionPanel);
+        southPanel.add(Box.createVerticalStrut(8));
+        southPanel.add(registerPanel);
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+        mainPanel.add(southPanel, BorderLayout.SOUTH);
+
+        setContentPane(mainPanel);
+
+
+
         pack();
+        setLocationRelativeTo(null);
     }
 
     private void loginAccount(){
@@ -139,7 +168,8 @@ public class Login extends JFrame {
                 return;
             }
 
-            AccountDTO account = accountDAO.loginAccount(username, password);
+            AccountBUS accountBUS = new AccountBUS();
+            AccountDTO account = accountBUS.login(username, password);
             if (account == null) {
                 JOptionPane.showMessageDialog(this, "Sai tài khoản hoặc mật khẩu.");
                 return;
@@ -167,5 +197,27 @@ public class Login extends JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void registerAccount(){
+        registerBtn = ButtonFactory.create("Đăng ký", UIColors.VIEW);
+        registerBtn.addActionListener(e -> {
+            RegisterDialog dialog = new RegisterDialog(
+                    this,
+                    accountBUS
+            );
+
+            dialog.setVisible(true);
+
+            if (dialog.isRegistered()) {
+                txtUsername.setText(
+                        dialog.getRegisteredUsername()
+                );
+
+                txtPassword.setText("");
+                txtPassword.requestFocus();
+            }
+        });
+
     }
 }

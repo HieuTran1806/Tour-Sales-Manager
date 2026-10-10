@@ -4,6 +4,8 @@ import org.example.dao.AccountDAO;
 import org.example.dto.AccountDTO;
 import org.example.enums.Role;
 
+import java.time.LocalDate;
+
 public class AccountBUS {
 
     private final AccountDAO accountDAO;
@@ -12,7 +14,6 @@ public class AccountBUS {
         this.accountDAO = new AccountDAO();
     }
 
-    // Dùng khi muốn truyền DAO từ bên ngoài, thuận tiện cho kiểm thử
     public AccountBUS(AccountDAO accountDAO) {
         this.accountDAO = accountDAO;
     }
@@ -121,5 +122,33 @@ public class AccountBUS {
         }
     }
 
+    public void registerCustomer(
+            String username,
+            String password,
+            String firstName,
+            String lastName,
+            String address,
+            String phoneNumber,
+            LocalDate dob
+    ) {
+        if (accountDAO.existsByUsername(username)) {
+            throw new IllegalArgumentException(
+                    "Tên tài khoản đã tồn tại"
+            );
+        }
+
+        Role role = Role.CUSTOMER;
+
+        accountDAO.registerCustomer(
+                username,
+                password,
+                firstName,
+                lastName,
+                address,
+                phoneNumber,
+                dob,
+                role
+        );
+    }
 
 }
