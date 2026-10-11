@@ -25,7 +25,7 @@ import javax.swing.table.DefaultTableModel;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffPanel extends JPanel {
-    JButton btnLamMoi, btnSua, btnThem, btnXoa;
+    JButton btnLamMoi, editBtn, addBtn, deleteBtn;
 
     JComboBox<String> jComboBox1;
 
@@ -46,14 +46,16 @@ public class StaffPanel extends JPanel {
 
     public StaffPanel() {
         staffBus = new StaffBUS();
+
         initComponents();
-        applyPermission();
         reloadStaffTable();
     }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        boolean canManageStaff = SessionManager.hasPermission(Permission.MANAGE_STAFF);
+
         jPanel1 = new JPanel();
         jLabel1 = new JLabel();
         jPanel2 = new JPanel();
@@ -63,18 +65,18 @@ public class StaffPanel extends JPanel {
         jScrollPane1 = new JScrollPane();
         jTable1 = new JTable();
         jPanel3 = new JPanel();
-        btnThem = new JButton();
-        btnXoa = new JButton();
-        btnSua = new JButton();
+        addBtn = new JButton();
+        deleteBtn = new JButton();
+        editBtn = new JButton();
         btnLamMoi = new JButton();
 
         setLayout(new BorderLayout());
 
         jPanel1.setLayout(new BorderLayout());
 
-        jLabel1.setFont(new Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel1.setFont(new Font("Segoe UI", 1, 24));
         jLabel1.setHorizontalAlignment(SwingConstants.CENTER);
-        jLabel1.setText("Quản lí nhân viên");
+        jLabel1.setText("QUẢN LÝ NHÂN VIÊN");
         jLabel1.setHorizontalTextPosition(SwingConstants.CENTER);
         jPanel1.add(jLabel1,BorderLayout.CENTER);
 
@@ -124,28 +126,31 @@ public class StaffPanel extends JPanel {
 
         add(jScrollPane1,BorderLayout.CENTER);
 
-        them();
-        jPanel3.add(btnThem);
+        addStaff();
+        addBtn.setVisible(canManageStaff);
+        jPanel3.add(addBtn);
 
-        xoa();
-        btnXoa.setEnabled(false);
-        jPanel3.add(btnXoa);
+        deleteStaff();
+        deleteBtn.setEnabled(false);
+        deleteBtn.setEnabled(canManageStaff);
+        jPanel3.add(deleteBtn);
 
-        sua();
-        btnSua.setEnabled(false);
-        jPanel3.add(btnSua);
+        updateStaff();
+        editBtn.setEnabled(false);
+        editBtn.setEnabled(canManageStaff);
+        jPanel3.add(editBtn);
 
-        lamMoi();
+        refresh();
         jPanel3.add(btnLamMoi);
 
 
         add(jPanel3, BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void them(){
-        btnThem = ButtonFactory.create("Thêm", UIColors.ADD);
-        btnThem.addActionListener(v -> {
-            if (!SessionManager.isAdmin()) {
+    private void addStaff(){
+        addBtn = ButtonFactory.create("Thêm", UIColors.ADD);
+        addBtn.addActionListener(v -> {
+            if (!requirePermission()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền thao tác với nhân viên.");
                 return;
             }
@@ -162,11 +167,11 @@ public class StaffPanel extends JPanel {
         });
     }
 
-    private void sua(){
-        btnSua = ButtonFactory.create("Sửa", UIColors.EDIT);
-        btnSua.setEnabled(false);
-        btnSua.addActionListener(v -> {
-            if (!SessionManager.isAdmin()) {
+    private void updateStaff(){
+        editBtn = ButtonFactory.create("Sửa", UIColors.EDIT);
+        editBtn.setEnabled(false);
+        editBtn.addActionListener(v -> {
+            if (!requirePermission()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền thao tác với nhân viên.");
                 return;
             }
@@ -174,7 +179,7 @@ public class StaffPanel extends JPanel {
 
             if (i >= 0) {
                 String maNV = jTable1.getValueAt(i, 0).toString();
-                StaffDTO nv = staffBus.timNhanVienTheoMa(maNV);
+                StaffDTO nv = staffBus.findStaffById(maNV);
                 System.err.println(nv.getIdStaff());
                 StaffDialog dialog = new StaffDialog(
                         null, true,
@@ -187,14 +192,15 @@ public class StaffPanel extends JPanel {
         });
     }
 
-    private void xoa(){
-        btnXoa = ButtonFactory.create("Xóa", UIColors.DELETE);
-        btnXoa.setEnabled(false);
-        btnXoa.addActionListener(v -> {
-            if (!SessionManager.isAdmin()) {
-                JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa dữ liệu.");
+    private void deleteStaff(){
+        deleteBtn = ButtonFactory.create("Xóa", UIColors.DELETE);
+        deleteBtn.setEnabled(false);
+        deleteBtn.addActionListener(v -> {
+            if(!requirePermission()){
+                JOptionPane.showMessageDialog(this, "Bạn không có quyền thao tác với nhân viên.");
                 return;
             }
+
             int i = jTable1.getSelectedRow();
             int result = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa nhân viên này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
             if (result == JOptionPane.YES_OPTION && i >= 0) {
@@ -207,7 +213,7 @@ public class StaffPanel extends JPanel {
         });
     }
 
-    private void lamMoi(){
+    private void refresh(){
         btnLamMoi = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         btnLamMoi.addActionListener(v -> {
             reloadStaffTable();
@@ -224,8 +230,8 @@ public class StaffPanel extends JPanel {
 
     private void jTable1MouseClicked(MouseEvent evt){
         if (SessionManager.isAdmin()) {
-            btnXoa.setEnabled(true);
-            btnSua.setEnabled(true);
+            deleteBtn.setEnabled(true);
+            editBtn.setEnabled(true);
         }
     }
 
@@ -264,7 +270,7 @@ public class StaffPanel extends JPanel {
 
             String roleText =
                     item.getRole()== null
-                            ? "Chưa có tài khoản"
+                            ? ""
                             : item.getRole().toString();
 
             model.addRow(new Object[]{
@@ -277,14 +283,6 @@ public class StaffPanel extends JPanel {
                     item.getAddress()
             });
         }
-    }
-
-    private void applyPermission(){
-        boolean canManage = SessionManager.hasPermission(Permission.MANAGE_STAFF);
-
-        btnThem.setVisible(canManage);
-        btnSua.setVisible(canManage);
-        btnXoa.setVisible(canManage);
     }
 
     private void reloadStaffTable(){
@@ -304,9 +302,13 @@ public class StaffPanel extends JPanel {
         if (keyword.isBlank()) {
             ls = staffBus.getAllStaffWithRole();
         } else {
-            ls = staffBus.timNhanVien(searchType, keyword);
+            ls = staffBus.findStaff(searchType, keyword);
         }
 
         loadNhanVienToTable(ls);
+    }
+
+    private boolean requirePermission(){
+        return SessionManager.hasPermission(Permission.MANAGE_STAFF);
     }
 }

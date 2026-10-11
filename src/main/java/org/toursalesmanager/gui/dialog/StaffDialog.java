@@ -7,12 +7,15 @@ import org.toursalesmanager.bus.StaffBUS;
 import org.toursalesmanager.dao.StaffDAO;
 import org.toursalesmanager.dto.StaffDTO;
 import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Objects;
 
 import static java.sql.Date.valueOf;
@@ -21,10 +24,9 @@ import static java.sql.Date.valueOf;
 public class StaffDialog extends JDialog {
     Mode mode;
     StaffDTO currentNhanVien;
-    StaffDAO ds;
     StaffBUS bus;
 
-    JButton btnHuy, btnLuu;
+    JButton cancelBtn, saveBtn;
 
     JDateChooser jDob;
 
@@ -34,7 +36,7 @@ public class StaffDialog extends JDialog {
 
     JPanel panelForm, jpBtn;
 
-    JComboBox<String> cbRoles;
+    JComboBox<Role> cbRoles;
 
     public enum Mode {
         ADD,
@@ -67,18 +69,15 @@ public class StaffDialog extends JDialog {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        panelForm = new JPanel(new GridLayout(7, 2, 10, 10));
+        panelForm = new JPanel(new GridLayout(0, 2, 10, 10));
         jpBtn = new JPanel(new FlowLayout());
 
 
         //row idStaff
-        lbIDStaff = new JLabel("Mã nhân viên: ");
-        lbIDStaff.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbIDStaff);
         txtIdStaff = new JTextField();
-        panelForm.add(txtIdStaff);
-
         txtIdStaff.addActionListener(this::txtIdStaffActionPerformed);
+        AddComponentToForm.addFormRow(panelForm, "Mã nhân viên: ", txtIdStaff);
+
 
         //row firstName
         lbFirstName = new JLabel("Họ: ");
@@ -226,10 +225,10 @@ public class StaffDialog extends JDialog {
         });
 
         // define handle funtion
-        luu();
-        jpBtn.add(btnLuu);
-        huy();
-        jpBtn.add(btnHuy);
+        save();
+        jpBtn.add(saveBtn);
+        cancel();
+        jpBtn.add(cancelBtn);
 
 
         add(panelForm, BorderLayout.CENTER);
@@ -242,13 +241,11 @@ public class StaffDialog extends JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void loadRolesCombobox() {
-        String[] roles = {"Tư vấn", "", "Điều hành tour", "Quản trị nội dung"};
+        Role[] roles = Arrays.stream(Role.values())
+                .filter(role -> role != Role.CUSTOMER && role != Role.ADMIN)
+                .toArray(Role[]::new);
 
-        // Đưa mảng vào DefaultComboBoxModel
-        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(roles);
-
-        // Gán model cho ComboBox
-        cbRoles = new JComboBox<>(model);
+        cbRoles.setModel(new DefaultComboBoxModel<>(roles));
     }
 
     private void txtPhoneNumberActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtPhoneNumberActionPerformed
@@ -259,20 +256,11 @@ public class StaffDialog extends JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtFirstNameActionPerformed
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-        return btn;
-    }
-
-    private void luu(){
-        btnLuu = createBtn("Lưu", UIColors.SAVE);
-        btnLuu.addActionListener(v -> {
+    private void save(){
+        saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
+        saveBtn.addActionListener(v -> {
             // get data
-            String idStaff = txtFirstName.getText().trim();
+            String idStaff = txtIdStaff.getText().trim();
             String firstName = txtFirstName.getText().trim();
             String lastName = txtLastName.getText().trim();
             Role role = Role.valueOf(Objects.requireNonNull(cbRoles.getSelectedItem()).toString());
@@ -290,7 +278,7 @@ public class StaffDialog extends JDialog {
                         "Mã nhân viên phải có dạng NVxxx!");
                 return;
             }
-            for (StaffDTO nv : ds.getAllStaffs()) {
+            for (StaffDTO nv : bus.getAllStaffs()) {
                 if (nv.getIdStaff().equals(idStaff)) {
                     JOptionPane.showMessageDialog(null,
                             "Mã nhân viên đã tồn tại!");
@@ -299,9 +287,14 @@ public class StaffDialog extends JDialog {
             }
 
             if (mode == Mode.ADD) {
-                // String idStaff, String ho, String ten, String diaChi, String sdt, LocalDate ngaySinh
                 StaffDTO newStaff = new StaffDTO(idStaff, firstName, lastName, address, phoneNumber, dob);
-                bus.them(newStaff, role);
+                if (!bus.addStaff(newStaff, role)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Thêm nhân viên thất bại. Vui lòng kiểm tra dữ liệu hoặc kết nối cơ sở dữ liệu.",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
             } else if (mode == Mode.EDIT && currentNhanVien != null) {
                 currentNhanVien.setFirstName(firstName);
                 currentNhanVien.setLastName(lastName);
@@ -309,17 +302,23 @@ public class StaffDialog extends JDialog {
                 currentNhanVien.setPhoneNumber(phoneNumber);
                 currentNhanVien.setDob(dob);
 
-                bus.updateStaff(currentNhanVien, role);
+                if (!bus.updateStaff(currentNhanVien, role)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Cập nhật nhân viên thất bại. Vui lòng kiểm tra dữ liệu hoặc kết nối cơ sở dữ liệu.",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
             }
 
-            JOptionPane.showMessageDialog(this, "Đã lưu TK là mà nhân viên, MK: 123"   );
+            JOptionPane.showMessageDialog(this, "Đã lưu nhân viên. Mật khẩu tài khoản mặc định: 123456.");
             dispose(); // đóng dialog sau khi lưu
         });
     }
 
-    private void huy(){
-        btnHuy = createBtn("Hủy", UIColors.CANCEL);
-        btnHuy.addActionListener(v -> {
+    private void cancel(){
+        cancelBtn = ButtonFactory.create("Hủy", UIColors.CANCEL);
+        cancelBtn.addActionListener(v -> {
             dispose();
         });
     }
@@ -332,17 +331,15 @@ public class StaffDialog extends JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtLastNameActionPerformed
 
-    private void txtIdStaffActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtFirstNameActionPerformed
+    private void txtIdStaffActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtIdStaffActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtFirstNameActionPerformed
+    }//GEN-LAST:event_txtIdStaffActionPerformed
 
     public void setStaffData(StaffDTO nv) {
-        txtFirstName.setText(nv.getIdStaff());
+        txtIdStaff.setText(nv.getIdStaff());
         txtFirstName.setText(nv.getFirstName());
         txtLastName.setText(nv.getLastName());
-        // cbRoles.setSelectedItem();
-
-        String roleSelected = Objects.requireNonNull(cbRoles.getSelectedItem()).toString();
+        cbRoles.setSelectedItem(nv.getRole());
 
         if (nv.getDob() != null) {
             jDob.setDate(java.util.Date.from(nv.getDob().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()));

@@ -67,9 +67,9 @@ public class AccountDAO {
 
     public boolean updateStaffRole(String idStaff, Role role) {
         String sql = """
-            UPDATE account
+            UPDATE taikhoan
             SET role = ?
-            WHERE idStaff = ?
+            WHERE idstaff = ?
             """;
 
         try (

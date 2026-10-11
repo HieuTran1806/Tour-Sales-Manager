@@ -22,57 +22,75 @@ public class StaffBUS {
         return dao.getAllStaffs();
     }
 
-    public void them(StaffDTO nv, Role role) {
+    public boolean addStaff(StaffDTO nv, Role role) {
+        if(!requirePermission()){
+            throw new SecurityException(
+                    "Bạn không có quyền thêm nhân viên"
+            );
+        }
+
         try{
             if (dsNV == null) {
                 dsNV = new ArrayList<>();
             }
             if (nv == null) {
-                return;
+                return false;
             }
             if (nv.getIdStaff() == null || nv.getIdStaff().isEmpty()) {
-                return;
+                return false;
             }
             for (StaffDTO existingNV : dsNV) {
                 if (existingNV.getIdStaff().equals(nv.getIdStaff())) {
-                    return;
+                    return false;
                 }
             }
-            dao.themNhanVien(nv, role);
-            if (dsNV != null) {
+            boolean success = dao.addStaff(nv, role);
+            if (success) {
+                nv.setRole(role);
                 dsNV.add(nv);
             }
+            return success;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
+
     public void deleteStaff(String maNV) {
+        if(!requirePermission()){
+            throw new SecurityException(
+                    "Bạn không có quyền xóa nhân viên"
+            );
+        }
+
         try {
             if (dsNV == null) {
                 return;
             }
-            dao.xoaNhanVien(maNV);
+            dao.deleteStaff(maNV);
             dsNV.removeIf(nv -> nv.getIdStaff().equals(maNV));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public StaffDTO timNhanVienTheoMa(String maNV) {
+    public StaffDTO findStaffById(String maNV) {
         if (dsNV == null) {
             return null;
         }
-        for (StaffDTO nv : dsNV) {
-            if (nv.getIdStaff().equals(maNV)) {
-                dao.timNhanVienTheoMa(maNV);
-                return nv;
+        StaffDTO staff = dao.findStaffById(maNV);
+        if (staff != null) {
+            for (int i = 0; i < dsNV.size(); i++) {
+                if (dsNV.get(i).getIdStaff().equals(maNV)) {
+                    dsNV.set(i, staff);
+                    break;
+                }
             }
         }
-        return null;
+        return staff;
     }
 
     public ArrayList<StaffDTO> getAllStaffWithRole() {
-
         if (!SessionManager.hasPermission(
                 Permission.VIEW_STAFF
         )) {
@@ -85,24 +103,31 @@ public class StaffBUS {
     }
 
 
-    public List<StaffDTO> timNhanVien(String type, String keyword) {
+    public List<StaffDTO> findStaff(String type, String keyword) {
         if (keyword == null || keyword.isBlank()) {
             return getAllStaffWithRole();
         }
 
-        return dao.timNhanVien(
+        return dao.findStaff(
                 type,
                 keyword.trim()
         );
     }
 
     public boolean updateStaff(StaffDTO nv, Role role) {
+        if(!requirePermission()){
+            throw new SecurityException(
+                    "Bạn không có quyền cập nhật nhân viên"
+            );
+        }
+
         try {
             if (dsNV == null) {
                 return false;
             }
             boolean success = dao.updateStaff(nv, role);
             if (success) {
+                nv.setRole(role);
                 for (int i = 0; i < dsNV.size(); i++) {
                     if (dsNV.get(i).getIdStaff().equals(nv.getIdStaff())) {
                         dsNV.set(i, nv);
@@ -115,5 +140,11 @@ public class StaffBUS {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private boolean requirePermission(){
+        return SessionManager.hasPermission(
+                Permission.MANAGE_STAFF
+        );
     }
 }
