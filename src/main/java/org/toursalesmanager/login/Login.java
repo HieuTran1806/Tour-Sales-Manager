@@ -7,6 +7,7 @@ import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.gui.MainFrame;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.RegisterDialog;
+import org.toursalesmanager.gui.helper.PasswordFieldWithReveal;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import java.awt.*;
@@ -78,8 +79,6 @@ public class Login extends JFrame {
 
         jlbPassword.setText("Mật khẩu:");
 
-
-
         // main Panel
         JPanel mainPanel = new JPanel(new BorderLayout(10, 15));
         mainPanel.setBorder(
@@ -111,7 +110,7 @@ public class Login extends JFrame {
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        formPanel.add(txtPassword, gbc);
+        formPanel.add(PasswordFieldWithReveal.create(txtPassword), gbc);
 
 
         JPanel southPanel = new JPanel();

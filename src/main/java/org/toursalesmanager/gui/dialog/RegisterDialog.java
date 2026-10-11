@@ -15,6 +15,7 @@ import java.util.Date;
 import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.AddComponentToForm;
+import org.toursalesmanager.gui.helper.PasswordFieldWithReveal;
 import org.toursalesmanager.gui.helper.UIColors;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -64,8 +65,18 @@ public class RegisterDialog extends JDialog {
 
         // add form fields to center panel
         AddComponentToForm.addFormRow(panelForm, "Tên đăng nhập:", txtUsername = new JTextField());
-        AddComponentToForm.addFormRow(panelForm, "Mật khẩu:", txtPassword = new JPasswordField());
-        AddComponentToForm.addFormRow(panelForm, "Xác nhận mật khẩu:", txtConfirmPassword = new JPasswordField());
+        txtPassword = new JPasswordField();
+        AddComponentToForm.addFormRow(
+                panelForm,
+                "Mật khẩu:",
+                PasswordFieldWithReveal.create(txtPassword)
+        );
+        txtConfirmPassword = new JPasswordField();
+        AddComponentToForm.addFormRow(
+                panelForm,
+                "Xác nhận mật khẩu:",
+                PasswordFieldWithReveal.create(txtConfirmPassword)
+        );
         AddComponentToForm.addFormRow(panelForm, "Họ:", txtFirstName = new JTextField());
         AddComponentToForm.addFormRow(panelForm, "Tên:", txtLastName = new JTextField());
         AddComponentToForm.addFormRow(panelForm, "Địa chỉ:", txtAddress = new JTextField());
