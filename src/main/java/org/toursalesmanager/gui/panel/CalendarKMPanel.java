@@ -16,7 +16,6 @@ import java.util.ArrayList;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CalendarKMPanel extends JPanel {
-
     JPanel calendarPanel;
     JLabel lblMonth;
     JTextField txtSearch;

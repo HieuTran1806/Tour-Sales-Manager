@@ -9,11 +9,13 @@ import java.util.ArrayList;
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.LocationDialog;
 import org.toursalesmanager.bus.*;
 import org.toursalesmanager.dto.*;
 import org.toursalesmanager.gui.helper.UIColors;
+import org.toursalesmanager.login.SessionManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -21,7 +23,7 @@ import javax.swing.table.DefaultTableModel;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LocationPanel extends JPanel {
     // define variables
-    JButton btnreset, btnsua, btnthem, btnxoa;
+    JButton resetBtn, editBtn, addBtn, deleteBtn;
 
     JComboBox<String> cbtim;
 
@@ -81,6 +83,8 @@ public class LocationPanel extends JPanel {
     }
 
     private void initComponents() {
+        boolean canManageLocation = requireManagePermission();
+
         pnlheader = new JPanel();
         lbname = new JLabel();
         pnlsearch = new JPanel();
@@ -89,10 +93,10 @@ public class LocationPanel extends JPanel {
         txttendd = new JTextField();
         txtdate = new com.toedter.calendar.JDateChooser();
         pnlfooter = new JPanel();
-        btnthem = new JButton();
-        btnxoa = new JButton();
-        btnsua = new JButton();
-        btnreset = new JButton();
+        addBtn = new JButton();
+        deleteBtn = new JButton();
+        editBtn = new JButton();
+        resetBtn = new JButton();
         pnltable = new JPanel();
         jScrollPane2 = new JScrollPane();
         tbldd = new JTable();
@@ -136,17 +140,20 @@ public class LocationPanel extends JPanel {
 
         add(pnlheader, BorderLayout.PAGE_START);
 
-        them();
-        pnlfooter.add(btnthem);
+        addLocation();
+        addBtn.setVisible(canManageLocation);
+        pnlfooter.add(addBtn);
 
-        xoa();
-        pnlfooter.add(btnxoa);
+        deleteLocation();
+        deleteBtn.setVisible(canManageLocation);
+        pnlfooter.add(deleteBtn);
 
-        sua();
-        pnlfooter.add(btnsua);
+        updateLocation();
+        editBtn.setVisible(canManageLocation);
+        pnlfooter.add(editBtn);
 
-        lamMoi();
-        pnlfooter.add(btnreset);
+        refresh();
+        pnlfooter.add(resetBtn);
 
         add(pnlfooter, BorderLayout.PAGE_END);
 
@@ -169,8 +176,8 @@ public class LocationPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (tbldd.getSelectedRow() != -1) {
-                    btnxoa.setEnabled(true);
-                    btnsua.setEnabled(true);
+                    deleteBtn.setEnabled(true);
+                    editBtn.setEnabled(true);
                 }
             }
         });
@@ -181,9 +188,14 @@ public class LocationPanel extends JPanel {
         add(pnltable, BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void them(){
-        btnthem = ButtonFactory.create("Thêm", UIColors.ADD);
-        btnthem.addActionListener(v -> {
+    private void addLocation(){
+        addBtn = ButtonFactory.create("Thêm", UIColors.ADD);
+        addBtn.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                JOptionPane.showMessageDialog(this, "Bạn không có quyền thêm địa điểm.");
+                return;
+            }
+
             LocationDialog ddd=new LocationDialog();
             ddd.setModal(true);
             ddd.setVisible(true);
@@ -191,10 +203,15 @@ public class LocationPanel extends JPanel {
         });
     }
 
-    private void sua(){
-        btnsua = ButtonFactory.create("Sửa", UIColors.EDIT);
-        btnsua.setEnabled(false);
-        btnsua.addActionListener(v -> {
+    private void updateLocation(){
+        editBtn = ButtonFactory.create("Sửa", UIColors.EDIT);
+        editBtn.setEnabled(false);
+        editBtn.addActionListener(v -> {
+            if(!requireManagePermission()) {
+                JOptionPane.showMessageDialog(this, "Bạn không có quyền sửa địa điểm.");
+                return;
+            }
+
             int row=tbldd.getSelectedRow();
             if(row!=-1){
                 String maDiaDiem = tbldd.getValueAt(row, 0).toString().trim();
@@ -209,10 +226,15 @@ public class LocationPanel extends JPanel {
         });
     }
 
-    private void xoa(){
-        btnxoa = ButtonFactory.create("Xóa", UIColors.DELETE);
-        btnxoa.setEnabled(false);
-        btnxoa.addActionListener(v -> {
+    private void deleteLocation(){
+        deleteBtn = ButtonFactory.create("Xóa", UIColors.DELETE);
+        deleteBtn.setEnabled(false);
+        deleteBtn.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa địa điểm.");
+                return;
+            }
+
             int row=tbldd.getSelectedRow();
             if(row != -1){
                 String maDiaDiem =model.getValueAt(row, 0).toString();
@@ -235,9 +257,9 @@ public class LocationPanel extends JPanel {
         });
     }
 
-    private void lamMoi(){
-        btnreset = ButtonFactory.create("Làm mới", UIColors.REFRESH);
-        btnreset.addActionListener(v -> {
+    private void refresh(){
+        resetBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
+        resetBtn.addActionListener(v -> {
             loadData();
         });
     }
@@ -271,5 +293,9 @@ public class LocationPanel extends JPanel {
                 loadData();
             }
         }
+    }
+
+    private boolean requireManagePermission() {
+        return SessionManager.hasPermission(Permission.MANAGE_LOCATION);
     }
 }

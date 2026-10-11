@@ -195,8 +195,8 @@ public class MainFrame extends JFrame {
         } catch (Exception ignored) {}
 
         SwingUtilities.invokeLater(() -> {
-            Login dangNhap = new Login();
-            dangNhap.setVisible(true);
+            Login login = new Login();
+            login.setVisible(true);
             this.dispose();
         });
     }

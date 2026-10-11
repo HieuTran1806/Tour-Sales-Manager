@@ -37,6 +37,8 @@ public class AuthorizationService {
                         Permission.VIEW_CUSTOMER,
                         Permission.MANAGE_CUSTOMER,
 
+                        Permission.VIEW_LOCATION,
+
                         Permission.VIEW_BOOKING,
 
                         Permission.VIEW_PAYMENT,
@@ -61,6 +63,7 @@ public class AuthorizationService {
                         Permission.VIEW_TOUR_TYPE,
                         Permission.VIEW_TOUR_PLAN,
 
+                        Permission.VIEW_LOCATION,
 
                         Permission.VIEW_BOOKING,
                         Permission.CREATE_BOOKING,

@@ -27,6 +27,9 @@ public class Login extends JFrame {
         accountBUS = new AccountBUS();
         initComponents();
         setLocationRelativeTo(null);
+
+        // Set the login button as the default button
+        this.getRootPane().setDefaultButton(loginBtn);
     }
 
     @SuppressWarnings("unchecked")
@@ -158,6 +161,8 @@ public class Login extends JFrame {
     }
 
     private void loginAccount(){
+
+
         loginBtn = ButtonFactory.create("Đăng nhập", UIColors.SAVE);
         loginBtn.addActionListener(v -> {
             String username = txtUsername.getText().trim();

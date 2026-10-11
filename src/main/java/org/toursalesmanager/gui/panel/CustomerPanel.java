@@ -171,7 +171,7 @@ public class CustomerPanel extends JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addCustomer(){
-        addBtn = ButtonFactory.create("Thêm", UIColors.ADD);
+        addBtn = ButtonFactory.create("Thêm khách hàng", UIColors.ADD);
         addBtn.addActionListener(v -> {
             if (!requireManagePermission()) {
                 return;
