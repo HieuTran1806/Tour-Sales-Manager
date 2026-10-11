@@ -98,8 +98,7 @@ public class AccountDAO {
 
         try (
                 Connection conn = MyConnection.getConnection();
-                PreparedStatement pstmt =
-                        conn.prepareStatement(sql)
+                PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
             pstmt.setString(1, idStaff);
 
@@ -133,6 +132,19 @@ public class AccountDAO {
     }
 
     public boolean existsByUsername(String username) {
-        return false;
+        String sql = "SELECT 1 FROM taikhoan WHERE username = ? LIMIT 1";
+        try (
+                Connection conn = MyConnection.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
+            pstmt.setString(1, username);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

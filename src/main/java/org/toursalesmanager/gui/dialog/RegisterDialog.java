@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
+import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
@@ -136,37 +137,45 @@ public class RegisterDialog extends JDialog {
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate();
             }
-            if(accountBUS.registerCustomer(
-                    username,
-                    password,
-                    firstName,
-                    lastName,
-                    address,
-                    phone,
-                    localDate
-            )){
-                registeredUsername = username;
-
+            try {
+                boolean success = accountBUS.registerCustomer(
+                        username,
+                        password,
+                        firstName,
+                        lastName,
+                        address,
+                        phone,
+                        localDate,
+                        confirmPassword
+                );
+                if (success) {
+                    registeredUsername = username;
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Đăng ký tài khoản thành công"
+                    );
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Đăng ký tài khoản thất bại",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "Đăng ký tài khoản thành công"
+                        ex.getMessage(),
+                        "Dữ liệu không hợp lệ",
+                        JOptionPane.WARNING_MESSAGE
                 );
-                dispose();
+                return;
             }
-
-
-        } catch (IllegalArgumentException ex) {
+        }catch (Exception e) {
             JOptionPane.showMessageDialog(
                     this,
-                    ex.getMessage(),
-                    "Dữ liệu không hợp lệ",
-                    JOptionPane.WARNING_MESSAGE
-            );
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Không thể đăng ký tài khoản",
+                    "Đã xảy ra lỗi khi đăng ký tài khoản",
                     "Lỗi",
                     JOptionPane.ERROR_MESSAGE
             );

@@ -122,20 +122,11 @@ public class AccountBUS {
         }
     }
 
-    public boolean registerCustomer(
-            String username,
-            String password,
-            String firstName,
-            String lastName,
-            String address,
-            String phoneNumber,
-            LocalDate dob
-    ) {
-        if (accountDAO.existsByUsername(username)) {
-            throw new IllegalArgumentException(
-                    "Tên tài khoản đã tồn tại"
-            );
-        }
+    public boolean registerCustomer(String username, String password, String firstName,
+            String lastName, String address, String phoneNumber,
+            LocalDate dob, String confirmPassword) {
+
+        validateCustomerInfo(username, password, firstName, lastName, address, phoneNumber, dob, confirmPassword);
 
         Role role = Role.CUSTOMER;
 
@@ -151,4 +142,63 @@ public class AccountBUS {
         );
     }
 
+    private void validateCustomerInfo(String username, String password, String firstName, String lastName, String address, String phoneNumber, LocalDate dob, String confirmPassword) {
+        if (accountDAO.existsByUsername(username)) {
+            throw new IllegalArgumentException(
+                    "Tên tài khoản đã tồn tại"
+            );
+        }
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Tên tài khoản không được để trống");
+        }
+
+        if (!password.equals(confirmPassword)) {
+            throw new IllegalArgumentException(
+                    "Mật khẩu xác nhận không khớp"
+            );
+        }
+        if(password.length() < 6) {
+            throw new IllegalArgumentException(
+                    "Mật khẩu phải có ít nhất 6 ký tự"
+            );
+        }
+        if (password.isBlank()) {
+            throw new IllegalArgumentException("Mật khẩu không được để trống");
+        }
+
+
+        if (firstName == null || firstName.isBlank()) {
+            throw new IllegalArgumentException("Tên không được để trống");
+        }
+
+        if (lastName == null || lastName.isBlank()) {
+            throw new IllegalArgumentException("Họ không được để trống");
+        }
+
+        if (address == null || address.isBlank()) {
+            throw new IllegalArgumentException("Địa chỉ không được để trống");
+        }
+
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            throw new IllegalArgumentException("Số điện thoại không được để trống");
+        }
+        if (phoneNumber.length() != 10) {
+            throw new IllegalArgumentException("Số điện thoại phải có 10 chữ số");
+        }
+        if (phoneNumber.matches(".*[a-zA-Z].*")) {
+            throw new IllegalArgumentException("Số điện thoại chỉ được chứa chữ số");
+        }
+        if (!phoneNumber.startsWith("0")) {
+            throw new IllegalArgumentException("Số điện thoại phải bắt đầu bằng số 0");
+        }
+
+
+        if (dob == null) {
+            throw new IllegalArgumentException("Ngày sinh không được để trống");
+        }
+        if(dob.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Ngày sinh không được sau ngày hiện tại");
+        }
+
+    }
 }
