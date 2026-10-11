@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.dao.TourPlanDAO;
 import org.toursalesmanager.dto.TourPlanDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.login.SessionManager;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,6 +40,12 @@ public class TourPlanBUS {
     }
 
     public boolean addKeHoachTour(TourPlanDTO t){
+        if(!SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN)) {
+            throw new SecurityException(
+                    "Bạn không có quyền thêm kế hoạch tour."
+            );
+        }
+
         if(t == null) return false;
 
         // use "Guard clause" technique to aggregate all error conditions to handle -> code will more compact
@@ -89,10 +97,22 @@ public class TourPlanBUS {
     }
 
     public boolean editKeHoachTour(TourPlanDTO t){
+        if (!SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN)) {
+            throw new SecurityException(
+                    "Bạn không có quyền sửa kế hoạch tour."
+            );
+        }
+
         return tourPlanDAO.editKeHoachTour(t);
     }
 
     public boolean removeKeHoachTour(String matour){
+        if (!SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN)) {
+            throw new SecurityException(
+                    "Bạn không có quyền quản xóa kế hoạch tour."
+            );
+        }
+
         return tourPlanDAO.removeKeHoachTour(matour);
     }
 
@@ -113,5 +133,13 @@ public class TourPlanBUS {
                 return true;
         }
         return false;
+    }
+
+    private void requireManagePermission() {
+        if (!SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN)) {
+            throw new SecurityException(
+                    "Bạn không có quyền quản lý kế hoạch tour."
+            );
+        }
     }
 }

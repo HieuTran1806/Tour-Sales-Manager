@@ -7,10 +7,13 @@ import org.toursalesmanager.bus.TourBUS;
 import org.toursalesmanager.dto.TourBookingDTO;
 import org.toursalesmanager.dto.TourPlanDTO;
 import org.toursalesmanager.dto.TourDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.TourPlanDetailDialog;
 import org.toursalesmanager.gui.dialog.TourPlanDialog;
 import org.toursalesmanager.gui.dialog.TourBookingDialog;
 import org.toursalesmanager.gui.helper.UIColors;
+import org.toursalesmanager.login.SessionManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -62,11 +65,14 @@ public class TourPlanPanel extends JPanel {
     }
 
     private void init(){
+        boolean canManageTourPlan = SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN);
+
         setLayout(new BorderLayout());
 
         //North Panel
         JPanel northPanel = new JPanel(new BorderLayout());
-        JLabel lblTitle = new JLabel("QUẢN LÝ KẾ HOẠCH TOUR", JLabel.CENTER);
+        JLabel lblTitle = new JLabel(
+                canManageTourPlan ? "QUẢN LÝ KẾ HOẠCH TOUR" : "XEM KẾ HOẠCH TOUR", JLabel.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
         northPanel.add(lblTitle, BorderLayout.NORTH);
 
@@ -97,15 +103,23 @@ public class TourPlanPanel extends JPanel {
         //South Panel contain buttons
         JPanel southPanel = new JPanel(new FlowLayout());
         add();
+        addBtn.setVisible(canManageTourPlan);
         southPanel.add(addBtn);
+
         delete();
+        deleteBtn.setVisible(canManageTourPlan);
         southPanel.add(deleteBtn);
+
         edit();
+        editBtn.setVisible(canManageTourPlan);
         southPanel.add(editBtn);
+
         viewDetail();
         southPanel.add(detailsBtn);
+
         booking();
         southPanel.add(bookingBtn);
+
         refresh();
         southPanel.add(refreshBtn);
 
@@ -155,25 +169,15 @@ public class TourPlanPanel extends JPanel {
         return model;
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
-    }
-
     private void add(){
-        addBtn = createBtn("Thêm kế hoạch Tour", UIColors.ADD);
+        addBtn = ButtonFactory.create("Thêm kế hoạch Tour", UIColors.ADD);
         TourPlanDTO tourPlanDTO = null;
-        addBtn.addActionListener(e -> openDiaLog(tourPlanDTO)); // null là ở chế độ thêm, có đối tượng DTO là ở dạng sửa
+        addBtn.addActionListener(e -> {
+            if (!requireManagePermission()) {
+                return;
+            }
+            openDiaLog(tourPlanDTO);
+        });
     }
 
     private void openDiaLog(TourPlanDTO tourPlanDTO){
@@ -190,19 +194,22 @@ public class TourPlanPanel extends JPanel {
     }
 
     private void booking(){
-        bookingBtn = createBtn("Booking", UIColors.BOOKING);
-
-
+        bookingBtn = ButtonFactory.create("Booking", UIColors.BOOKING);
         bookingBtn.addActionListener(e -> {
+
             tourBookingDialog = new TourBookingDialog(null, true, TourBookingDialog.Mode.ADD, tourBookingDTO, tourPlanBUS);
             tourBookingDialog.setVisible(true);
         });
     }
 
     private void delete(){
-        deleteBtn = createBtn("Xóa kế hoạch tour", UIColors.DELETE);
+        deleteBtn = ButtonFactory.create("Xóa kế hoạch tour", UIColors.DELETE);
         deleteBtn.setEnabled(false);
         deleteBtn.addActionListener(e ->{
+            if (!requireManagePermission()) {
+                return;
+            }
+
             int row = table.getSelectedRow();
             if (row == -1){
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn kế hoạch tour cần xóa");
@@ -224,9 +231,13 @@ public class TourPlanPanel extends JPanel {
     }
 
     private void edit(){
-        editBtn = createBtn("Chỉnh sửa", UIColors.EDIT);
+        editBtn = ButtonFactory.create("Chỉnh sửa", UIColors.EDIT);
         editBtn.setEnabled(false);
         editBtn.addActionListener(e -> {
+            if(!requireManagePermission()) {
+                return;
+            }
+
             int row = table.getSelectedRow();
             if (row == -1) {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn kế hoạch tour cần sửa");
@@ -239,7 +250,7 @@ public class TourPlanPanel extends JPanel {
     }
 
     private void viewDetail(){
-        detailsBtn = createBtn("Xem chi tiết", UIColors.VIEW);
+        detailsBtn = ButtonFactory.create("Xem chi tiết", UIColors.VIEW);
         detailsBtn.setEnabled(false);
         detailsBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
@@ -258,7 +269,7 @@ public class TourPlanPanel extends JPanel {
     }
 
     private void refresh(){
-        refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
+        refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(e -> {
             //load tours when press refresh
             toursModel = new DefaultComboBoxModel<>();
@@ -280,5 +291,19 @@ public class TourPlanPanel extends JPanel {
             detailsBtn.setEnabled(hadSelection);
             bookingBtn.setEnabled(hadSelection);
         });
+    }
+
+    private boolean requireManagePermission() {
+        if (SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN)) {
+            return true;
+        }
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Bạn không có quyền quản lý kế hoạch tour.",
+                "Không đủ quyền",
+                JOptionPane.WARNING_MESSAGE
+        );
+        return false;
     }
 }

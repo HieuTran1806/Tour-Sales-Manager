@@ -71,7 +71,7 @@ public class MainFrame extends JFrame {
                 new MenuItem("Tour", "Tour", Permission.VIEW_TOUR),
                 new MenuItem("Loại Tour", "LoaiTour", Permission.VIEW_TOUR_TYPE),
                 new MenuItem("Kế Hoạch Tour", "KeHoachTour", Permission.VIEW_TOUR_PLAN),
-                new MenuItem("PhieuDatTour", "PhieuDatTour", Permission.VIEW_BOOKING),
+                new MenuItem("Phiếu Đặt Tour", "PhieuDatTour", Permission.VIEW_BOOKING),
                 new MenuItem("Hóa đơn", "HoaDon", Permission.VIEW_INVOICE),
                 new MenuItem("Địa điểm", "DiaDiem", Permission.VIEW_LOCATION),
                 new MenuItem("Nhân viên", "NhanVien", Permission.VIEW_STAFF),
