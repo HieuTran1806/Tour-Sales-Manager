@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.dao.InvoiceDAO;
 import org.toursalesmanager.dto.InvoiceDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.login.SessionManager;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -40,14 +42,6 @@ public class InvoiceBUS {
         return false;
     }
 
-    public ArrayList docDS(){
-        if(ds==null) {
-            ds=new ArrayList<InvoiceDTO>();
-            ds=dao.getDsHoaDon();
-        }
-        return ds;
-    }
-
     public InvoiceDTO timHd(String mahd){
         if(dao.timHoaDon(mahd)!=null){
             for(InvoiceDTO hd: ds){
@@ -60,6 +54,8 @@ public class InvoiceBUS {
     }
 
     public boolean themHoaDon(InvoiceDTO hd){
+        requireManagePermission();
+
         if(timHd(hd)){
             return false;
         }
@@ -73,6 +69,8 @@ public class InvoiceBUS {
     }
 
     public boolean xoaHoaDon(String mahd){
+        requireManagePermission();
+
         InvoiceDTO hd=dao.timHoaDon(mahd);
         boolean b=timHd(hd);
         if(hd==null){
@@ -88,6 +86,8 @@ public class InvoiceBUS {
     }
 
     public boolean suaHoaDon(InvoiceDTO hd){
+        requireManagePermission();
+
         if(!timHd(hd)){
             return false;
         }
@@ -167,5 +167,13 @@ public class InvoiceBUS {
             return new int[12];
         }
         return dao.getTongChiTungThang(nam);
+    }
+
+    private void requireManagePermission() {
+        if (!SessionManager.hasPermission(Permission.MANAGE_INVOICE)) {
+            throw new SecurityException(
+                    "Bạn không có quyền quản lý hóa đơn."
+            );
+        }
     }
 }

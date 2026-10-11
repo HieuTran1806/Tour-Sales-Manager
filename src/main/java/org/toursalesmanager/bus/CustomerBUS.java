@@ -2,6 +2,8 @@ package org.toursalesmanager.bus;
 
 import org.toursalesmanager.dao.CustomerDAO;
 import org.toursalesmanager.dto.CustomerDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.login.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,9 @@ public class CustomerBUS {
     public ArrayList<CustomerDTO> getAllCustomers() {
         return dao.getAllCustomers();
     }
-    public void them(CustomerDTO khang) {
+    public void addCustomer(CustomerDTO khang) {
+        requireManagePermission();
+
         try{
             if (dsKH == null) {
                 dsKH = new ArrayList<CustomerDTO>();
@@ -41,6 +45,8 @@ public class CustomerBUS {
         }
     }
     public void deleteCustomer(String maKH) {
+        requireManagePermission();
+
         try {
             if (dsKH == null) {
                 return;
@@ -51,7 +57,7 @@ public class CustomerBUS {
             e.printStackTrace();
         }
     }
-    public CustomerDTO timKiemKH(String maKH){
+    public CustomerDTO findCustomerById(String maKH){
         for (CustomerDTO kh : dsKH) {
             if (kh.getIdCustomer().equals(maKH)) {
                 return dao.findCustomerWithId(maKH);
@@ -65,6 +71,8 @@ public class CustomerBUS {
     }
 
     public boolean editCustomer(CustomerDTO khang) {
+        requireManagePermission();
+
         try {
             if (dsKH == null) {
                 return false;
@@ -83,6 +91,14 @@ public class CustomerBUS {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private void requireManagePermission() {
+        if (!SessionManager.hasPermission(Permission.MANAGE_CUSTOMER)) {
+            throw new SecurityException(
+                    "Bạn không có quyền quản lý khách hàng."
+            );
         }
     }
 }

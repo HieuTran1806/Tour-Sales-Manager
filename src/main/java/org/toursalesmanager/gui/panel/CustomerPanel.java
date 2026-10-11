@@ -14,8 +14,11 @@ import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.CustomerBUS;
 import org.toursalesmanager.dao.CustomerDAO;
 import org.toursalesmanager.dto.CustomerDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.CustomerDialog;
 import org.toursalesmanager.gui.helper.UIColors;
+import org.toursalesmanager.gui.helper.UIFontHelper;
 import org.toursalesmanager.login.SessionManager;
 
 import javax.swing.*;
@@ -25,7 +28,7 @@ import javax.swing.table.DefaultTableModel;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CustomerPanel extends JPanel {
-    JButton btnLamMoi, btnSua, btnThem, btnXoa;
+    JButton refreshBtn, editBtn, addBtn, deleteBtn;
 
     JComboBox<String> jComboBox1;
 
@@ -43,10 +46,9 @@ public class CustomerPanel extends JPanel {
 
     public CustomerPanel() {
         customerBUS = new CustomerBUS();
+
         initComponents();
-        if (!SessionManager.isAdmin()) {
-            btnXoa.setEnabled(false);
-        }
+
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
 
             private void search() {
@@ -70,11 +72,13 @@ public class CustomerPanel extends JPanel {
             }
         });
         loadKhachHangToTable(ds.getAllCustomers());
+        hasSelectedRow();
     }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        boolean canManageCustomer = SessionManager.hasPermission(Permission.MANAGE_CUSTOMER);
 
         jPanel1 = new JPanel();
         jLabel1 = new JLabel();
@@ -85,18 +89,18 @@ public class CustomerPanel extends JPanel {
         jScrollPane1 = new JScrollPane();
         jTable1 = new JTable();
         jPanel3 = new JPanel();
-        btnThem = new JButton();
-        btnXoa = new JButton();
-        btnSua = new JButton();
-        btnLamMoi = new JButton();
+        addBtn = new JButton();
+        deleteBtn = new JButton();
+        editBtn = new JButton();
+        refreshBtn = new JButton();
 
         setLayout(new BorderLayout());
 
         jPanel1.setLayout(new BorderLayout());
 
-        jLabel1.setFont(new Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel1.setFont(UIFontHelper.PAGE_TITLE); // NOI18N
         jLabel1.setHorizontalAlignment(SwingConstants.CENTER);
-        jLabel1.setText("Quản lí khách hàng");
+        jLabel1.setText(canManageCustomer ? "QUẢN LÝ KHÁCH HÀNG" : "THÔNG TIN KHÁCH HÀNG");
         jLabel1.setHorizontalTextPosition(SwingConstants.CENTER);
         jPanel1.add(jLabel1, BorderLayout.CENTER);
 
@@ -138,19 +142,20 @@ public class CustomerPanel extends JPanel {
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         add(jScrollPane1, BorderLayout.CENTER);
 
-        them();
-        jPanel3.add(btnThem);
+        addCustomer();
+        addBtn.setVisible(canManageCustomer);
+        jPanel3.add(addBtn);
 
-        xoa();
-        btnXoa.setEnabled(false);
-        jPanel3.add(btnXoa);
+        deleteCustomer();
+        deleteBtn.setVisible(canManageCustomer);
+        jPanel3.add(deleteBtn);
 
-        sua();
-        btnSua.setEnabled(false);
-        jPanel3.add(btnSua);
+        updateCustomer();
+        editBtn.setVisible(canManageCustomer);
+        jPanel3.add(editBtn);
 
         lamMoi();
-        jPanel3.add(btnLamMoi);
+        jPanel3.add(refreshBtn);
 
         jTable1.addMouseListener(new MouseAdapter() {
             @Override
@@ -158,47 +163,39 @@ public class CustomerPanel extends JPanel {
                 jTable1MouseClicked(e);
             }
         });
-        jPanel3.add(btnSua);
+        jPanel3.add(editBtn);
 
-        btnLamMoi.setText("Làm mới");
-        jPanel3.add(btnLamMoi);
+        jPanel3.add(refreshBtn);
 
         add(jPanel3, BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // in south panel
+    private void addCustomer(){
+        addBtn = ButtonFactory.create("Thêm", UIColors.ADD);
+        addBtn.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                return;
+            }
 
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
-    }
-
-    private void them(){
-        btnThem = createBtn("Thêm", UIColors.ADD);
-        btnThem.addActionListener(v -> {
             CustomerDialog dialog = new CustomerDialog(null, true, ds, CustomerDialog.Mode.ADD, null);
             dialog.setVisible(true);
 
             loadKhachHangToTable(ds.getAllCustomers());
         });
     }
-    private void sua(){
-        btnSua = createBtn("Sửa", UIColors.EDIT);
-        btnSua.setEnabled(false);
-        btnSua.addActionListener(v -> {
+    private void updateCustomer(){
+        editBtn = ButtonFactory.create("Sửa", UIColors.EDIT);
+        editBtn.setEnabled(false);
+        editBtn.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                return;
+            }
+
             int i = jTable1.getSelectedRow();
 
             if (i>=0){
                 String idStaff = jTable1.getValueAt(i, 0).toString();
-                CustomerDTO kh = customerBUS.timKiemKH(idStaff);
+                CustomerDTO kh = customerBUS.findCustomerById(idStaff);
                 CustomerDialog dialog = new CustomerDialog(null, true, ds, CustomerDialog.Mode.EDIT, kh);
                 dialog.setVisible(true);
 
@@ -206,14 +203,14 @@ public class CustomerPanel extends JPanel {
             }
         });
     }
-    private void xoa(){
-        btnXoa = createBtn("Xóa", UIColors.DELETE);
-        btnSua.setEnabled(false);
-        btnXoa.addActionListener(v -> {
-            if (!SessionManager.isAdmin()) {
-                JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa dữ liệu.");
+    private void deleteCustomer(){
+        deleteBtn = ButtonFactory.create("Xóa", UIColors.DELETE);
+        deleteBtn.setEnabled(false);
+        deleteBtn.addActionListener(v -> {
+            if (!requireManagePermission()) {
                 return;
             }
+
             int i = jTable1.getSelectedRow();
             int result = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa khách hàng này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
             if (result == JOptionPane.YES_OPTION && i >= 0) {
@@ -227,8 +224,8 @@ public class CustomerPanel extends JPanel {
         });
     }
     private void lamMoi(){
-        btnLamMoi = createBtn("Làm mới", UIColors.REFRESH);
-        btnLamMoi.addActionListener(v -> {
+        refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
+        refreshBtn.addActionListener(v -> {
             loadKhachHangToTable(ds.getAllCustomers());
         });
     }
@@ -239,9 +236,9 @@ public class CustomerPanel extends JPanel {
 
     private void jTable1MouseClicked(MouseEvent evt) {
         if (SessionManager.isAdmin()) {
-            btnXoa.setEnabled(true);
+            deleteBtn.setEnabled(true);
         }
-        btnSua.setEnabled(true);
+        editBtn.setEnabled(true);
     }
 
     private String getColumnName(String selected) {
@@ -283,5 +280,21 @@ public class CustomerPanel extends JPanel {
                     kh.getAddress()
             });
         }
+    }
+
+    private void hasSelectedRow(){
+        jTable1.getSelectionModel().addListSelectionListener(e ->{
+            boolean hadSelection = jTable1.getSelectedRow() != -1;
+            deleteBtn.setEnabled(hadSelection);
+            editBtn.setEnabled(hadSelection);
+        });
+    }
+
+    private boolean requireManagePermission() {
+        if (!SessionManager.hasPermission(Permission.MANAGE_CUSTOMER)) {
+            JOptionPane.showMessageDialog(this, "Bạn không có quyền quản lý khách hàng.");
+            return false;
+        }
+        return true;
     }
 }

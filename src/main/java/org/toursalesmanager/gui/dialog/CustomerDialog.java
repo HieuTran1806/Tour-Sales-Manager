@@ -174,7 +174,7 @@ public class CustomerDialog extends JDialog {
                     validateIdCustomer(idCustomer); // validate id customer
 
                     CustomerDTO newCustomer = new CustomerDTO(idCustomer, firstName, lastName, address, phoneNumber, dob);
-                    customerBUS.them(newCustomer);
+                    customerBUS.addCustomer(newCustomer);
                     JOptionPane.showMessageDialog(this, "Thêm khách hàng thành công!");
                 } else if (mode == Mode.EDIT && currentKhachHang != null) {
                     currentKhachHang.setFirstName(firstName);

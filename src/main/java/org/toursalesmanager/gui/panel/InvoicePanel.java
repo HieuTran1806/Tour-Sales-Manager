@@ -6,11 +6,13 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.dto.*;
 import org.toursalesmanager.bus.*;
+import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.*;
 import org.toursalesmanager.gui.helper.DateHelper;
 import org.toursalesmanager.gui.helper.ExcelHelper;
 import org.toursalesmanager.gui.helper.UIColors;
+import org.toursalesmanager.login.SessionManager;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -22,7 +24,7 @@ import javax.swing.table.DefaultTableModel;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoicePanel extends JPanel {
-    JButton btnchitiet, btnreset, btnsua, btnthem, btnxoa, btnxuat;
+    JButton viewDetailBtn, refreshBtn, editBtn, addBtn, deleteBtn, exportBtn;
 
     JComboBox<String> cbtim;
 
@@ -91,6 +93,8 @@ public class InvoicePanel extends JPanel {
     }
 
     private void initComponents() {
+        boolean canManageInvoice = SessionManager.hasPermission(Permission.MANAGE_INVOICE);
+
         pnlheader = new JPanel();
         lbname = new JLabel();
         pnlsearch = new JPanel();
@@ -99,12 +103,12 @@ public class InvoicePanel extends JPanel {
         txttim = new JTextField();
         txtday = new com.toedter.calendar.JDateChooser();
         pnlfooter = new JPanel();
-        btnthem = new JButton();
-        btnxoa = new JButton();
-        btnsua = new JButton();
-        btnchitiet = new JButton();
-        btnreset = new JButton();
-        btnxuat = new JButton();
+        addBtn = new JButton();
+        deleteBtn = new JButton();
+        editBtn = new JButton();
+        viewDetailBtn = new JButton();
+        refreshBtn = new JButton();
+        exportBtn = new JButton();
         pnltable = new JPanel();
         jScrollPane1 = new JScrollPane();
         tblhoadon = new JTable();
@@ -159,23 +163,26 @@ public class InvoicePanel extends JPanel {
 
         add(pnlheader, BorderLayout.NORTH);
 
-        them();
-        pnlfooter.add(btnthem);
+        addInvoice();
+        addBtn.setVisible(canManageInvoice);
+        pnlfooter.add(addBtn);
 
-        xoa();
-        pnlfooter.add(btnxoa);
+        deleteInvoice();
+        deleteBtn.setVisible(canManageInvoice);
+        pnlfooter.add(deleteBtn);
 
-        sua();
-        pnlfooter.add(btnsua);
+        updateInvoice();
+        editBtn.setVisible(canManageInvoice);
+        pnlfooter.add(editBtn);
 
-        xemChiTiet();
-        pnlfooter.add(btnchitiet);
+        viewDetail();
+        pnlfooter.add(viewDetailBtn);
 
-        lamMoi();
-        pnlfooter.add(btnreset);
+        refresh();
+        pnlfooter.add(refreshBtn);
 
-        xuatExcel();
-        pnlfooter.add(btnxuat);
+        exportToExcel();
+        pnlfooter.add(exportBtn);
 
         add(pnlfooter, BorderLayout.PAGE_END);
 
@@ -224,9 +231,13 @@ public class InvoicePanel extends JPanel {
         add(pnltable, BorderLayout.CENTER);
     }
 
-    private void them(){
-        btnthem = ButtonFactory.create("Thêm", UIColors.ADD);
-        btnthem.addActionListener(v -> {
+    private void addInvoice(){
+        addBtn = ButtonFactory.create("Thêm hóa đơn", UIColors.ADD);
+        addBtn.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                return;
+            }
+            invoiceDTO = new InvoiceDTO();
             openDiaLog(invoiceDTO);
         });
     }
@@ -238,10 +249,14 @@ public class InvoicePanel extends JPanel {
         loadData();
     }
 
-    private void xoa(){
-        btnxoa = ButtonFactory.create("Xóa", UIColors.DELETE);
-        btnxoa.setEnabled(false);
-        btnxoa.addActionListener(v -> {
+    private void deleteInvoice(){
+        deleteBtn = ButtonFactory.create("Xóa hóa đơn", UIColors.DELETE);
+        deleteBtn.setEnabled(false);
+        deleteBtn.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                return;
+            }
+
             try{
                 int row =tblhoadon.getSelectedRow();
 
@@ -269,10 +284,13 @@ public class InvoicePanel extends JPanel {
         });
     }
 
-    private void sua(){
-        btnsua = ButtonFactory.create("Chỉnh sửa", UIColors.EDIT);
-        btnsua.setEnabled(false);
-        btnsua.addActionListener(v -> {
+    private void updateInvoice(){
+        editBtn = ButtonFactory.create("Chỉnh sửa hóa đơn", UIColors.EDIT);
+        editBtn.setEnabled(false);
+        editBtn.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                return;
+            }
 
             int row =tblhoadon.getSelectedRow();
             if(row==-1){
@@ -292,13 +310,13 @@ public class InvoicePanel extends JPanel {
         });
     }
 
-    private void xemChiTiet(){
-        btnchitiet = ButtonFactory.create("Xem chi tiết", UIColors.VIEW);
-        btnchitiet.addActionListener(v -> {
+    private void viewDetail(){
+        viewDetailBtn = ButtonFactory.create("Xem chi tiết", UIColors.VIEW);
+        viewDetailBtn.addActionListener(v -> {
             int row=tblhoadon.getSelectedRow();
             String ma =tblhoadon.getValueAt(row, 0).toString().trim();
             if(row!=-1){
-                btnchitiet.setEnabled(true);
+                viewDetailBtn.setEnabled(true);
                 NhapCTHD nhap=new NhapCTHD(ma);
                 nhap.setModal(true);
                 nhap.setVisible(true);
@@ -306,16 +324,16 @@ public class InvoicePanel extends JPanel {
         });
     }
 
-    private void lamMoi(){
-        btnreset = ButtonFactory.create("Làm mới", UIColors.REFRESH);
-        btnreset.addActionListener(v -> {
+    private void refresh(){
+        refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
+        refreshBtn.addActionListener(v -> {
             loadData();
         });
     }
 
-    private void xuatExcel(){
-        btnxuat = ButtonFactory.create("Xuất excel", UIColors.EXPORT_EXCEL);
-        btnxuat.addActionListener(v -> {
+    private void exportToExcel(){
+        exportBtn = ButtonFactory.create("Xuất excel", UIColors.EXPORT_EXCEL);
+        exportBtn.addActionListener(v -> {
             ExcelHelper.xuatExcel(tblhoadon, this, "Danh sách hóa đơn");
         });
     }
@@ -358,15 +376,23 @@ public class InvoicePanel extends JPanel {
         int row=tblhoadon.getSelectedRow();
         String ma =tblhoadon.getValueAt(row, 0).toString().trim();
         if(row!=-1){
-            btnsua.setEnabled(true);
-            btnxoa.setEnabled(true);
-            btnchitiet.setEnabled(true);
+            editBtn.setEnabled(true);
+            deleteBtn.setEnabled(true);
+            viewDetailBtn.setEnabled(true);
             if(evt.getClickCount()==2){
                 int cf=JOptionPane.showConfirmDialog(this, "Bạn có muốn xuất excel dòng này không?");
                 if(cf==JOptionPane.YES_OPTION){
-                    ExcelHelper.xuatExcel1Dong(tblhoadon, row, btnreset, ma);
+                    ExcelHelper.xuatExcel1Dong(tblhoadon, row, refreshBtn, ma);
                 }
             }
         }
+    }
+
+    private boolean requireManagePermission() {
+        if (!SessionManager.hasPermission(Permission.MANAGE_INVOICE)) {
+            JOptionPane.showMessageDialog(this, "Bạn không có quyền quản lý hóa đơn.");
+            return false;
+        }
+        return true;
     }
 }
