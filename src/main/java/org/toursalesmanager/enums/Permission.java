@@ -39,9 +39,7 @@ public enum Permission {
 
     // Hóa đơn
     VIEW_INVOICE,
-    CREATE_INVOICE,
-    UPDATE_INVOICE,
-    CANCEL_INVOICE,
+    MANAGE_INVOICE,
 
     // Khuyến mãi
     VIEW_PROMOTION,
