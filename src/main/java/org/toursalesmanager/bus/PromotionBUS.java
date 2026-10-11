@@ -10,6 +10,8 @@ import org.toursalesmanager.dao.PromotionalTourDAO;
 import org.toursalesmanager.dto.PromotionDTO;
 import org.toursalesmanager.dto.PromotionalInvoiceDTO;
 import org.toursalesmanager.dto.KMTourDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.login.SessionManager;
 
 import java.util.*;
 
@@ -39,10 +41,14 @@ public class PromotionBUS {
     }
 
     public boolean themCTrinhKM(PromotionDTO ct) {
+        if (!SessionManager.hasPermission(Permission.MANAGE_PROMOTION)) {
+            throw new SecurityException(
+                    "Bạn không có quyền thêm chương trình khuyến mãi."
+            );
+        }
         // Kiểm tra trùng mã
         if (dao.timCTrinhKM(ct.getIdPromotion()) != null) return false;
 
-        // Bước 1: Thêm vào bảng CTrinhKM (bảng cha)
         boolean resultCha = dao.themCTrinhKM(ct);
         if (!resultCha) return false;
 
@@ -89,6 +95,12 @@ public class PromotionBUS {
     }
 
     public boolean xoaCTrinhKM(String maKM) {
+        if (!SessionManager.hasPermission(Permission.MANAGE_PROMOTION)) {
+            throw new SecurityException(
+                    "Bạn không có quyền xóa chương trình khuyến mãi."
+            );
+        }
+
         PromotionDTO ct = timCTrinhKM(maKM);
         if (ct == null) return false;
 
@@ -110,6 +122,12 @@ public class PromotionBUS {
     }
 
     public boolean suaCTrinhKM(PromotionDTO ct) {
+        if (!requireManagePermission()) {
+            throw new SecurityException(
+                    "Bạn không có quyền sửa chương trình khuyến mãi."
+            );
+        }
+
         boolean result = false;
         if (ct instanceof KMTourDTO) {
             PromotionalTourDAO daoTour = new PromotionalTourDAO();
@@ -167,23 +185,8 @@ public class PromotionBUS {
         return result;
     }
 
-    public void ghiDsCTrinhKM() {
-        // Ghi dsCTrinhKM vào database thông qua DAO
-        for (PromotionDTO ct : dsCTrinhKM) {
-            if (dao.timCTrinhKM(ct.getIdPromotion()) != null) {
-                dao.suaCTrinhKM(ct); // Cập nhật nếu đã tồn tại
-            } else {
-                dao.themCTrinhKM(ct); // Thêm mới nếu chưa tồn tại
-            }
-        }
+    private boolean requireManagePermission() {
+        return SessionManager.hasPermission(Permission.MANAGE_PROMOTION);
     }
 
-    public PromotionDTO maptoCTrinhKM(String maKM) {
-        PromotionDTO ct = dao.timCTrinhKM(maKM);
-
-        if (ct != null) {
-            return ct;
-        }
-        return null;
-    }
 }

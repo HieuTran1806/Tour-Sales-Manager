@@ -112,15 +112,19 @@ public class TourPanel extends JPanel {
 
         // southPanel contain buttons
         southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+
         add();
         addBtn.setVisible(canManageTours);
         southPanel.add(addBtn);
+
         delete();
         deleteBtn.setVisible(canManageTours);
         southPanel.add(deleteBtn);
+
         edit();
         editBtn.setVisible(canManageTours);
         southPanel.add(editBtn);
+
         viewDetail();
         southPanel.add(detailBtn);
 

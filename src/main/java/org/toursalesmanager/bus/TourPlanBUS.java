@@ -40,7 +40,7 @@ public class TourPlanBUS {
     }
 
     public boolean addKeHoachTour(TourPlanDTO t){
-        if(!SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN)) {
+        if(!requireManagePermission()) {
             throw new SecurityException(
                     "Bạn không có quyền thêm kế hoạch tour."
             );
@@ -97,7 +97,7 @@ public class TourPlanBUS {
     }
 
     public boolean editKeHoachTour(TourPlanDTO t){
-        if (!SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN)) {
+        if (!requireManagePermission()) {
             throw new SecurityException(
                     "Bạn không có quyền sửa kế hoạch tour."
             );
@@ -107,7 +107,7 @@ public class TourPlanBUS {
     }
 
     public boolean removeKeHoachTour(String matour){
-        if (!SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN)) {
+        if (!requireManagePermission()) {
             throw new SecurityException(
                     "Bạn không có quyền quản xóa kế hoạch tour."
             );
@@ -135,11 +135,7 @@ public class TourPlanBUS {
         return false;
     }
 
-    private void requireManagePermission() {
-        if (!SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN)) {
-            throw new SecurityException(
-                    "Bạn không có quyền quản lý kế hoạch tour."
-            );
-        }
+    private boolean requireManagePermission() {
+        return SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN);
     }
 }

@@ -3,9 +3,12 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.PromotionBUS;
 import org.toursalesmanager.dto.PromotionDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.PromotionDialog;
 import org.toursalesmanager.gui.helper.ExcelHelper;
 import org.toursalesmanager.gui.helper.UIColors;
+import org.toursalesmanager.login.SessionManager;
 
 
 import javax.swing.*;
@@ -22,13 +25,13 @@ import java.util.Comparator;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PromotionPanel extends JPanel {
-    JButton btnAdd, btnDel, btnEdit, btnLoad, btnXuat;
+    JButton btnAdd, btnDel, btnEdit, btnRefresh, btnExport;
 
     JComboBox<String> cbbKM;
 
     Box.Filler filler1;
 
-    JLabel jLabel1, jLabel2, jLabel3;
+    JLabel lbTitle, jLabel2, jLabel3;
 
     JPanel jPanel1, jPanel2, jPanel3;
 
@@ -67,44 +70,13 @@ public class PromotionPanel extends JPanel {
         loadData();
     }
 
-    private void loadData() {
-        model.setRowCount(0);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        ArrayList<PromotionDTO> list = new ArrayList<>(bus.getDsCTrinhKM());
-        list.sort(Comparator.comparing(PromotionDTO::getIdPromotion));
-        for (PromotionDTO km : list) {
-            model.addRow(new Object[]{
-                    km.getIdPromotion(),
-                    km.getPromotionName(),
-                    km.getStartDate().format(formatter),
-                    km.getEndDate().format(formatter),
-                    km.isHinhThucKM() ? "KMHD" : "KMTour",
-                    km.getDiscount(),
-                    km.getNote()
-            });
-        }
-    }
-
-    private void loadData(String loai, String keyword) {
-        model.setRowCount(0);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        bus.searchCTrinhKM(loai, keyword).forEach(km -> {
-            model.addRow(new Object[]{
-                    km.getIdPromotion(),
-                    km.getPromotionName(),
-                    km.getStartDate().format(formatter),
-                    km.getEndDate().format(formatter),
-                    km.isHinhThucKM() ? "KMHD" : "KMTour",
-                    km.getDiscount(),
-                    km.getNote()
-            });
-        });
-    }
 
     @SuppressWarnings("unchecked")
     private void initComponents() {
+        boolean canManagePromotion = SessionManager.hasPermission(Permission.MANAGE_PROMOTION);
+
         jPanel1 = new JPanel();
-        jLabel1 = new JLabel();
+        lbTitle = new JLabel();
         jPanel2 = new JPanel();
         jLabel2 = new JLabel();
         cbbKM = new JComboBox<>();
@@ -117,8 +89,8 @@ public class PromotionPanel extends JPanel {
         btnAdd = new JButton();
         btnDel = new JButton();
         btnEdit = new JButton();
-        btnLoad = new JButton();
-        btnXuat = new JButton();
+        btnRefresh = new JButton();
+        btnExport = new JButton();
 
         setPreferredSize(new Dimension(623, 300));
         setLayout(new BorderLayout());
@@ -128,10 +100,10 @@ public class PromotionPanel extends JPanel {
         jPanel1.setPreferredSize(new Dimension(623, 50));
         jPanel1.setLayout(new BorderLayout());
 
-        jLabel1.setFont(new Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel1.setHorizontalAlignment(SwingConstants.CENTER);
-        jLabel1.setText("QUẢN LÝ KHUYẾN MÃI");
-        jPanel1.add(jLabel1, BorderLayout.PAGE_START);
+        lbTitle.setFont(new Font("Segoe UI", 1, 18)); // NOI18N8N
+        lbTitle.setHorizontalAlignment(SwingConstants.CENTER);
+        lbTitle.setText(canManagePromotion ? "QUẢN LÝ KHUYẾN MÃI" : "DANH SÁCH KHUYẾN MÃI");
+        jPanel1.add(lbTitle, BorderLayout.PAGE_START);
 
         jPanel2.setBorder(BorderFactory.createEmptyBorder(5, 100, 5, 100));
         jPanel2.setAlignmentX(0.0F);
@@ -183,7 +155,7 @@ public class PromotionPanel extends JPanel {
                 }
         ) {
             Class[] types = new Class [] {
-                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Float.class, java.lang.String.class
+                    String.class, String.class, String.class, String.class, String.class, Float.class, String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -198,42 +170,69 @@ public class PromotionPanel extends JPanel {
         jPanel3.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 5));
 
 
-        them();
+        addPromotion();
+        btnAdd.setVisible(canManagePromotion);
         jPanel3.add(btnAdd);
 
-        xoa();
+        deletePromotion();
+        btnDel.setVisible(canManagePromotion);
         jPanel3.add(btnDel);
 
-        sua();
+        editPromotion();
+        btnEdit.setVisible(canManagePromotion);
         jPanel3.add(btnEdit);
 
-        lamMoi();
-        jPanel3.add(btnLoad);
+        refresh();
+        jPanel3.add(btnRefresh);
 
-        xuatExcel();
-        jPanel3.add(btnXuat);
+        exportExcel();
+        jPanel3.add(btnExport);
 
         add(jPanel3, BorderLayout.PAGE_END);
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // in south panel
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
+    private void loadData() {
+        model.setRowCount(0);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        ArrayList<PromotionDTO> list = new ArrayList<>(bus.getDsCTrinhKM());
+        list.sort(Comparator.comparing(PromotionDTO::getIdPromotion));
+        for (PromotionDTO km : list) {
+            model.addRow(new Object[]{
+                    km.getIdPromotion(),
+                    km.getPromotionName(),
+                    km.getStartDate().format(formatter),
+                    km.getEndDate().format(formatter),
+                    km.isHinhThucKM() ? "KMHD" : "KMTour",
+                    km.getDiscount(),
+                    km.getNote()
+            });
+        }
     }
 
-    private void them(){
-        btnAdd = createBtn("Thêm", UIColors.ADD);
+    private void loadData(String loai, String keyword) {
+        model.setRowCount(0);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        bus.searchCTrinhKM(loai, keyword).forEach(km -> {
+            model.addRow(new Object[]{
+                    km.getIdPromotion(),
+                    km.getPromotionName(),
+                    km.getStartDate().format(formatter),
+                    km.getEndDate().format(formatter),
+                    km.isHinhThucKM() ? "KMHD" : "KMTour",
+                    km.getDiscount(),
+                    km.getNote()
+            });
+        });
+    }
+
+
+    private void addPromotion(){
+        btnAdd = ButtonFactory.create("Thêm", UIColors.ADD);
         btnAdd.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                return;
+            }
+
             PromotionDialog dialog=new PromotionDialog(bus);
             dialog.setModal(true);
             dialog.setVisible(true);
@@ -241,9 +240,13 @@ public class PromotionPanel extends JPanel {
         });
     }
 
-    private void xoa(){
-        btnDel = createBtn("Xóa", UIColors.DELETE);
+    private void deletePromotion(){
+        btnDel = ButtonFactory.create("Xóa", UIColors.DELETE);
         btnDel.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                return;
+            }
+
             try{
                 int row = tblKM.getSelectedRow();
 
@@ -269,9 +272,13 @@ public class PromotionPanel extends JPanel {
         });
     }
 
-    private void sua(){
-        btnEdit = createBtn("Chỉnh sửa", UIColors.EDIT);
+    private void editPromotion(){
+        btnEdit = ButtonFactory.create("Chỉnh sửa", UIColors.EDIT);
         btnEdit.addActionListener(v -> {
+            if (!requireManagePermission()) {
+                return;
+            }
+
             int row = tblKM.getSelectedRow();
             if (row >= 0) {
                 String maKM = tblKM.getValueAt(row, 0).toString();
@@ -290,16 +297,16 @@ public class PromotionPanel extends JPanel {
         });
     }
 
-    private void lamMoi(){
-        btnLoad = createBtn("Làm mới", UIColors.REFRESH);
-        btnLoad.addActionListener(v -> {
+    private void refresh(){
+        btnRefresh = ButtonFactory.create("Làm mới", UIColors.REFRESH);
+        btnRefresh.addActionListener(v -> {
             loadData();
         });
     }
 
-    private void xuatExcel(){
-        btnXuat = createBtn("Xuất excel", UIColors.EXPORT_EXCEL);
-        btnXuat.addActionListener(v -> {
+    private void exportExcel(){
+        btnExport = ButtonFactory.create("Xuất excel", UIColors.EXPORT_EXCEL);
+        btnExport.addActionListener(v -> {
             ExcelHelper.xuatExcel(tblKM, this, "Danh sách khuyến mãi");
         });
     }
@@ -365,4 +372,18 @@ public class PromotionPanel extends JPanel {
     private void txtSearchActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSearchActionPerformed
+
+    private boolean requireManagePermission() {
+        if (SessionManager.hasPermission(Permission.MANAGE_PROMOTION)) {
+            return true;
+        }
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Bạn không có quyền quản lý chương trình khuyến mãi.",
+                "Không đủ quyền",
+                JOptionPane.WARNING_MESSAGE
+        );
+        return false;
+    }
 }
