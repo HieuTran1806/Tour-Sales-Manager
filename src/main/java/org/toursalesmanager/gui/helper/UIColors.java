@@ -14,4 +14,6 @@ public class UIColors {
     public static final Color CHOSE = Color.CYAN;
     public static final Color BOOKING = Color.PINK;
     public static final Color BACKGROUND = new Color(240, 245, 250);
+    public static final Color PRIMARYCOLOR = Color.CYAN;
+
 }

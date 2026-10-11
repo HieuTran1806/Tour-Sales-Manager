@@ -88,7 +88,6 @@ public class TourPlanDialog extends JDialog {
         setLayout(new BorderLayout());
 
         JPanel formPanel = new JPanel(new GridLayout(11, 2)); // at center
-
         JPanel southPanel = new JPanel(new FlowLayout());
 
         // Save button
@@ -384,7 +383,7 @@ public class TourPlanDialog extends JDialog {
         return false;
     }
 
-    private void validateTickets(String prices, String tickets) throws ValidationException{
+    private void validateTickets(String  prices, String tickets) throws ValidationException{
         if (prices.isEmpty()) throw new ValidationException("Giá vé không được để trống!");
         if (tickets.isEmpty()) throw new ValidationException("Số vé còn lại không được để trống!");
 

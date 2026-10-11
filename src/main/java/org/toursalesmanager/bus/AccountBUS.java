@@ -122,7 +122,7 @@ public class AccountBUS {
         }
     }
 
-    public void registerCustomer(
+    public boolean registerCustomer(
             String username,
             String password,
             String firstName,
@@ -139,7 +139,7 @@ public class AccountBUS {
 
         Role role = Role.CUSTOMER;
 
-        accountDAO.registerCustomer(
+        return accountDAO.registerCustomer(
                 username,
                 password,
                 firstName,

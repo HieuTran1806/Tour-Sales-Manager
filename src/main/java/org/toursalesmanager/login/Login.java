@@ -23,6 +23,7 @@ public class Login extends JFrame {
     AccountBUS accountBUS;
 
     public Login() {
+        accountBUS = new AccountBUS();
         initComponents();
         setLocationRelativeTo(null);
     }
@@ -172,7 +173,6 @@ public class Login extends JFrame {
                 return;
             }
 
-            AccountBUS accountBUS = new AccountBUS();
             AccountDTO account = accountBUS.login(username, password);
             if (account == null) {
                 JOptionPane.showMessageDialog(this, "Sai tài khoản hoặc mật khẩu.");

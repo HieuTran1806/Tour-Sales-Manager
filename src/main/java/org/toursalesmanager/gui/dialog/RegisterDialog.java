@@ -1,16 +1,20 @@
 package org.toursalesmanager.gui.dialog;
 
+import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.AccountBUS;
-import org.toursalesmanager.gui.component.ButtonFactory;
-import org.toursalesmanager.gui.helper.UIColors;
-
 
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+
+import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
+import org.toursalesmanager.gui.helper.UIColors;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterDialog extends JDialog {
@@ -19,34 +23,63 @@ public class RegisterDialog extends JDialog {
     JPasswordField txtPassword;
     JPasswordField txtConfirmPassword;
 
-    JTextField txtUsername, txtFirstName, txtLastName, txtAddress, txtPhoneNumber, txtPhone;
-    LocalDate dob;
+    JTextField txtUsername, txtFirstName, txtLastName, txtAddress, txtPhoneNumber;
+    JDateChooser dob;
+
+    String formatter = ("dd/MM/yyyy");
+
+    JPanel panelForm, panelButtons;
 
     JButton btnRegister, btnCancel;
 
-    @Getter
-    boolean registered;
     @Getter
     String registeredUsername;
 
     public RegisterDialog(Frame owner, AccountBUS accountBUS) {
         super(owner, "Đăng ký tài khoản", true);
 
+
         this.accountBUS = accountBUS;
 
-        initButtons();
         initComponents();
         initEvents();
 
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        pack();
-        setMinimumSize(new Dimension(450, 400));
         setLocationRelativeTo(owner);
-        setResizable(false);
+        pack();
     }
 
     private void initComponents() {
+        setLayout(new BorderLayout());
 
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setMinimumSize(new Dimension(450, 400));
+        setResizable(false);
+
+        panelForm = new JPanel(new GridLayout(0, 2, 10, 10));
+        panelButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+
+        // add buttons to south panel
+        initButtons();
+
+        // add form fields to center panel
+        AddComponentToForm.addFormRow(panelForm, "Tên đăng nhập:", txtUsername = new JTextField());
+        AddComponentToForm.addFormRow(panelForm, "Mật khẩu:", txtPassword = new JPasswordField());
+        AddComponentToForm.addFormRow(panelForm, "Xác nhận mật khẩu:", txtConfirmPassword = new JPasswordField());
+        AddComponentToForm.addFormRow(panelForm, "Họ:", txtFirstName = new JTextField());
+        AddComponentToForm.addFormRow(panelForm, "Tên:", txtLastName = new JTextField());
+        AddComponentToForm.addFormRow(panelForm, "Địa chỉ:", txtAddress = new JTextField());
+        AddComponentToForm.addFormRow(panelForm, "Số điện thoại:", txtPhoneNumber = new JTextField());
+
+        dob = new JDateChooser();
+        dob.setDateFormatString(formatter);
+        dob.setDate(null);
+        AddComponentToForm.addFormRow(panelForm, "Ngày sinh:", dob);
+
+        panelButtons.add(btnRegister);
+        panelButtons.add(btnCancel);
+
+        add(panelForm, BorderLayout.CENTER);
+        add(panelButtons, BorderLayout.SOUTH);
     }
 
     private void initButtons(){
@@ -60,7 +93,6 @@ public class RegisterDialog extends JDialog {
     }
 
     private void register() {
-
         String username = txtUsername.getText().trim();
         String password = new String(txtPassword.getPassword());
 
@@ -69,8 +101,8 @@ public class RegisterDialog extends JDialog {
         String firstName = txtFirstName.getText().trim();
         String lastName = txtLastName.getText().trim();
         String address = txtAddress.getText().trim();
-        String phone = txtPhone.getText().trim();
-        // LocalDate date = dob
+        String phone = txtPhoneNumber.getText().trim();
+        LocalDate d = dob.getDate() != null ? dob.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : null;
 
         if (username.isBlank()
                 || password.isBlank()
@@ -78,6 +110,7 @@ public class RegisterDialog extends JDialog {
                 || lastName.isBlank()
                 || address.isBlank()
                 || phone.isBlank()
+                || d == null
         ) {
 
             JOptionPane.showMessageDialog(
@@ -96,25 +129,31 @@ public class RegisterDialog extends JDialog {
         }
 
         try {
-            accountBUS.registerCustomer(
+            Date date = dob.getDate();
+            LocalDate localDate = null;
+            if (date != null) {
+                localDate = date.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+            }
+            if(accountBUS.registerCustomer(
                     username,
                     password,
                     firstName,
                     lastName,
                     address,
                     phone,
-                    dob
-            );
+                    localDate
+            )){
+                registeredUsername = username;
 
-            registered = true;
-            registeredUsername = username;
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Đăng ký tài khoản thành công"
+                );
+                dispose();
+            }
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Đăng ký tài khoản thành công"
-            );
-
-            dispose();
 
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(
@@ -124,6 +163,7 @@ public class RegisterDialog extends JDialog {
                     JOptionPane.WARNING_MESSAGE
             );
         } catch (Exception ex) {
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(
                     this,
                     "Không thể đăng ký tài khoản",
@@ -131,5 +171,9 @@ public class RegisterDialog extends JDialog {
                     JOptionPane.ERROR_MESSAGE
             );
         }
+    }
+
+    public boolean isRegistered() {
+        return registeredUsername != null;
     }
 }

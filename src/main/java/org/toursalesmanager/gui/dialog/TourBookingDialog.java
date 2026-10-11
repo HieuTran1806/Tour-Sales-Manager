@@ -9,6 +9,7 @@ import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourBookingDTO;
 import org.toursalesmanager.dto.CustomerDTO;
 import org.toursalesmanager.dto.TourPlanDTO;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.validate.ValidationException;
 
@@ -138,65 +139,65 @@ public class TourBookingDialog extends JDialog {
         customerSearchPanel.add(txtCustomerSearch, BorderLayout.CENTER);
         customerSearchPanel.add(searchCustomerBtn, BorderLayout.EAST);
 
-        addFormRow(formPanel, "Tìm khách hàng:", customerSearchPanel);
+        AddComponentToForm.addFormRow(formPanel, "Tìm khách hàng:", customerSearchPanel);
 
         // row id customer
         txtIdCustomer = new JTextField();
-        addFormRow(formPanel, "Mã khách hàng", txtIdCustomer);
+        AddComponentToForm.addFormRow(formPanel, "Mã khách hàng", txtIdCustomer);
 
         txtFirstName = new JTextField();
-        addFormRow(formPanel, "Họ: ", txtFirstName);
+        AddComponentToForm.addFormRow(formPanel, "Họ: ", txtFirstName);
 
         txtLastName = new JTextField();
-        addFormRow(formPanel, "Tên: ", txtLastName);
+        AddComponentToForm.addFormRow(formPanel, "Tên: ", txtLastName);
 
         txtAddress = new JTextField();
-        addFormRow(formPanel, "Địa chỉ: ", txtAddress);
+        AddComponentToForm.addFormRow(formPanel, "Địa chỉ: ", txtAddress);
 
         txtPhoneNumber = new JTextField();
-        addFormRow(formPanel, "Số điện thoại: ", txtPhoneNumber);
+        AddComponentToForm.addFormRow(formPanel, "Số điện thoại: ", txtPhoneNumber);
 
         dateCustomerDob = new JDateChooser();
         dateCustomerDob.setDateFormatString(formatter);
-        addFormRow(formPanel, "Ngày sinh: ", dateCustomerDob);
+        AddComponentToForm.addFormRow(formPanel, "Ngày sinh: ", dateCustomerDob);
 
         // row id tour plan
         loadTourPlans();
         tourPlanCombo.setModel(tourPlanModel);
-        addFormRow(formPanel, "Mã kế hoạch tour:", tourPlanCombo);
+        AddComponentToForm.addFormRow(formPanel, "Mã kế hoạch tour:", tourPlanCombo);
 
         // row booking date
         jBookingDate = new JDateChooser();
         jBookingDate.setDateFormatString(formatter);
         jBookingDate.setDate(valueOf(LocalDate.now()));
-        addFormRow(formPanel, "Ngày đặt: ",jBookingDate);
+        AddComponentToForm.addFormRow(formPanel, "Ngày đặt: ",jBookingDate);
 
         // row tickets
         txtTickets = new JTextField();
-        addFormRow(formPanel, "Số lượng vé: ", txtTickets);
+        AddComponentToForm.addFormRow(formPanel, "Số lượng vé: ", txtTickets);
 
 
         // row price
         txtPrice = new JTextField();
         txtPrice.setEditable(false);
-        addFormRow(formPanel, "Giá vé: ",txtPrice);
+        AddComponentToForm.addFormRow(formPanel, "Giá vé: ",txtPrice);
 
 
         // row cost total
         txtCostTotal = new JTextField();
         txtCostTotal.setEditable(false);
-        addFormRow(formPanel, "Tổng số tiền: ",txtCostTotal);
+        AddComponentToForm.addFormRow(formPanel, "Tổng số tiền: ",txtCostTotal);
 
         // row booking status
         String[]  tourBookingStatus = {"Chờ xác nhận", "Đã xác nhận", "Đã hủy", "Hoàn thành", "Hết hạn"};
         // hết hạn khi khách hàng không thanh toán/ xác nhận đúng hạn
         tourBookingStatusCombo = new JComboBox<>(tourBookingStatus);
-        addFormRow(formPanel, "Trạng thái phiếu đặt: ",tourBookingStatusCombo);
+        AddComponentToForm.addFormRow(formPanel, "Trạng thái phiếu đặt: ",tourBookingStatusCombo);
 
 
         // row mo ta
         txtNote = new JTextArea();
-        addFormRow(formPanel, "Ghi chú: ",txtNote);
+        AddComponentToForm.addFormRow(formPanel, "Ghi chú: ",txtNote);
 
 
         southPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
@@ -227,19 +228,6 @@ public class TourBookingDialog extends JDialog {
                 tourPlanModel.addElement(tourPlan);
             }
         }
-    }
-
-    private void addFormRow(JPanel formPanel, String labelText, JComponent component) {
-        JLabel label = new JLabel(labelText);
-
-        label.setBorder(
-                BorderFactory.createEmptyBorder(
-                        5, 5, 5, 0
-                )
-        );
-
-        formPanel.add(label);
-        formPanel.add(component);
     }
 
     private void initEvents() {
