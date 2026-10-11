@@ -2,6 +2,8 @@ package org.toursalesmanager.bus;
 
 import org.toursalesmanager.dao.TourDAO;
 import org.toursalesmanager.dto.TourDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.login.SessionManager;
 
 import java.util.ArrayList;
 
@@ -18,11 +20,13 @@ public class TourBUS {
     }
 
     public ArrayList<TourDTO> getAllTours(){
+        requirePermission(Permission.VIEW_TOUR);
         lsTour = tourDAO.getAllTours();
         return lsTour;
     }
 
     public boolean addTour(TourDTO t){
+        requirePermission(Permission.MANAGE_TOUR);
         if(t == null) return false;
 
         if(t.getNumberOfDate() <= 0 || t.getSeats() < 0){
@@ -36,6 +40,8 @@ public class TourBUS {
     }
 
     public boolean editTour(TourDTO t){
+        requirePermission(Permission.MANAGE_TOUR);
+        if (t == null) return false;
         if(t.getNumberOfDate() <= 0 || t.getSeats() < 0)
             return false;
 
@@ -43,10 +49,12 @@ public class TourBUS {
     }
 
     public boolean removeTour(String maTour){
+        requirePermission(Permission.MANAGE_TOUR);
         return tourDAO.removeTour(maTour);
     }
 
     public ArrayList<TourDTO> search(String keyWord){
+        requirePermission(Permission.VIEW_TOUR);
         ArrayList<TourDTO> list = new ArrayList<>();
         for (TourDTO lt : lsTour){
             if(lt.getTourName().trim().toLowerCase().contains(keyWord)){
@@ -57,6 +65,7 @@ public class TourBUS {
     }
 
     public TourDTO getByID(String maTour){
+        requirePermission(Permission.VIEW_TOUR);
         TourDTO tour = new TourDTO();
         for (TourDTO t : lsTour){
             if(t.getIdTour().trim().equalsIgnoreCase(maTour)){
@@ -68,6 +77,7 @@ public class TourBUS {
     }
 
     public boolean existedTourWithID(String maTour){
+        requirePermission(Permission.VIEW_TOUR);
         for (TourDTO t : lsTour){
             if(t.getIdTour().trim().equalsIgnoreCase(maTour))
                 return true;
@@ -76,6 +86,7 @@ public class TourBUS {
     }
 
     public ArrayList<TourDTO> getListsByName(String name){
+        requirePermission(Permission.VIEW_TOUR);
         if(name.isEmpty()){
             return null;
         }
@@ -84,6 +95,7 @@ public class TourBUS {
     }
 
     public int getVacantSpot(String maTour){
+        requirePermission(Permission.VIEW_TOUR);
         TourDTO t = getByID(maTour);
         if(t != null){
             return t.getSeats();
@@ -92,5 +104,12 @@ public class TourBUS {
         return 0;
     }
 
+    private void requirePermission(Permission permission) {
+        if (!SessionManager.hasPermission(permission)) {
+            throw new SecurityException(
+                    "Bạn không có quyền thực hiện thao tác này"
+            );
+        }
+    }
 
 }

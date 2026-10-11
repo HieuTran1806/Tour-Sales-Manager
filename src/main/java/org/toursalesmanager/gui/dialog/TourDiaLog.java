@@ -45,7 +45,7 @@ public class TourDiaLog extends JDialog {
 
     public TourDiaLog(TourBUS tourBUS, TourDTO tourDTO){
         this.tourDTO = tourDTO;
-        // this.tourBUS = tourBUS;
+        this.tourBUS = tourBUS;
         tourTypeBUS = new TourTypeBUS();
         locationBUS = new LocationBUS();
         cbLoaiTours = new JComboBox<>();

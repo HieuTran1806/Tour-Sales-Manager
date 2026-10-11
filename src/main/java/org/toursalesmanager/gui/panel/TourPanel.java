@@ -3,17 +3,18 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourBUS;
 import org.toursalesmanager.dto.TourDTO;
+import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.TourDetailDialog;
 import org.toursalesmanager.gui.dialog.TourDiaLog;
 import org.toursalesmanager.gui.helper.UIColors;
+import org.toursalesmanager.login.SessionManager;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.util.ArrayList;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TourPanel extends JPanel {
@@ -39,6 +40,9 @@ public class TourPanel extends JPanel {
     final TourBUS tourBUS;
 
     public TourPanel(){
+        if (!SessionManager.hasPermission(Permission.VIEW_TOUR)) {
+            throw new SecurityException("Bạn không có quyền xem tour");
+        }
         tourBUS = new TourBUS();
         init();
         loadTable();
@@ -46,11 +50,17 @@ public class TourPanel extends JPanel {
     }
 
     private void init(){
+        boolean canManageTours =
+                SessionManager.hasPermission(Permission.MANAGE_TOUR);
+
         setLayout(new BorderLayout());
 
         // northPanel
         northPanel = new JPanel(new BorderLayout());
-        JLabel jlbTitle = new JLabel("QUẢN LÝ TOUR DU LỊCH", JLabel.CENTER);
+        JLabel jlbTitle = new JLabel(
+                canManageTours ? "QUẢN LÝ TOUR DU LỊCH" : "DANH SÁCH TOUR DU LỊCH",
+                JLabel.CENTER
+        );
         jlbTitle.setFont(new Font("Arial", Font.BOLD, 18));
         northPanel.add(jlbTitle, BorderLayout.NORTH); // northPanel add components
 
@@ -82,6 +92,7 @@ public class TourPanel extends JPanel {
                 " Tất cả", " Tên Tour", " Địa điểm khởi hành"
         });
         cmbSearchType.setFont(new Font("Arial", Font.PLAIN, 14));
+        cmbSearchType.addActionListener(e -> searchByType());
         gbc.gridx = 1;
         searchPanel.add(cmbSearchType, gbc);
 
@@ -102,10 +113,13 @@ public class TourPanel extends JPanel {
         // southPanel contain buttons
         southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         add();
+        addBtn.setVisible(canManageTours);
         southPanel.add(addBtn);
         delete();
+        deleteBtn.setVisible(canManageTours);
         southPanel.add(deleteBtn);
         edit();
+        editBtn.setVisible(canManageTours);
         southPanel.add(editBtn);
         viewDetail();
         southPanel.add(detailBtn);
@@ -169,7 +183,12 @@ public class TourPanel extends JPanel {
 
     private void add(){
         addBtn = ButtonFactory.create("Thêm Tour", UIColors.ADD);
-        addBtn.addActionListener(e -> openDiaLog(null));
+        addBtn.addActionListener(e -> {
+            if (!requireManagePermission()) {
+                return;
+            }
+            openDiaLog(null);
+        });
     }
 
     private void openDiaLog(TourDTO tourDTO){
@@ -182,13 +201,19 @@ public class TourPanel extends JPanel {
         deleteBtn = ButtonFactory.create("Xóa tour", UIColors.DELETE);
         deleteBtn.setEnabled(false);
         deleteBtn.addActionListener(e ->{
+            if (!requireManagePermission()) {
+                return;
+            }
             int row = table.getSelectedRow();
             if (row == -1){
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn tour cần xóa");
                 return;
             }
 
-            String maTour = tableModel.getValueAt(row, 0).toString();
+            String maTour = getSelectedTourId();
+            if (maTour == null) {
+                return;
+            }
             int confirm = JOptionPane.showConfirmDialog(this, "Xác nhận xóa?");
             if(confirm == JOptionPane.YES_OPTION){
                 boolean result = tourBUS.removeTour(maTour);
@@ -205,12 +230,18 @@ public class TourPanel extends JPanel {
         editBtn = ButtonFactory.create("Chỉnh sửa", UIColors.EDIT);
         editBtn.setEnabled(false);
         editBtn.addActionListener(e -> {
+            if (!requireManagePermission()) {
+                return;
+            }
             int row = table.getSelectedRow();
             if (row == -1) {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn tour cần sửa");
                 return;
             }
-            String maTour = tableModel.getValueAt(row, 0).toString();
+            String maTour = getSelectedTourId();
+            if (maTour == null) {
+                return;
+            }
             TourDTO t = tourBUS.getByID(maTour);
             openDiaLog(t);
         });
@@ -220,13 +251,12 @@ public class TourPanel extends JPanel {
         detailBtn = ButtonFactory.create("Xem chi tiết", UIColors.VIEW);
         detailBtn.setEnabled(false);
         detailBtn.addActionListener(e -> {
-            int row = table.getSelectedRow();
-            if (row == -1) {
+            String maTour = getSelectedTourId();
+            if (maTour == null) {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn kế tour để xem");
                 return;
             }
 
-            String maTour = tableModel.getValueAt(row, 0).toString();
             TourDTO t = tourBUS.getByID(maTour);
             TourDetailDialog dialog = new TourDetailDialog(t);
             dialog.setVisible(true);
@@ -236,9 +266,8 @@ public class TourPanel extends JPanel {
     private void refresh(){
         refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(e -> {
-            String keyWord = txtSearch.getText().trim().toLowerCase();
-            ArrayList<TourDTO> lsTour = tourBUS.search(keyWord);
-            loadTableByName(lsTour);
+            loadTable();
+            searchByType();
         });
     }
 
@@ -259,30 +288,39 @@ public class TourPanel extends JPanel {
         }
     }
 
-    private void loadTableByName(ArrayList<TourDTO> list){
-        tableModel.setRowCount(0);
-
-        for(TourDTO t : list) {
-            tableModel.addRow(new Object[]{
-                    t.getIdTour(),
-                    t.getTourName(),
-                    t.getNumberOfDate(),
-                    t.getPrice(),
-                    t.getSeats(),
-                    t.getDepartureLocation(),
-                    t.getIdTourType(),
-                    t.getIdLocation()
-            });
-        }
-    }
-
     private void hasSelectedRow(){
         table.getSelectionModel().addListSelectionListener(e ->{
             boolean hadSelection = table.getSelectedRow() != -1;
 
-            deleteBtn.setEnabled(hadSelection);
-            editBtn.setEnabled(hadSelection);
+            boolean canManageTours =
+                    SessionManager.hasPermission(Permission.MANAGE_TOUR);
+            deleteBtn.setEnabled(hadSelection && canManageTours);
+            editBtn.setEnabled(hadSelection && canManageTours);
             detailBtn.setEnabled(hadSelection);
         });
+    }
+
+    private String getSelectedTourId() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow < 0) {
+            return null;
+        }
+
+        int modelRow = table.convertRowIndexToModel(selectedRow);
+        return tableModel.getValueAt(modelRow, 0).toString();
+    }
+
+    private boolean requireManagePermission() {
+        if (SessionManager.hasPermission(Permission.MANAGE_TOUR)) {
+            return true;
+        }
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Bạn không có quyền quản lý tour.",
+                "Không đủ quyền",
+                JOptionPane.WARNING_MESSAGE
+        );
+        return false;
     }
 }
