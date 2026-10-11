@@ -154,8 +154,6 @@ public class Login extends JFrame {
         mainPanel.setBackground(UIColors.BACKGROUND);
         formPanel.setBackground(UIColors.BACKGROUND);
 
-
-
         pack();
         setLocationRelativeTo(null);
     }
