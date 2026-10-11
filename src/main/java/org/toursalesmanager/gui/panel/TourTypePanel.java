@@ -4,8 +4,11 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourTypeBUS;
 import org.toursalesmanager.dto.TourTypeDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.TourTypeDialog;
 import org.toursalesmanager.gui.helper.UIColors;
+import org.toursalesmanager.login.SessionManager;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -42,11 +45,13 @@ public class TourTypePanel extends JPanel {
     }
 
     public void init(){
+        boolean canManageTourType = SessionManager.hasPermission(Permission.MANAGE_TOUR_TYPE);
+
         setLayout(new BorderLayout());
 
         //North Panel
         northPanel = new JPanel(new BorderLayout());
-        JLabel lblTitle = new JLabel("QUẢN LÝ LOẠI TOUR", JLabel.CENTER);
+        JLabel lblTitle = new JLabel(canManageTourType ? "QUẢN LÝ LOẠI TOUR" : "DANH SÁCH LOẠI TOUR", JLabel.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
         northPanel.add(lblTitle, BorderLayout.NORTH);
 
@@ -85,10 +90,13 @@ public class TourTypePanel extends JPanel {
         //South Panel
         southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         add(); // add button
+        addBtn.setVisible(canManageTourType);
         southPanel.add(addBtn);
         delete(); // delete button
+        deleteBtn.setVisible(canManageTourType);
         southPanel.add(deleteBtn);
         edit(); // edit button
+        editBtn.setVisible(canManageTourType);
         southPanel.add(editBtn);
         refresh();
         southPanel.add(refreshBtn);
@@ -127,21 +135,6 @@ public class TourTypePanel extends JPanel {
         }
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // in south panel
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
-    }
-
     private void searchByType(){
         String keyWord = txtSearch.getText().trim().toLowerCase();
 
@@ -158,8 +151,15 @@ public class TourTypePanel extends JPanel {
     }
 
     private void add(){
-        addBtn = createBtn("Thêm loại Tour", UIColors.ADD);
-        addBtn.addActionListener(e -> openDiaLog(null));
+        addBtn = ButtonFactory.create("Thêm loại Tour", UIColors.ADD);
+        addBtn.addActionListener(
+                e -> {
+                    if (!requireManagePermission()) {
+                        return;
+                    }
+                    openDiaLog(null);
+                }
+        );
     }
 
     private void openDiaLog(TourTypeDTO tourTypeDTO){
@@ -169,16 +169,20 @@ public class TourTypePanel extends JPanel {
     }
 
     private void delete(){
-        deleteBtn = createBtn("Xóa loại Tour", UIColors.DELETE);
+        deleteBtn = ButtonFactory.create("Xóa loại Tour", UIColors.DELETE);
         deleteBtn.setEnabled(false);
         deleteBtn.addActionListener(e ->{
+            if (!requireManagePermission()) {
+                return;
+            }
             int row = table.getSelectedRow();
             if (row == -1){
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn dòng cần xóa");
                 return;
             }
 
-            String maLoaiTour = tableModel.getValueAt(row, 0).toString();
+            int modelRow = table.convertRowIndexToModel(row);
+            String maLoaiTour = tableModel.getValueAt(modelRow, 0).toString();
             int confirm = JOptionPane.showConfirmDialog(this, "Xác nhận xóa?");
             if(confirm == JOptionPane.YES_OPTION){
                 boolean result = tourTypeBUS.removeLoaiTour(maLoaiTour);
@@ -192,23 +196,28 @@ public class TourTypePanel extends JPanel {
     }
 
     private void edit(){
-        editBtn = createBtn("Chỉnh sửa", UIColors.EDIT);
+        editBtn = ButtonFactory.create("Chỉnh sửa", UIColors.EDIT);
         editBtn.setEnabled(false);
 
         editBtn.addActionListener(e -> {
+            if(!requireManagePermission()) {
+                return;
+            }
+
             int row = table.getSelectedRow();
             if (row == -1) {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn loại tour cần sửa");
                 return;
             }
-            String maLoaiTour = tableModel.getValueAt(row, 0).toString();
+            int modelRow = table.convertRowIndexToModel(row);
+            String maLoaiTour = tableModel.getValueAt(modelRow, 0).toString();
             TourTypeDTO lt = tourTypeBUS.getById(maLoaiTour);
             openDiaLog(lt);
         });
     }
 
     private void refresh(){
-        refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
+        refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(e -> {
             String keyWord = txtSearch.getText().trim().toLowerCase();
             ArrayList<TourTypeDTO> lsCate = tourTypeBUS.search(keyWord);
@@ -232,8 +241,24 @@ public class TourTypePanel extends JPanel {
     private void hasSelectedRow(){
         table.getSelectionModel().addListSelectionListener(e ->{
             boolean hadSelection = table.getSelectedRow() != -1;
-            deleteBtn.setEnabled(hadSelection);
-            editBtn.setEnabled(hadSelection);
+            boolean canManageTourType =
+                    SessionManager.hasPermission(Permission.MANAGE_TOUR_TYPE);
+            deleteBtn.setEnabled(hadSelection && canManageTourType);
+            editBtn.setEnabled(hadSelection && canManageTourType);
         });
+    }
+
+    private boolean requireManagePermission() {
+        if (SessionManager.hasPermission(Permission.MANAGE_TOUR_TYPE)) {
+            return true;
+        }
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Bạn không có quyền quản lý loại tour.",
+                "Không đủ quyền",
+                JOptionPane.WARNING_MESSAGE
+        );
+        return false;
     }
 }

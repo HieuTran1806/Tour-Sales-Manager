@@ -155,7 +155,7 @@ public class TourPanel extends JPanel {
         RowFilter<DefaultTableModel, Object> rf = new RowFilter<DefaultTableModel, Object>() {
             @Override
             public boolean include(Entry<? extends DefaultTableModel, ? extends Object> entry) {
-                if(!keyWord.isEmpty()){
+                if (!keyWord.isEmpty()) {
                     boolean found = false;
                     switch (searchType) {
                         case " Tên Tour":
@@ -172,7 +172,7 @@ public class TourPanel extends JPanel {
                                 }
                             }
                     }
-                    if(!found) return false;
+                    if (!found) return false;
                 }
 
                 return true;
@@ -233,6 +233,7 @@ public class TourPanel extends JPanel {
             if (!requireManagePermission()) {
                 return;
             }
+
             int row = table.getSelectedRow();
             if (row == -1) {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn tour cần sửa");

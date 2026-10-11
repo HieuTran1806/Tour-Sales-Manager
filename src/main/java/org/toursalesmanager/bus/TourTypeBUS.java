@@ -2,6 +2,8 @@ package org.toursalesmanager.bus;
 
 import org.toursalesmanager.dao.TourTypeDAO;
 import org.toursalesmanager.dto.TourTypeDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.login.SessionManager;
 
 import java.util.ArrayList;
 
@@ -20,6 +22,7 @@ public class TourTypeBUS {
     }
 
     public boolean addLoaiTour(TourTypeDTO cate){
+        requireManagePermission();
         if(cate == null) return false;
 
         boolean success = tourTypeDAO.addLoaiTour(cate);
@@ -29,10 +32,12 @@ public class TourTypeBUS {
     }
 
     public boolean editLoaiTour(TourTypeDTO cate){
+        requireManagePermission();
         return tourTypeDAO.editLoaiTour(cate);
     }
 
     public boolean removeLoaiTour(String maLoaiTour){
+        requireManagePermission();
         return tourTypeDAO.removeLoaiTour(maLoaiTour);
     }
 
@@ -65,5 +70,13 @@ public class TourTypeBUS {
                 return true;
         }
         return false;
+    }
+
+    private void requireManagePermission() {
+        if (!SessionManager.hasPermission(Permission.MANAGE_TOUR_TYPE)) {
+            throw new SecurityException(
+                    "Bạn không có quyền quản lý loại tour."
+            );
+        }
     }
 }
