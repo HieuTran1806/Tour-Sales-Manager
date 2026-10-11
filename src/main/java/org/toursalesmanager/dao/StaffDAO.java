@@ -171,8 +171,8 @@ public class StaffDAO {
         try (Connection conn = MyConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                if (!recordExists(conn, staffExistsSql, nv.getIdStaff())
-                        || !recordExists(conn, accountExistsSql, nv.getIdStaff())) {
+                if (!recordExists(nv.getIdStaff())
+                        || !recordExists(nv.getIdStaff())) {
                     conn.rollback();
                     return false;
                 }
@@ -209,9 +209,11 @@ public class StaffDAO {
         }
     }
 
-    private boolean recordExists(Connection conn, String sql, String idStaff)
+    public boolean recordExists(String idStaff)
             throws SQLException {
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        String sql = "SELECT 1 FROM NhanVien WHERE MaNV = ?";
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, idStaff);
             try (ResultSet rs = pstmt.executeQuery()) {
                 return rs.next();

@@ -14,6 +14,7 @@ import org.toursalesmanager.gui.helper.UIColors;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Objects;
@@ -29,8 +30,6 @@ public class StaffDialog extends JDialog {
     JButton cancelBtn, saveBtn;
 
     JDateChooser jDob;
-
-    JLabel lbIDStaff, lbFirstName, lbLastName, lbRole, lbBirth, lbPhoneNumber, lbAddress;
 
     JTextField txtAddress, txtFirstName, txtIdStaff, txtPhoneNumber, txtLastName;
 
@@ -72,157 +71,37 @@ public class StaffDialog extends JDialog {
         panelForm = new JPanel(new GridLayout(0, 2, 10, 10));
         jpBtn = new JPanel(new FlowLayout());
 
-
         //row idStaff
         txtIdStaff = new JTextField();
-        txtIdStaff.addActionListener(this::txtIdStaffActionPerformed);
         AddComponentToForm.addFormRow(panelForm, "Mã nhân viên: ", txtIdStaff);
 
-
         //row firstName
-        lbFirstName = new JLabel("Họ: ");
-        lbFirstName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbFirstName);
         txtFirstName = new JTextField();
-        panelForm.add(txtFirstName);
-
-        txtFirstName.addActionListener(this::txtFirstNameActionPerformed);
-
-        txtFirstName.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                String ho = txtFirstName.getText().trim();
-                if (!ho.matches("^[\\p{L}]+(\\s[\\p{L}]+)*$")) {
-                    JOptionPane.showMessageDialog(null,
-                            "Họ chỉ được chứa chữ cái và khoảng trắng!");
-                    return false; // Không cho rời field
-                }
-                if (ho.isEmpty()) {
-                    JOptionPane.showMessageDialog(null,
-                            "Họ không được để trống!");
-                    return false; // Không cho rời field
-                }
-                return true;
-            }
-        });
+        AddComponentToForm.addFormRow(panelForm, "Họ: ", txtFirstName);
 
         //row lastName
-        lbLastName = new JLabel("Tên: ");
-        lbLastName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbLastName);
         txtLastName = new JTextField();
-        panelForm.add(txtLastName);
-
-        txtLastName.addActionListener(this::txtLastNameActionPerformed);
-
-        txtLastName.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                String ten = txtLastName.getText().trim();
-                if (!ten.matches("^[\\p{L}]+(\\s[\\p{L}]+)*$")) {
-                    JOptionPane.showMessageDialog(null,
-                            "Tên chỉ được chứa chữ cái và khoảng trắng!");
-                    return false; // Không cho rời field
-                }
-                if (ten.isEmpty()) {
-                    JOptionPane.showMessageDialog(null,
-                            "Tên không được để trống!");
-                    return false; // Không cho rời field
-                }
-                return true;
-            }
-        });
+        AddComponentToForm.addFormRow(panelForm, "Tên: ", txtLastName);
 
         //row role
-        lbRole = new JLabel("Chức vụ: ");
-        lbRole.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbRole);
         loadRolesCombobox();
         panelForm.add(cbRoles);
-        panelForm.add(cbRoles);
+        AddComponentToForm.addFormRow(panelForm, "Chức vụ: ", cbRoles);
 
         //row birthDay
-        lbBirth = new JLabel("Ngày sinh ");
-        lbBirth.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbBirth);
 
         jDob = new JDateChooser();
         jDob.setDateFormatString("dd/MM/yyyy");
         jDob.setDate(valueOf(LocalDate.now()));
-        panelForm.add(jDob);
-
-        jDob.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                if (jDob.getDate() == null) {
-                    JOptionPane.showMessageDialog(null,
-                            "Ngày sinh không được để trống!");
-                    return false; // Không cho rời field
-                }
-                if (jDob.getDate().after(new java.util.Date())) {
-                    JOptionPane.showMessageDialog(null,
-                            "Ngày sinh không được lớn hơn ngày hiện tại!");
-                    return false; // Không cho rời field
-                }
-                return true;
-            }
-        });
+        AddComponentToForm.addFormRow(panelForm, "Ngày sinh: ", jDob);
 
         //row role
-        lbPhoneNumber = new JLabel("Số điện thoại: ");
-        lbPhoneNumber.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbPhoneNumber);
         txtPhoneNumber = new JTextField();
-        panelForm.add(txtPhoneNumber);
-
-        txtPhoneNumber.addActionListener(this::txtPhoneNumberActionPerformed);
-
-        txtPhoneNumber.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                String sdt = txtPhoneNumber.getText().trim();
-                if (!sdt.matches("^0\\d{9}$")) {
-                    JOptionPane.showMessageDialog(null,
-                            "Số điện thoại phải có 10 chữ số và bắt đầu bằng 0!");
-                    return false; // Không cho rời field
-                }
-                if (sdt.isEmpty()) {
-                    JOptionPane.showMessageDialog(null,
-                            "Số điện thoại không được để trống!");
-                    return false; // Không cho rời field
-                }
-                return true;
-            }
-        });
+        AddComponentToForm.addFormRow(panelForm, "Số điện thoại: ", txtPhoneNumber);
 
         //row address
-        lbAddress = new JLabel("Chức vụ: ");
-        lbAddress.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbAddress);
         txtAddress = new JTextField();
-        panelForm.add(txtAddress);
-
-        lbAddress.setText("Địa chỉ:");
-
-        txtAddress.addActionListener(this::txtAddressActionPerformed);
-
-        txtAddress.setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify(JComponent input) {
-                String diaChi = txtAddress.getText().trim();
-                if (!diaChi.matches("^[\\p{L}0-9\\s,.-]+$")) {
-                    JOptionPane.showMessageDialog(null,
-                            "Địa chỉ chỉ được chứa chữ cái, số, khoảng trắng và các ký tự ,.-!");
-                    return false; // Không cho rời field
-                }
-                if (diaChi.isEmpty()) {
-                    JOptionPane.showMessageDialog(null,
-                            "Địa chỉ không được để trống!");
-                    return false; // Không cho rời field
-                }
-                return true;
-            }
-        });
+        AddComponentToForm.addFormRow(panelForm, "Địa chỉ: ", txtAddress);
 
         // define handle funtion
         save();
@@ -248,13 +127,6 @@ public class StaffDialog extends JDialog {
         cbRoles.setModel(new DefaultComboBoxModel<>(roles));
     }
 
-    private void txtPhoneNumberActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtPhoneNumberActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtPhoneNumberActionPerformed
-
-    private void txtFirstNameActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtFirstNameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtFirstNameActionPerformed
 
     private void save(){
         saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
@@ -268,22 +140,10 @@ public class StaffDialog extends JDialog {
             String phoneNumber = txtPhoneNumber.getText().trim();
             String address = txtAddress.getText().trim();
 
-            if (idStaff.isEmpty()) {
-                JOptionPane.showMessageDialog(null,
-                        "Mã nhân viên không được để trống!");
-                return;
-            }
-            if (!idStaff.matches("^NV\\d{3}$")) {
-                JOptionPane.showMessageDialog(null,
-                        "Mã nhân viên phải có dạng NVxxx!");
-                return;
-            }
-            for (StaffDTO nv : bus.getAllStaffs()) {
-                if (nv.getIdStaff().equals(idStaff)) {
-                    JOptionPane.showMessageDialog(null,
-                            "Mã nhân viên đã tồn tại!");
-                    return;
-                }
+            try {
+                bus.validateStaffData(idStaff, firstName, lastName, dob, phoneNumber, address);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
 
             if (mode == Mode.ADD) {
@@ -322,18 +182,6 @@ public class StaffDialog extends JDialog {
             dispose();
         });
     }
-
-    private void txtAddressActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtAddressActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtAddressActionPerformed
-
-    private void txtLastNameActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtLastNameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtLastNameActionPerformed
-
-    private void txtIdStaffActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtIdStaffActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtIdStaffActionPerformed
 
     public void setStaffData(StaffDTO nv) {
         txtIdStaff.setText(nv.getIdStaff());
