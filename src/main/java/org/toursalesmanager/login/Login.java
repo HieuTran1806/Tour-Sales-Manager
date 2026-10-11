@@ -43,7 +43,10 @@ public class Login extends JFrame {
         registerBtn = new JButton();
 
         txtUsername = new JTextField(20);
+        txtUsername.setPreferredSize(new Dimension(280, 30));
+
         txtPassword = new JPasswordField(20);
+        txtPassword.setPreferredSize(new Dimension(280, 30));
         txtPassword.setEchoChar('*');
 
         // Header Panel
@@ -79,7 +82,7 @@ public class Login extends JFrame {
         // main Panel
         JPanel mainPanel = new JPanel(new BorderLayout(10, 15));
         mainPanel.setBorder(
-                BorderFactory.createEmptyBorder(25, 30, 15, 30)
+                BorderFactory.createEmptyBorder(25, 0, 15, 0)
         );
         JPanel formPanel = new JPanel(new GridBagLayout());
 
@@ -147,6 +150,8 @@ public class Login extends JFrame {
         mainPanel.add(southPanel, BorderLayout.SOUTH);
 
         setContentPane(mainPanel);
+        mainPanel.setBackground(UIColors.BACKGROUND);
+        formPanel.setBackground(UIColors.BACKGROUND);
 
 
 
