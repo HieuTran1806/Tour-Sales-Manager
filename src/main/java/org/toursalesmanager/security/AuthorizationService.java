@@ -35,6 +35,7 @@ public class AuthorizationService {
                         Permission.VIEW_TOUR_PLAN,
 
                         Permission.VIEW_CUSTOMER,
+                        Permission.MANAGE_CUSTOMER,
 
                         Permission.VIEW_BOOKING,
 
@@ -44,9 +45,7 @@ public class AuthorizationService {
                         Permission.VIEW_REVENUE_REPORT,
 
                         Permission.VIEW_INVOICE,
-                        Permission.CREATE_INVOICE,
-                        Permission.UPDATE_INVOICE,
-                        Permission.CANCEL_INVOICE,
+                        Permission.MANAGE_INVOICE,
 
                         Permission.VIEW_PROMOTION,
                         Permission.VIEW_STATISTICS
@@ -89,7 +88,6 @@ public class AuthorizationService {
                         Permission.MANAGE_TOUR_PLAN,
 
                         Permission.VIEW_CUSTOMER,
-                        Permission.MANAGE_CUSTOMER,
 
                         Permission.VIEW_BOOKING,
                         Permission.CREATE_BOOKING,
