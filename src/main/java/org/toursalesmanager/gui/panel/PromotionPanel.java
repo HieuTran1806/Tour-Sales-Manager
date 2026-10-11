@@ -7,6 +7,7 @@ import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.PromotionDialog;
 import org.toursalesmanager.gui.helper.ExcelHelper;
+import org.toursalesmanager.gui.helper.UIFontHelper;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
 
@@ -28,8 +29,6 @@ public class PromotionPanel extends JPanel {
     JButton btnAdd, btnDel, btnEdit, btnRefresh, btnExport;
 
     JComboBox<String> cbbKM;
-
-    Box.Filler filler1;
 
     JLabel lbTitle, jLabel2, jLabel3;
 
@@ -75,12 +74,11 @@ public class PromotionPanel extends JPanel {
     private void initComponents() {
         boolean canManagePromotion = SessionManager.hasPermission(Permission.MANAGE_PROMOTION);
 
-        jPanel1 = new JPanel();
+        jPanel1 = new JPanel(new BorderLayout(0, 8));
         lbTitle = new JLabel();
-        jPanel2 = new JPanel();
+        jPanel2 = new JPanel(new GridBagLayout());
         jLabel2 = new JLabel();
         cbbKM = new JComboBox<>();
-        filler1 = new Box.Filler(new Dimension(20, 0), new Dimension(20, 0), new Dimension(20, 32767));
         jLabel3 = new JLabel();
         txtSearch = new JTextField();
         jScrollPane1 = new JScrollPane();
@@ -92,64 +90,60 @@ public class PromotionPanel extends JPanel {
         btnRefresh = new JButton();
         btnExport = new JButton();
 
-        setPreferredSize(new Dimension(623, 300));
         setLayout(new BorderLayout());
 
-        jPanel1.setAlignmentX(0.0F);
-        jPanel1.setAlignmentY(0.0F);
-        jPanel1.setPreferredSize(new Dimension(623, 50));
-        jPanel1.setLayout(new BorderLayout());
-
-        lbTitle.setFont(new Font("Segoe UI", 1, 18)); // NOI18N8N
+        lbTitle.setFont(UIFontHelper.PAGE_TITLE);
         lbTitle.setHorizontalAlignment(SwingConstants.CENTER);
         lbTitle.setText(canManagePromotion ? "QUẢN LÝ KHUYẾN MÃI" : "DANH SÁCH KHUYẾN MÃI");
-        jPanel1.add(lbTitle, BorderLayout.PAGE_START);
+        lbTitle.setBorder(BorderFactory.createEmptyBorder(14, 10, 2, 10));
+        jPanel1.add(lbTitle, BorderLayout.NORTH);
 
-        jPanel2.setBorder(BorderFactory.createEmptyBorder(5, 100, 5, 100));
-        jPanel2.setAlignmentX(0.0F);
-        jPanel2.setAlignmentY(0.0F);
-        jPanel2.setMinimumSize(new Dimension(230, 35));
-        jPanel2.setPreferredSize(new Dimension(100, 45));
+        javax.swing.border.TitledBorder searchBorder =
+                BorderFactory.createTitledBorder(
+                        BorderFactory.createLineBorder(Color.CYAN, 2),
+                        "Tìm kiếm khuyến mãi"
+                );
+        searchBorder.setTitleFont(UIFontHelper.SECTION_TITLE);
+        jPanel2.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(0, 12, 8, 12),
+                searchBorder
+        ));
 
-        jLabel2.setFont(new Font("Segoe UI", 3, 14)); // NOI18N
+        jLabel2.setFont(UIFontHelper.BODY);
         jLabel2.setText("Loại");
-        jPanel2.add(jLabel2);
+        GridBagConstraints filterConstraints = new GridBagConstraints();
+        filterConstraints.insets = new Insets(6, 8, 6, 8);
+        filterConstraints.gridy = 0;
+        filterConstraints.gridx = 0;
+        filterConstraints.anchor = GridBagConstraints.LINE_START;
+        jPanel2.add(jLabel2, filterConstraints);
 
-        cbbKM.setFont(new Font("Segoe UI", 1, 14)); // NOI18N
+        cbbKM.setFont(UIFontHelper.BODY);
         cbbKM.setModel(new DefaultComboBoxModel<>(new String[] { "Tất cả", "KMHD", "KMTour" }));
-        cbbKM.setToolTipText("");
-        cbbKM.setMinimumSize(new Dimension(91, 20));
-        cbbKM.setName(""); // NOI18N
-        cbbKM.setPreferredSize(new Dimension(81, 30));
+        cbbKM.setPreferredSize(new Dimension(130, 30));
         cbbKM.addActionListener(this::cbbKMActionPerformed);
-        jPanel2.add(cbbKM);
-        jPanel2.add(filler1);
+        filterConstraints.gridx = 1;
+        jPanel2.add(cbbKM, filterConstraints);
 
-        jLabel3.setFont(new Font("Segoe UI", 3, 14)); // NOI18N
+        jLabel3.setFont(UIFontHelper.BODY);
         jLabel3.setText("Từ khóa");
-        jPanel2.add(jLabel3);
+        filterConstraints.gridx = 2;
+        jPanel2.add(jLabel3, filterConstraints);
 
-        txtSearch.setHorizontalAlignment(JTextField.CENTER);
-        txtSearch.setToolTipText("");
-        txtSearch.setAlignmentX(2.0F);
-        txtSearch.setAlignmentY(20.0F);
-        txtSearch.setMargin(new Insets(5, 10, 5, 10));
-        txtSearch.setMinimumSize(new Dimension(40, 22));
-        txtSearch.setPreferredSize(new Dimension(200, 28));
+        txtSearch.setFont(UIFontHelper.BODY);
+        txtSearch.setPreferredSize(new Dimension(260, 30));
         txtSearch.addActionListener(this::txtSearchActionPerformed);
-        jPanel2.add(txtSearch);
+        filterConstraints.gridx = 3;
+        filterConstraints.weightx = 1;
+        filterConstraints.fill = GridBagConstraints.HORIZONTAL;
+        jPanel2.add(txtSearch, filterConstraints);
 
-        jPanel1.add(jPanel2, BorderLayout.PAGE_END);
+        jPanel1.add(jPanel2, BorderLayout.CENTER);
 
         add(jPanel1, BorderLayout.PAGE_START);
 
         tblKM.setModel(new DefaultTableModel(
-                new Object [][] {
-                        {null, null, null, null, null, null, null},
-                        {null, null, null, null, null, null, null},
-                        {null, null, null, null, null, null, null},
-                        {null, null, null, null, null, null, null}
-                },
+                new Object [][] {},
                 new String [] {
                         "Mã KM", "Tên KM", "Ngày BD", "Ngày KT", "Hình thức", "Chiết Khấu(%)", "Ghi chú"
                 }
@@ -162,12 +156,17 @@ public class PromotionPanel extends JPanel {
                 return types [columnIndex];
             }
         });
+        tblKM.setFont(UIFontHelper.TABLE);
+        tblKM.setRowHeight(26);
+        tblKM.setFillsViewportHeight(true);
+        tblKM.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        tblKM.getTableHeader().setFont(UIFontHelper.SECTION_TITLE);
         jScrollPane1.setViewportView(tblKM);
-        jScrollPane1.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        jScrollPane1.setBorder(BorderFactory.createEmptyBorder(0, 12, 8, 12));
 
         add(jScrollPane1, BorderLayout.CENTER);
 
-        jPanel3.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 5));
+        jPanel3.setLayout(new FlowLayout(FlowLayout.CENTER, 12, 10));
 
 
         addPromotion();

@@ -10,6 +10,7 @@ import org.toursalesmanager.dto.PromotionalInvoiceDTO;
 import org.toursalesmanager.dto.KMTourDTO;
 import org.toursalesmanager.dto.TourDTO;
 import org.toursalesmanager.gui.helper.DateHelper;
+import org.toursalesmanager.gui.helper.UIFontHelper;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
@@ -403,7 +404,7 @@ public class PromotionDialog extends JDialog {
 
         pnlSwitch.setLayout(new CardLayout());
 
-        jLabel8.setFont(new Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel8.setFont(UIFontHelper.BODY);
         jLabel8.setText("Tổng tiền áp dụng tối thiểu:");
 
         txtDieukienapdung.addActionListener(this::txtDieukienapdungActionPerformed);
@@ -434,7 +435,7 @@ public class PromotionDialog extends JDialog {
 
         pnlSwitch.add(HOADON, "card2");
 
-        jLabel9.setFont(new Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel9.setFont(UIFontHelper.BODY);
         jLabel9.setText("Danh sách tour áp dụng");
 
         tblTour.setModel(new DefaultTableModel(
@@ -569,8 +570,109 @@ public class PromotionDialog extends JDialog {
                                 .addContainerGap())
         );
 
+        configureResponsiveLayout();
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void configureResponsiveLayout() {
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 8, 4));
+
+        addFormRow(formPanel, 0, jLabel1, txtMaCTKM);
+        addFormRow(formPanel, 1, jLabel2, txtTenctkm);
+        addFormRow(formPanel, 2, jLabel3, txtNgayBD);
+        addFormRow(formPanel, 3, jLabel4, txtNgayKT);
+
+        JPanel promotionTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        promotionTypePanel.add(rdoHd);
+        promotionTypePanel.add(rdoTour);
+        addFormRow(formPanel, 4, jLabel5, promotionTypePanel);
+
+        addFormRow(formPanel, 5, jLabel6, txtChietkhau);
+        addFormRow(formPanel, 6, jLabel7, txtGhichu);
+
+        HOADON.removeAll();
+        HOADON.setLayout(new BorderLayout(8, 8));
+        HOADON.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        HOADON.add(jLabel8, BorderLayout.NORTH);
+        HOADON.add(txtDieukienapdung, BorderLayout.CENTER);
+
+        TOUR.removeAll();
+        TOUR.setLayout(new BorderLayout(8, 8));
+        TOUR.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        TOUR.add(jLabel9, BorderLayout.NORTH);
+        TOUR.add(jScrollPane1, BorderLayout.CENTER);
+
+        pnlSwitch.removeAll();
+        pnlSwitch.setLayout(new CardLayout());
+        pnlSwitch.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY),
+                "Điều kiện áp dụng"
+        ));
+        pnlSwitch.setPreferredSize(new Dimension(520, 190));
+        pnlSwitch.add(HOADON, "card2");
+        pnlSwitch.add(TOUR, "card3");
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel.add(btnLuu);
+        buttonPanel.add(btnReset);
+        buttonPanel.add(btnHuy);
+
+        JPanel content = new JPanel(new BorderLayout(12, 8));
+        content.setBorder(BorderFactory.createEmptyBorder(16, 20, 16, 20));
+        content.add(formPanel, BorderLayout.NORTH);
+        content.add(pnlSwitch, BorderLayout.CENTER);
+        content.add(buttonPanel, BorderLayout.SOUTH);
+
+        for (JLabel label : new JLabel[]{
+                jLabel1, jLabel2, jLabel3, jLabel4, jLabel5,
+                jLabel6, jLabel7, jLabel8, jLabel9
+        }) {
+            UIFontHelper.apply(label, UIFontHelper.BODY);
+        }
+        for (JComponent input : new JComponent[]{
+                txtMaCTKM, txtTenctkm, txtNgayBD, txtNgayKT,
+                rdoHd, rdoTour, txtChietkhau, txtGhichu, txtDieukienapdung
+        }) {
+            UIFontHelper.apply(input, UIFontHelper.BODY);
+        }
+
+        tblTour.setFont(UIFontHelper.TABLE);
+        tblTour.setRowHeight(25);
+        tblTour.setFillsViewportHeight(true);
+        tblTour.getTableHeader().setFont(UIFontHelper.SECTION_TITLE);
+        txtNgayBD.setPreferredSize(new Dimension(250, 30));
+        txtNgayKT.setPreferredSize(new Dimension(250, 30));
+        txtMaCTKM.setPreferredSize(new Dimension(250, 30));
+        txtTenctkm.setPreferredSize(new Dimension(250, 30));
+        txtChietkhau.setPreferredSize(new Dimension(250, 30));
+        txtGhichu.setPreferredSize(new Dimension(250, 30));
+        txtDieukienapdung.setPreferredSize(new Dimension(250, 34));
+
+        setContentPane(content);
+    }
+
+    private void addFormRow(
+            JPanel formPanel,
+            int row,
+            JLabel label,
+            JComponent field
+    ) {
+        GridBagConstraints labelConstraints = new GridBagConstraints();
+        labelConstraints.gridx = 0;
+        labelConstraints.gridy = row;
+        labelConstraints.anchor = GridBagConstraints.LINE_START;
+        labelConstraints.insets = new Insets(5, 4, 5, 14);
+        formPanel.add(label, labelConstraints);
+
+        GridBagConstraints fieldConstraints = new GridBagConstraints();
+        fieldConstraints.gridx = 1;
+        fieldConstraints.gridy = row;
+        fieldConstraints.weightx = 1;
+        fieldConstraints.fill = GridBagConstraints.HORIZONTAL;
+        fieldConstraints.insets = new Insets(5, 0, 5, 4);
+        formPanel.add(field, fieldConstraints);
+    }
 
     public void loadTourTable() {
         DefaultTableModel model = (DefaultTableModel) tblTour.getModel();
