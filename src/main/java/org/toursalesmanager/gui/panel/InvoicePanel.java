@@ -9,9 +9,7 @@ import org.toursalesmanager.bus.*;
 import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.*;
-import org.toursalesmanager.gui.helper.DateHelper;
-import org.toursalesmanager.gui.helper.ExcelHelper;
-import org.toursalesmanager.gui.helper.UIColors;
+import org.toursalesmanager.gui.helper.*;
 import org.toursalesmanager.login.SessionManager;
 
 import java.awt.*;
@@ -31,6 +29,7 @@ public class InvoicePanel extends JPanel {
     JScrollPane jScrollPane1;
 
     JLabel lbname, lbtim;
+
     JPanel pnlfooter, pnlheader, pnlsearch, pnltable;
 
     JTable tblhoadon;
@@ -45,8 +44,6 @@ public class InvoicePanel extends JPanel {
     TourPlanBUS tourPlanBUS;
     PromotionBUS promotionBUS;
 
-
-
     public InvoicePanel() {
         initComponents();
         bus=new InvoiceBUS();
@@ -57,9 +54,8 @@ public class InvoicePanel extends JPanel {
 
     private void loadData(){
         model.setRowCount(0);
-        bus.docDs();
 
-        ArrayList<InvoiceDTO> ds = bus.getDs();
+        ArrayList<InvoiceDTO> ds = bus.getAllInvoices();
         if(ds==null) return;
         for(InvoiceDTO hd: ds){
             model.addRow(new Object[]{
@@ -69,7 +65,6 @@ public class InvoicePanel extends JPanel {
     }
     private void loadData(Date ngay){
         model.setRowCount(0);
-        bus.docDs();
 
         ArrayList<InvoiceDTO> ds =bus.getHDtheongay(ngay);
         if(ds==null) return;
@@ -81,7 +76,6 @@ public class InvoicePanel extends JPanel {
     }
     private void loadData(String loai,String key){
         model.setRowCount(0);
-        bus.docDs();
 
         ArrayList<InvoiceDTO> ds =bus.timNangcao(loai, key);
         if(ds==null) return;
@@ -117,9 +111,9 @@ public class InvoicePanel extends JPanel {
 
         pnlheader.setLayout(new BorderLayout());
 
-        lbname.setFont(new Font("Arial", 0, 18)); // NOI18N
+        lbname.setFont(UIFontHelper.PAGE_TITLE); // NOI18N
         lbname.setHorizontalAlignment(SwingConstants.CENTER);
-        lbname.setText("Quản lý hóa đơn");
+        lbname.setText("QUẢN LÝ HÓA ĐƠN");
         pnlheader.add(lbname, BorderLayout.CENTER);
 
         lbtim.setText("Tìm theo:");
@@ -267,9 +261,9 @@ public class InvoicePanel extends JPanel {
                 int cf =JOptionPane.showConfirmDialog(this, "Bạn có muốn xóa không?","Xác nhận",JOptionPane.YES_NO_OPTION);
                 if(cf==JOptionPane.YES_OPTION){
                     String ma = tblhoadon.getValueAt(row, 0).toString();
-                    InvoiceDTO hd=bus.timHd(ma);
+                    InvoiceDTO hd=bus.getInvoiceById(ma);
 
-                    if(bus.xoaHoaDon(ma)){
+                    if(bus.deleteInvoice(ma)){
                         DefaultTableModel model=(DefaultTableModel) tblhoadon.getModel();
 
                         model.removeRow(row);
@@ -298,7 +292,7 @@ public class InvoicePanel extends JPanel {
                 return;
             }
             String ma =tblhoadon.getValueAt(row, 0).toString().trim();
-            InvoiceDTO hd=bus.timHd(ma);
+            InvoiceDTO hd=bus.getInvoiceById(ma);
             if(hd!=null){
                 InvoiceDialog hdd=new InvoiceDialog(hd);
                 hdd.setModal(true);

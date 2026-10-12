@@ -12,7 +12,6 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.CustomerBUS;
-import org.toursalesmanager.dao.CustomerDAO;
 import org.toursalesmanager.dto.CustomerDTO;
 import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.gui.component.ButtonFactory;
@@ -41,7 +40,6 @@ public class CustomerPanel extends JPanel {
 
     JTextField txtSearch;
 
-    CustomerDAO ds = new CustomerDAO();
     CustomerBUS customerBUS = new CustomerBUS();
 
     public CustomerPanel() {
@@ -71,7 +69,7 @@ public class CustomerPanel extends JPanel {
                 search();
             }
         });
-        loadKhachHangToTable(ds.getAllCustomers());
+        loadKhachHangToTable(customerBUS.getAllCustomers());
         hasSelectedRow();
     }
 
@@ -177,10 +175,10 @@ public class CustomerPanel extends JPanel {
                 return;
             }
 
-            CustomerDialog dialog = new CustomerDialog(null, true, ds, CustomerDialog.Mode.ADD, null);
+            CustomerDialog dialog = new CustomerDialog(null, true, customerBUS, CustomerDialog.Mode.ADD, null);
             dialog.setVisible(true);
 
-            loadKhachHangToTable(ds.getAllCustomers());
+            loadKhachHangToTable(customerBUS.getAllCustomers());
         });
     }
     private void updateCustomer(){
@@ -196,10 +194,10 @@ public class CustomerPanel extends JPanel {
             if (i>=0){
                 String idStaff = jTable1.getValueAt(i, 0).toString();
                 CustomerDTO kh = customerBUS.findCustomerById(idStaff);
-                CustomerDialog dialog = new CustomerDialog(null, true, ds, CustomerDialog.Mode.EDIT, kh);
+                CustomerDialog dialog = new CustomerDialog(null, true, customerBUS, CustomerDialog.Mode.EDIT, kh);
                 dialog.setVisible(true);
 
-                loadKhachHangToTable(ds.getAllCustomers());
+                loadKhachHangToTable(customerBUS.getAllCustomers());
             }
         });
     }
@@ -226,7 +224,7 @@ public class CustomerPanel extends JPanel {
     private void lamMoi(){
         refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(v -> {
-            loadKhachHangToTable(ds.getAllCustomers());
+            loadKhachHangToTable(customerBUS.getAllCustomers());
         });
     }
 

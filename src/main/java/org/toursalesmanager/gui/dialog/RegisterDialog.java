@@ -39,7 +39,6 @@ public class RegisterDialog extends JDialog {
     public RegisterDialog(Frame owner, AccountBUS accountBUS) {
         super(owner, "Đăng ký tài khoản", true);
 
-
         this.accountBUS = accountBUS;
 
         initComponents();
@@ -65,17 +64,9 @@ public class RegisterDialog extends JDialog {
         // add form fields to center panel
         AddComponentToForm.addFormRow(panelForm, "Tên đăng nhập:", txtUsername = new JTextField());
         txtPassword = new JPasswordField();
-        AddComponentToForm.addFormRow(
-                panelForm,
-                "Mật khẩu:",
-                PasswordFieldWithReveal.create(txtPassword)
-        );
+        AddComponentToForm.addFormRow(panelForm, "Mật khẩu:", PasswordFieldWithReveal.create(txtPassword));
         txtConfirmPassword = new JPasswordField();
-        AddComponentToForm.addFormRow(
-                panelForm,
-                "Xác nhận mật khẩu:",
-                PasswordFieldWithReveal.create(txtConfirmPassword)
-        );
+        AddComponentToForm.addFormRow(panelForm, "Xác nhận mật khẩu:", PasswordFieldWithReveal.create(txtConfirmPassword));
         AddComponentToForm.addFormRow(panelForm, "Họ:", txtFirstName = new JTextField());
         AddComponentToForm.addFormRow(panelForm, "Tên:", txtLastName = new JTextField());
         AddComponentToForm.addFormRow(panelForm, "Địa chỉ:", txtAddress = new JTextField());

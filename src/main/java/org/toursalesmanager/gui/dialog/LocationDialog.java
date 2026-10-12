@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.*;
 import org.toursalesmanager.dto.*;
+import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
@@ -12,14 +14,14 @@ import java.awt.event.ActionEvent;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LocationDialog extends JDialog {
+    JPanel formPanel, buttonPanel;
+
     LocationBUS bus;
     LocationDTO dd;
     boolean sua=false;
     String maDiaDiemCu = "";
 
     JButton btnluu, btnHuy;
-
-    JLabel lbMaDiaDiem, lbDiaChi, lbTenDiaDiem, lbTenQuocGia;
 
     JTextField txtmadiadiem, txtdiachi, txttendd,txtquocgia;
 
@@ -29,6 +31,7 @@ public class LocationDialog extends JDialog {
         this.setTitle("Địa điểm");
         this.setLocationRelativeTo(null);
     }
+
     public LocationDialog(LocationDTO dd) {
         this.bus=new LocationBUS();
         this.dd = dd;
@@ -60,47 +63,28 @@ public class LocationDialog extends JDialog {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Địa điểm");
 
-        lbMaDiaDiem = new JLabel("Mã địa điểm:");
-        txtmadiadiem = new JTextField();
-
-        lbTenDiaDiem = new JLabel("Tên địa điểm:");
-        txttendd = new JTextField();
-
-        lbDiaChi = new JLabel("Địa chỉ:");
-        txtdiachi = new JTextField();
-
-        lbTenQuocGia = new JLabel("Quốc gia:");
-        txtquocgia = new JTextField();
-
-        btnluu = createBtn("Lưu", UIColors.SAVE);
-        btnHuy = createBtn("Huỷ", UIColors.CANCEL);
+        formPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
+        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0)); // Tạo lề dưới
 
         setLayout(new BorderLayout(10, 10));
 
-        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 15));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
+        txtmadiadiem = new JTextField();
+        AddComponentToForm.addFormRow(formPanel, "Mã địa điểm:", txtmadiadiem);
 
-        formPanel.add(lbMaDiaDiem);
-        formPanel.add(txtmadiadiem);
+        txttendd = new JTextField();
+        AddComponentToForm.addFormRow(formPanel, "Tên địa điểm:", txttendd);
 
-        formPanel.add(lbTenDiaDiem);
-        formPanel.add(txttendd);
+        txtdiachi = new JTextField();
+        AddComponentToForm.addFormRow(formPanel, "Địa chỉ:", txtdiachi);
 
-        formPanel.add(lbDiaChi);
-        formPanel.add(txtdiachi);
-
-        formPanel.add(lbTenQuocGia);
-        formPanel.add(txtquocgia);
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0)); // Tạo lề dưới
+        txtquocgia = new JTextField();
+        AddComponentToForm.addFormRow(formPanel, "Quốc gia:", txtquocgia);
 
         luu();
-        btnluu.setPreferredSize(new Dimension(100, 35));
-        huy();
-        btnHuy.setPreferredSize(new Dimension(100, 35));
-
         buttonPanel.add(btnluu);
+        huy();
         buttonPanel.add(btnHuy);
 
         add(formPanel, BorderLayout.CENTER);
@@ -111,18 +95,8 @@ public class LocationDialog extends JDialog {
         setLocationRelativeTo(null);
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-
-        return btn;
-    }
-
     private void luu(){
-        btnluu = createBtn("Lưu", UIColors.SAVE);
+        btnluu = ButtonFactory.create("Lưu", UIColors.SAVE);
         btnluu.addActionListener(v -> {
             try{
                 // them dia diem
@@ -175,14 +149,9 @@ public class LocationDialog extends JDialog {
     }
 
     private void huy(){
-        btnHuy = createBtn("Huỷ", UIColors.CANCEL);
+        btnHuy = ButtonFactory.create("Huỷ", UIColors.CANCEL);
         btnHuy.addActionListener(v -> {
             dispose();
         });
     }
-
-    private void txtquocgiaActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtquocgiaActionPerformed
-        // TODO add your handling code here:
-    }
-
 }

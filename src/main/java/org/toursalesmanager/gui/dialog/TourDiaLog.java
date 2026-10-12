@@ -8,6 +8,8 @@ import org.toursalesmanager.bus.TourBUS;
 import org.toursalesmanager.dto.LocationDTO;
 import org.toursalesmanager.dto.TourTypeDTO;
 import org.toursalesmanager.dto.TourDTO;
+import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
@@ -57,6 +59,7 @@ public class TourDiaLog extends JDialog {
         setModal(true);
 
         init();
+
         if(tourDTO != null){
             loadData();
         }
@@ -79,52 +82,30 @@ public class TourDiaLog extends JDialog {
         southPanel.add(cancelBtn);
 
         //row maTour
-        jlbMaTour = new JLabel("Mã tour");
-        jlbMaTour.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbMaTour);
         txtMaTour = new JTextField();
-        formPanel.add(txtMaTour);
+        AddComponentToForm.addFormRow(formPanel, "Mã tour", txtMaTour);
 
         // row ten
-        jlbTen = new JLabel("Tên");
-        jlbTen.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbTen);
         txtTen = new JTextField();
-        formPanel.add(txtTen);
+        AddComponentToForm.addFormRow(formPanel, "Tên", txtTen);
 
         //row soNgay
-        jlbSoNgay = new JLabel("Số ngày");
-        jlbSoNgay.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbSoNgay);
         txtSoNgay = new JTextField();
-        formPanel.add(txtSoNgay);
+        AddComponentToForm.addFormRow(formPanel, "Số ngày", txtSoNgay);
 
         // row donGia
-        jlbDonGia = new JLabel("Đơn giá");
-        jlbDonGia.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbDonGia);
         txtDonGia = new JTextField();
-        formPanel.add(txtDonGia);
+        AddComponentToForm.addFormRow(formPanel, "Đơn giá", txtDonGia);
 
         //row soNguoi
-        jlbSoCho = new JLabel("Số chỗ");
-        jlbSoCho.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbSoCho);
         txtSoCho = new JTextField();
-        formPanel.add(txtSoCho);
+        AddComponentToForm.addFormRow(formPanel, "Số chỗ", txtSoCho);
 
         // row ddkhoihanh
-        jlbDiaDiemKhoiHanh = new JLabel("Địa điểm khởi hành");
-        jlbDiaDiemKhoiHanh.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbDiaDiemKhoiHanh);
         txtDiaDiemKhoiHanh = new JTextField();
-        formPanel.add(txtDiaDiemKhoiHanh);
+        AddComponentToForm.addFormRow(formPanel, "Địa điểm khởi hành", txtDiaDiemKhoiHanh);
 
         // row maLoaiTour
-        jlbMaLoaiTour = new JLabel("Mã loại tour");
-        jlbMaLoaiTour.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbMaLoaiTour);
-
         ArrayList<TourTypeDTO> lsCate = tourTypeBUS.getAllLoaiTour();
         loaiToursModel = new DefaultComboBoxModel<>();
         for(TourTypeDTO lt : lsCate){
@@ -132,6 +113,7 @@ public class TourDiaLog extends JDialog {
         }
         cbLoaiTours.setModel(loaiToursModel);
         formPanel.add(cbLoaiTours);
+        AddComponentToForm.addFormRow(formPanel, "Mã loại tour", cbLoaiTours);
 
         // row image
         jlbImgLink = new JLabel(" Đường dẫn ảnh");
@@ -151,11 +133,7 @@ public class TourDiaLog extends JDialog {
         imgPanel.add(jlbPreview, BorderLayout.CENTER);
         formPanel.add(imgPanel);
 
-        // row maDiaDiem
-        jlbMaDiaDiem = new JLabel("Mã Địa điểm");
-        jlbMaDiaDiem.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbMaDiaDiem);
-
+        // row location
         ArrayList<LocationDTO> lsDiaDiem = locationBUS.getAllLocations();
         diaDiemModel = new DefaultComboBoxModel<>();
         for(LocationDTO dd : lsDiaDiem){
@@ -169,7 +147,7 @@ public class TourDiaLog extends JDialog {
                 txtDiaDiemKhoiHanh.setText(selected.getAddress());
             }
         });
-        formPanel.add(cbDiaDiem);
+        AddComponentToForm.addFormRow(formPanel, "Mã địa điểm", cbDiaDiem);
 
         add(formPanel, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
@@ -229,18 +207,8 @@ public class TourDiaLog extends JDialog {
         }
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-
-        return btn;
-    }
-
     private void save(){
-        saveBtn = createBtn("Lưu", UIColors.SAVE);
+        saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(e -> {
             if(isEmpty(txtMaTour, txtTen, txtSoNgay, txtDonGia, txtSoCho, txtDiaDiemKhoiHanh, txtImgLink)){
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin");
@@ -312,14 +280,14 @@ public class TourDiaLog extends JDialog {
     }
 
     private void cancel(){
-        cancelBtn = createBtn("Hủy", UIColors.CANCEL);
+        cancelBtn = ButtonFactory.create("Hủy", UIColors.CANCEL);
         cancelBtn.addActionListener(e -> {
             dispose();
         });
     }
 
     private void chooseImage(){
-        chooseImageBtn = createBtn("Chọn", UIColors.CHOSE);
+        chooseImageBtn = ButtonFactory.create("Chọn", UIColors.CHOSE);
         chooseImageBtn.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             int result = chooser.showOpenDialog(this);

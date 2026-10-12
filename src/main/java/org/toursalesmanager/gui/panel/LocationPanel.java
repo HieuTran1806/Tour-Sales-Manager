@@ -189,7 +189,7 @@ public class LocationPanel extends JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addLocation(){
-        addBtn = ButtonFactory.create("Thêm", UIColors.ADD);
+        addBtn = ButtonFactory.create("Thêm địa điểm", UIColors.ADD);
         addBtn.addActionListener(v -> {
             if (!requireManagePermission()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền thêm địa điểm.");

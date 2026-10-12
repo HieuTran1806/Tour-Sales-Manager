@@ -89,7 +89,6 @@ public class StaffDialog extends JDialog {
         AddComponentToForm.addFormRow(panelForm, "Chức vụ: ", cbRoles);
 
         //row birthDay
-
         jDob = new JDateChooser();
         jDob.setDateFormatString("dd/MM/yyyy");
         jDob.setDate(valueOf(LocalDate.now()));

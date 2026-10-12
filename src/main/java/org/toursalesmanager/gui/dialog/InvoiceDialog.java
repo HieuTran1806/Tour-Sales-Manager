@@ -7,6 +7,8 @@ import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.*;
 import org.toursalesmanager.dao.InvoiceDAO;
 import org.toursalesmanager.dto.*;
+import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.DateHelper;
 import org.toursalesmanager.gui.panel.InvoiceDetailPanel;
 import org.toursalesmanager.gui.helper.UIColors;
@@ -15,24 +17,25 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoiceDialog extends JDialog {
     JTextField txtmahd, txtsoluong, txttongtien;
-    int soluong=0;
+
+    JPanel panelForm, panelBtn;
 
     JButton saveBtn, refreshBtn;
 
     JComboBox<String> cbmakh, cbmakht, cbmanv;
 
     JComboBox<PromotionDTO> cbKM;
-    JLabel lbmahd, lbmakh, lbmakht, lbmanv, lbngay, lbsoluong, lbMaKM,lbtongtien;
 
-
-    JDateChooser txtngay;
+    JDateChooser jDate;
 
     CustomerBUS customerBUS;
     InvoiceBUS invoiceBUS;
@@ -50,23 +53,20 @@ public class InvoiceDialog extends JDialog {
 
         initComponents();
 
-
         this.setTitle(invoiceBUS == null ? "Thêm hóa đơn" : "Sửa hóa đơn");
 
+        // load invoice data
         if(invoiceDTO != null){
-            loadCbox();
+            loadData();
         }
-
-
     }
 
     public InvoiceDialog(InvoiceDTO hd) {
         initComponents();
         this.setTitle("Sửa hóa đơn");
         this.setLocationRelativeTo(null);
-        this.soluong=hd.getTickets();
 
-        loadCbox();
+        loadData();
         if (hd.getIdPromotion() != null) {
             for (int i = 0; i < cbKM.getItemCount(); i++) {
                 PromotionDTO km = cbKM.getItemAt(i);
@@ -76,33 +76,59 @@ public class InvoiceDialog extends JDialog {
                 }
             }
         }
+    }
 
-        txtmahd.setInputVerifier(new InputVerifier(){
-            @Override
-            public boolean verify(JComponent input){
-                String ma=txtmahd.getText().trim();
+    @SuppressWarnings("unchecked")
+    private void initComponents() {
+        this.setLayout(new BorderLayout());
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-                if(!ma.matches("^HD\\d{3}$") && invoiceBUS.timHd(ma)==null){
-                    JOptionPane.showMessageDialog(null, "Mã hóa đơn phải có dạng HDxx!");
-                    return false;
-                }
-                return true;
+        panelForm = new JPanel(new GridLayout(0, 2, 10, 10));
+        panelBtn = new JPanel(new FlowLayout());
+
+        txtmahd = new JTextField();
+        AddComponentToForm.addFormRow(panelForm,"Mã hóa đơn", txtmahd );
+
+        cbmakht = new JComboBox<>();
+        cbmakht.setEditable(true);
+        AddComponentToForm.addFormRow(panelForm,"Mã kế hoạch tour", cbmakht );
+
+        jDate = new JDateChooser();
+        jDate.setDateFormatString("dd/MM/yyyy");
+        AddComponentToForm.addFormRow(panelForm,"Ngày", jDate);
+
+        txtsoluong = new JTextField();
+        txtsoluong.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent evt) {
+                txtsoluongFocusLost(evt);
             }
-
         });
-        txtsoluong.setInputVerifier(new InputVerifier(){
-            @Override
-            public boolean verify(JComponent input){
-                int sl=Integer.parseInt(txtsoluong.getText().trim());
+        AddComponentToForm.addFormRow(panelForm,"Số lượng", txtsoluong );
 
-                if(sl<=0){
-                    JOptionPane.showMessageDialog(null, "Số lượng không được bé hơn 0");
-                    return false;
-                }
-                return true;
-            }
-        });
+        cbKM = new JComboBox<>();
+        AddComponentToForm.addFormRow(panelForm,"Khuyến mãi", cbKM );
 
+        txttongtien = new JTextField();
+        txttongtien.setEditable(false);
+        AddComponentToForm.addFormRow(panelForm,"Tổng tiền", txttongtien);
+
+        cbmakh = new JComboBox<>();
+        AddComponentToForm.addFormRow(panelForm,"Mã khách hàng đặt", cbmakh );
+
+        cbmanv = new JComboBox<>();
+        AddComponentToForm.addFormRow(panelForm,"Mã nhân viên", cbmanv );
+
+        // define handle function
+        save();
+        refresh();
+        panelBtn.add(saveBtn);
+        panelBtn.add(refreshBtn);
+
+        this.add(panelForm, BorderLayout.CENTER);
+        this.add(panelBtn, BorderLayout.SOUTH);
+
+        this.setLocationRelativeTo(null);
+        pack();
     }
 
     public void setupAutoComplete(JComboBox<String> cbx, java.util.List<String> data) {
@@ -132,7 +158,7 @@ public class InvoiceDialog extends JDialog {
     }
 
 
-    public void loadCbox(){
+    public void loadData(){
         ArrayList<TourPlanDTO> tourPlanList = tourPlanBUS.getAllKeHoachTours();
         ArrayList<CustomerDTO> customerList = customerBUS.getAllCustomers();
         ArrayList<StaffDTO> staffList = staffBUS.getAllStaffs();
@@ -212,271 +238,40 @@ public class InvoiceDialog extends JDialog {
         });
     }
 
-    @SuppressWarnings("unchecked")
-    private void initComponents() {
-        lbmakht = new JLabel();
-        lbmanv = new JLabel();
-        lbmakh = new JLabel();
-        lbtongtien = new JLabel();
-        txtmahd = new JTextField();
-        txttongtien = new JTextField();
-        lbmahd = new JLabel();
-        saveBtn = new JButton();
-        txtsoluong = new JTextField();
-        lbsoluong = new JLabel();
-        refreshBtn = new JButton();
-        lbMaKM = new JLabel();
-        lbngay = new JLabel();
-        txtngay = new JDateChooser();
 
-        cbmakht = new JComboBox<>();
-        cbmakh = new JComboBox<>();
-        cbmanv = new JComboBox<>();
-        cbKM = new JComboBox<>();
 
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-        lbmakht.setText("Mã kế hoạch tour");
-
-        lbmanv.setText("Mã nhân viên");
-
-        lbmakh.setText("Mã khách hàng đặt");
-
-        lbMaKM.setText("Khuyến mãi");
-
-        lbtongtien.setText("Tổng tiền");
-
-        txtmahd.addInputMethodListener(new InputMethodListener() {
-            public void caretPositionChanged(InputMethodEvent evt) {
-            }
-            public void inputMethodTextChanged(InputMethodEvent evt) {
-                txtmahdInputMethodTextChanged(evt);
-            }
-        });
-        txtmahd.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                txtmahdActionPerformed(evt);
-            }
-        });
-
-        txttongtien.setEditable(false);
-        txttongtien.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) {
-                txttongtienFocusLost(evt);
-            }
-        });
-        txttongtien.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                txttongtienActionPerformed(evt);
-            }
-        });
-
-        lbmahd.setText("Mã hóa đơn");
-
-        txtsoluong.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) {
-                txtsoluongFocusLost(evt);
-            }
-        });
-
-        lbsoluong.setText("Số lượng");
-
-        // define handle function
-        luu();
-        lamMoi();
-
-        lbngay.setText("Ngày");
-
-        txtngay.setDateFormatString("dd/MM/yyyy");
-
-        cbmakht.setEditable(true);
-        cbmakht.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                cbmakhtActionPerformed(evt);
-            }
-        });
-
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(30, 30, 30)
-                                                .addComponent(lbmahd, GroupLayout.PREFERRED_SIZE, 183, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(6, 6, 6)
-                                                .addComponent(txtmahd, GroupLayout.PREFERRED_SIZE, 177, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(30, 30, 30)
-                                                .addComponent(lbmakht, GroupLayout.PREFERRED_SIZE, 151, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(38, 38, 38)
-                                                .addComponent(cbmakht, GroupLayout.PREFERRED_SIZE, 177, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(30, 30, 30)
-                                                .addComponent(lbngay, GroupLayout.PREFERRED_SIZE, 49, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(140, 140, 140)
-                                                .addComponent(txtngay, GroupLayout.PREFERRED_SIZE, 177, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(30, 30, 30)
-                                                .addComponent(lbsoluong, GroupLayout.PREFERRED_SIZE, 70, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(119, 119, 119)
-                                                .addComponent(txtsoluong, GroupLayout.PREFERRED_SIZE, 177, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(30, 30, 30)
-                                                .addComponent(lbMaKM, GroupLayout.PREFERRED_SIZE, 136, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(53, 53, 53)
-                                                .addComponent(cbKM, GroupLayout.PREFERRED_SIZE, 177, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(30, 30, 30)
-                                                .addComponent(lbtongtien, GroupLayout.PREFERRED_SIZE, 136, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(53, 53, 53)
-                                                .addComponent(txttongtien, GroupLayout.PREFERRED_SIZE, 177, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(69, 69, 69)
-                                                .addComponent(saveBtn, GroupLayout.PREFERRED_SIZE, 75, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(112, 112, 112)
-                                                .addComponent(refreshBtn, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(30, 30, 30)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                        .addGroup(layout.createSequentialGroup()
-                                                                .addComponent(lbmakh, GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
-                                                                .addGap(38, 38, 38))
-                                                        .addGroup(layout.createSequentialGroup()
-                                                                .addComponent(lbmanv, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                                .addGap(53, 53, 53)))
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                        .addComponent(cbmakh, 0, 177, Short.MAX_VALUE)
-                                                        .addComponent(cbmanv, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                                .addContainerGap(20, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(3, 3, 3)
-                                                .addComponent(lbmahd))
-                                        .addComponent(txtmahd, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(3, 3, 3)
-                                                .addComponent(lbmakht))
-                                        .addComponent(cbmakht, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(21, 21, 21)
-                                                .addComponent(lbmakh))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(18, 18, 18)
-                                                .addComponent(cbmakh, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(16, 16, 16)
-                                                .addComponent(lbmanv))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(cbmanv, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-                                .addGap(7, 7, 7)
-
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(6, 6, 6)
-                                                .addComponent(lbngay))
-                                        .addComponent(txtngay, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(6, 6, 6)
-
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(3, 3, 3)
-                                                .addComponent(lbsoluong))
-                                        .addComponent(txtsoluong, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(12, 12, 12)
-
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(3, 3, 3)
-                                                .addComponent(lbMaKM))
-                                        .addComponent(cbKM, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(12, 12, 12)
-
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(lbtongtien, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(txttongtien, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(12, 12, 12)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(saveBtn)
-                                        .addComponent(refreshBtn)))
-        );
-
-        this.setLocationRelativeTo(null);
-        pack();
-    }
-
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-
-        return btn;
-    }
-
-    private void luu() {
-        saveBtn = createBtn("Lưu", UIColors.SAVE);
+    private void save() {
+        saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(v -> {
             try {
+                // get Data
                 String ma = txtmahd.getText().trim();
-
-                if (ma.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Chưa nhập mã hóa đơn!");
-                    return;
-                }
-
-                String makht = cbmakht.getSelectedItem().toString().trim();
-                String makh = cbmakh.getSelectedItem().toString().trim();
-                String manv = cbmanv.getSelectedItem().toString().trim();
-
+                String makht = Objects.requireNonNull(cbmakht.getSelectedItem()).toString().trim();
+                String makh = Objects.requireNonNull(cbmakh.getSelectedItem()).toString().trim();
+                String manv = Objects.requireNonNull(cbmanv.getSelectedItem()).toString().trim();
                 PromotionDTO km = (PromotionDTO) cbKM.getSelectedItem();
                 String maKM = km != null ? km.getIdPromotion() : null;
+                int sl = Integer.parseInt(txtsoluong.getText().trim());
+                BigDecimal tongTien = BigDecimal.valueOf(Float.parseFloat(txttongtien.getText().trim()));
 
-                int newSl;
-                try {
-                    newSl = Integer.parseInt(txtsoluong.getText().trim());
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(this, "Số lượng không hợp lệ!");
-                    return;
-                }
-
-                BigDecimal tongTien;
-                try {
-                    tongTien = BigDecimal.valueOf(Float.parseFloat(txttongtien.getText().trim()));
-                } catch (Exception e) {
-                    tongTien = new BigDecimal(String.valueOf(BigDecimal.ZERO));
-                }
-
-                InvoiceDTO kt = invoiceBUS.timHd(ma);
+                InvoiceDTO kt = invoiceBUS.getInvoiceById(ma);
                 if (kt != null) {
-                    InvoiceDTO hd = new InvoiceDTO(
+                    invoiceBUS.updateInvoice(new InvoiceDTO(
                             ma, makht, makh, manv,
                             kt.getDate(),
-                            newSl,maKM, tongTien
-                    );
-                    if (invoiceBUS.suaHoaDon(hd)) {
-                        if (newSl > this.soluong) {
-                            int canThem = newSl - this.soluong;
+                            sl,maKM, tongTien
+                    ));
+                    if (invoiceBUS.updateInvoice(hd)) {
+                        if (sl > invoiceDTO.getTickets()) {
+                            int canThem = sl - this.soluong;
                             JOptionPane.showMessageDialog(this,
                                     "Số lượng tăng. Nhập thêm " + canThem + " vé.");
 
                             NhapCTHD nhap = new NhapCTHD(null, true, ma, canThem);
                             nhap.setVisible(true);
 
-                        } else if (newSl < this.soluong) {
-                            int veDu = this.soluong - newSl;
+                        } else if (sl < this.soluong) {
+                            int veDu = this.soluong - sl;
 
                             JOptionPane.showMessageDialog(this,
                                     "Số lượng giảm. Xóa " + veDu + " vé.");
@@ -495,7 +290,7 @@ public class InvoiceDialog extends JDialog {
                     }
                 }
                 else {
-                    Date ngaydl = txtngay.getDate();
+                    Date ngaydl = jDate.getDate();
                     if (ngaydl == null) {
                         JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày!");
                         return;
@@ -506,7 +301,7 @@ public class InvoiceDialog extends JDialog {
                     makh = cbmakh.getSelectedItem().toString().trim();
                     manv = cbmanv.getSelectedItem().toString().trim();
 
-                    int sl = Integer.parseInt(txtsoluong.getText().trim());
+                    // int sl = Integer.parseInt(txtsoluong.getText().trim());
 
                     InvoiceDAO dao = new InvoiceDAO();
                     BigDecimal gia = BigDecimal.valueOf(dao.getPrice(makht));
@@ -530,7 +325,7 @@ public class InvoiceDialog extends JDialog {
 
                     InvoiceDTO hdmoi = new InvoiceDTO(ma, makht, makh, manv, ngay, sl,maKM, tong);
 
-                    if (invoiceBUS.themHoaDon(hdmoi)) {
+                    if (invoiceBUS.addInvoice(hdmoi)) {
                         JOptionPane.showMessageDialog(this, "Thêm thành công!");
 
                         NhapCTHD nhap = new NhapCTHD(null, true, ma, sl);
@@ -556,26 +351,14 @@ public class InvoiceDialog extends JDialog {
         cbKM.setSelectedItem(null);
         txtsoluong.setText("");
         txttongtien.setText("");
-        txtngay.setDate(new Date());
+        jDate.setDate(new Date());
     }
 
-    private void lamMoi(){
-        refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
+    private void refresh(){
+        refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(v -> {
             resetField();
         });
-    }
-
-    private void txtmahdActionPerformed(ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void txttongtienFocusLost(FocusEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void txttongtienActionPerformed(ActionEvent evt) {
-        // TODO add your handling code here:
     }
 
     private void txtsoluongFocusLost(FocusEvent evt) {
@@ -602,13 +385,5 @@ public class InvoiceDialog extends JDialog {
         }catch (Exception e){
             txttongtien.setText("0");
         }
-    }
-
-    private void txtmahdInputMethodTextChanged(InputMethodEvent evt) {//GEN-FIRST:event_txtmahdInputMethodTextChanged
-        // TODO add your handling code here:
-    }
-
-    private void cbmakhtActionPerformed(ActionEvent evt) {//GEN-FIRST:event_cbmakhtActionPerformed
-        // TODO add your handling code here:
     }
 }

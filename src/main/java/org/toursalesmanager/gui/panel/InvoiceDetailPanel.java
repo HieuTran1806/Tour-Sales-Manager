@@ -17,7 +17,7 @@ import javax.swing.table.DefaultTableModel;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoiceDetailPanel extends JPanel {
-    JButton btnreset, btnsua, btnthem, btnxoa, btnxuat;
+    JButton refreshBtn, editBtn, addBtn, deleteBtn, exportBtn;
 
     JComboBox<String> cbtim;
 
@@ -55,10 +55,10 @@ public class InvoiceDetailPanel extends JPanel {
         model=(DefaultTableModel) tblcthd.getModel();
         txttim.setVisible(false);
         cbtim.setVisible(false);
-        btnthem.setVisible(false);
-        btnxoa.setVisible(false);
-        btnxuat.setVisible(false);
-        btnreset.setVisible(false);
+        addBtn.setVisible(false);
+        deleteBtn.setVisible(false);
+        exportBtn.setVisible(false);
+        refreshBtn.setVisible(false);
         loadchitiet(mahd);
     }
 
@@ -69,18 +69,18 @@ public class InvoiceDetailPanel extends JPanel {
         model=(DefaultTableModel) tblcthd.getModel();
         txttim.setVisible(false);
         cbtim.setVisible(false);
-        btnthem.setVisible(false);
-        btnxoa.setVisible(false);
-        btnxuat.setVisible(false);
-        btnsua.setVisible(false);
-        btnreset.setVisible(false);
+        addBtn.setVisible(false);
+        deleteBtn.setVisible(false);
+        exportBtn.setVisible(false);
+        editBtn.setVisible(false);
+        refreshBtn.setVisible(false);
 
         if(vedu>0){
             this.soluongcanxoa=vedu;
-            btnxoa.setVisible(true);
+            deleteBtn.setVisible(true);
             lbname.setText("Cần xóa thêm "+vedu+" VÉ");
         }else{
-            btnxoa.setVisible(true);
+            deleteBtn.setVisible(true);
         }
         loadchitiet(mahd);
     }
@@ -140,11 +140,11 @@ public class InvoiceDetailPanel extends JPanel {
         cbtim = new JComboBox<>();
         txttim = new JTextField();
         pnltable = new JPanel();
-        btnthem = new JButton();
-        btnxoa = new JButton();
-        btnsua = new JButton();
-        btnreset = new JButton();
-        btnxuat = new JButton();
+        addBtn = new JButton();
+        deleteBtn = new JButton();
+        editBtn = new JButton();
+        refreshBtn = new JButton();
+        exportBtn = new JButton();
         pnlfooter = new JPanel();
         jScrollPane1 = new JScrollPane();
         tblcthd = new JTable();
@@ -181,20 +181,20 @@ public class InvoiceDetailPanel extends JPanel {
 
         add(pnlheader, java.awt.BorderLayout.PAGE_START);
 
-        them();
-        pnltable.add(btnthem);
+        add();
+        pnltable.add(addBtn);
 
-        xoa();
-        pnltable.add(btnxoa);
+        delete();
+        pnltable.add(deleteBtn);
 
-        sua();
-        pnltable.add(btnsua);
+        update();
+        pnltable.add(editBtn);
 
-        lamMoi();
-        pnltable.add(btnreset);
+        refresh();
+        pnltable.add(refreshBtn);
 
         xuatExcel();
-        pnltable.add(btnxuat);
+        pnltable.add(exportBtn);
 
         add(pnltable, java.awt.BorderLayout.PAGE_END);
 
@@ -247,9 +247,9 @@ public class InvoiceDetailPanel extends JPanel {
         return btn;
     }
 
-    private void them(){
-        btnthem = createBtn("", UIColors.ADD);
-        btnthem.addActionListener(v -> {
+    private void add(){
+        addBtn = createBtn("", UIColors.ADD);
+        addBtn.addActionListener(v -> {
             org.toursalesmanager.gui.dialog.InvoiceDetailPanel cthd=new org.toursalesmanager.gui.dialog.InvoiceDetailPanel(invoiceBUS, customerBUS);
             cthd.setModal(true);
             cthd.setVisible(true);
@@ -257,9 +257,9 @@ public class InvoiceDetailPanel extends JPanel {
         });
     }
 
-    private void xoa(){
-        btnxoa = createBtn("", UIColors.DELETE);
-        btnxoa.addActionListener(v -> {
+    private void delete(){
+        deleteBtn = createBtn("", UIColors.DELETE);
+        deleteBtn.addActionListener(v -> {
             int row=tblcthd.getSelectedRow();
 
             if(row==-1){
@@ -282,7 +282,7 @@ public class InvoiceDetailPanel extends JPanel {
 
                         }else{
                             lbname.setText("Đã xóa đủ");
-                            btnxoa.setVisible(false);
+                            deleteBtn.setVisible(false);
 
                         }
                     }
@@ -291,9 +291,9 @@ public class InvoiceDetailPanel extends JPanel {
         });
     }
 
-    private void sua(){
-        btnsua = createBtn("", UIColors.EDIT);
-        btnsua.addActionListener(v -> {
+    private void update(){
+        editBtn = createBtn("", UIColors.EDIT);
+        editBtn.addActionListener(v -> {
             int row = tblcthd.getSelectedRow();
             if (row < 0) {
                 return;
@@ -309,16 +309,16 @@ public class InvoiceDetailPanel extends JPanel {
         });
     }
 
-    private void lamMoi(){
-        btnreset = createBtn("", UIColors.REFRESH);
-        btnreset.addActionListener(v -> {
+    private void refresh(){
+        refreshBtn = createBtn("", UIColors.REFRESH);
+        refreshBtn.addActionListener(v -> {
             loaddata();
         });
     }
 
     private void xuatExcel(){
-        btnxuat = createBtn("", UIColors.EXPORT_EXCEL);
-        btnxuat.addActionListener(v -> {
+        exportBtn = createBtn("", UIColors.EXPORT_EXCEL);
+        exportBtn.addActionListener(v -> {
             ExcelHelper.xuatExcel(tblcthd, this, "Danh sách chi tiết hóa đơn");
         });
     }
@@ -338,11 +338,11 @@ public class InvoiceDetailPanel extends JPanel {
         // TODO add your handling code here:
         int row=tblcthd.getSelectedRow();
         if(row!=-1){
-            btnsua.setEnabled(true);
-            btnxoa.setEnabled(true);
+            editBtn.setEnabled(true);
+            deleteBtn.setEnabled(true);
             int cf=JOptionPane.showConfirmDialog(this, "Bạn có muốn xuất Excel dòng này không?");
             if(cf==JOptionPane.YES_OPTION){
-                ExcelHelper.xuatExcel1Dong(tblcthd, row, btnreset, "Chi tiết hóa đơn");
+                ExcelHelper.xuatExcel1Dong(tblcthd, row, refreshBtn, "Chi tiết hóa đơn");
             }
         }
     }

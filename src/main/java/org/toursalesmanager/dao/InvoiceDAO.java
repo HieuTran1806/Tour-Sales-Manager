@@ -28,7 +28,7 @@ public class InvoiceDAO {
     public InvoiceDAO() {
     }
 
-    public InvoiceDTO timHoaDon(String mahd){
+    public InvoiceDTO getInvoiceById(String mahd){
         String sql="SELECT * FROM HOADON where mahd=?";
         try(Connection conn= MyConnection.getConnection();
             PreparedStatement ps=conn.prepareStatement(sql)){
@@ -56,8 +56,8 @@ public class InvoiceDAO {
         return new InvoiceDTO(mahd, makhtour, makhdi, manv,ngay,soluong, makm, tongtien);
     }
 
-    public boolean themHoaDon(InvoiceDTO hd) {
-        if(timHoaDon(hd.getIdInvoice()) != null) {
+    public boolean addInvoice(InvoiceDTO hd) {
+        if(getInvoiceById(hd.getIdInvoice()) != null) {
             return false;
         }
 
@@ -150,7 +150,7 @@ public class InvoiceDAO {
         return false;
     }
 
-    public boolean editInvoice(InvoiceDTO hd){
+    public boolean updateInvoice(InvoiceDTO hd){
         String sqlhd ="Update hoadon set makhtour=?,makhangdat=?,manv=?,ngay=?,soluong=?, makm=?,tongtien=? where mahd=?";
 
         try(Connection conn= MyConnection.getConnection();

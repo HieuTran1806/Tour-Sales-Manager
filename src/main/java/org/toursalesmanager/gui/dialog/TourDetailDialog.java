@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourTypeBUS;
 import org.toursalesmanager.dto.TourTypeDTO;
 import org.toursalesmanager.dto.TourDTO;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
@@ -152,18 +153,8 @@ public class TourDetailDialog extends JDialog {
         add(exitBtn, BorderLayout.SOUTH);
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-
-        return btn;
-    }
-
     private void exit(){
-        exitBtn = createBtn("Thoát", UIColors.CANCEL);
+        exitBtn = ButtonFactory.create("Thoát", UIColors.CANCEL);
         exitBtn.addActionListener(e -> {
             dispose();
         });

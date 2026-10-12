@@ -19,7 +19,7 @@ import static java.sql.Date.valueOf;
 public class StatisticsPanel extends JPanel {
     JDateChooser dateFrom;
     JDateChooser dateTo;
-    JComboBox<Integer> cbYear; // Thêm ComboBox chọn năm
+    JComboBox<Integer> cbYear; // ComboBox chọn năm
 
     // define BUS
     InvoiceBUS invoiceBus;
@@ -118,8 +118,6 @@ public class StatisticsPanel extends JPanel {
         try {
             LocalDate fromDate = dateFrom.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate toDate = dateTo.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-            invoiceBus.docDs();
 
             float totalIncome = invoiceBus.getTongThuDuKien(fromDate, toDate);
             float totalExpenditure = invoiceBus.getTongchiDuKien(fromDate, toDate);

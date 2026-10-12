@@ -7,6 +7,7 @@ import org.toursalesmanager.dto.InvoiceDTO;
 import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.login.SessionManager;
 
+import javax.swing.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,22 +18,17 @@ public class InvoiceBUS {
     InvoiceDAO dao = new InvoiceDAO();
 
     public InvoiceBUS(){
-        if(ds==null)
-            ds=dao.getDsHoaDon();
-    }
-
-    public void docDs(){
         ds=dao.getDsHoaDon();
     }
 
-    public ArrayList<InvoiceDTO> getDs(){
+    public ArrayList<InvoiceDTO> getAllInvoices(){
         if (ds == null)
             ds = dao.getDsHoaDon();
         return ds;
     }
 
-    public boolean timHd(InvoiceDTO h){
-        if(dao.timHoaDon(h.getIdInvoice())!=null){
+    public boolean invoiceExisted(InvoiceDTO h){
+        if(dao.getInvoiceById(h.getIdInvoice())!=null){
             for(InvoiceDTO hd: ds){
                 if(hd.getIdInvoice().equals(h.getIdInvoice())){
                     return true;
@@ -42,25 +38,27 @@ public class InvoiceBUS {
         return false;
     }
 
-    public InvoiceDTO timHd(String mahd){
-        if(dao.timHoaDon(mahd)!=null){
+    public InvoiceDTO getInvoiceById(String mahd){
+        if(dao.getInvoiceById(mahd)!=null){
             for(InvoiceDTO hd: ds){
                 if(hd.getIdInvoice().equals(mahd)){
-                    return dao.timHoaDon(mahd);
+                    return dao.getInvoiceById(mahd);
                 }
             }
         }
         return null;
     }
 
-    public boolean themHoaDon(InvoiceDTO hd){
+    public boolean addInvoice(InvoiceDTO hd){
         requireManagePermission();
 
-        if(timHd(hd)){
+        validateInvoiceData(hd);
+
+        if(invoiceExisted(hd)){
             return false;
         }
 
-        boolean kq=dao.themHoaDon(hd);
+        boolean kq=dao.addInvoice(hd);
         if(kq){
             ds.add(hd);
             return true;
@@ -68,11 +66,51 @@ public class InvoiceBUS {
         return false;
     }
 
-    public boolean xoaHoaDon(String mahd){
+    private void validateInvoiceData(InvoiceDTO invoice) {
+        // validate id invoice
+        if (invoice.getIdInvoice() == null || invoice.getIdInvoice().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mã hóa đơn không được để trống.");
+        }
+        if(!invoice.getIdInvoice().matches("^HD\\d{3}$")){
+            throw new IllegalArgumentException("Mã hóa đơn phải có dạng HDxx!");
+        }
+
+        // validate id tour plan
+        if (invoice.getIdTourPlan() == null || invoice.getIdTourPlan().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mã kế hoạch tour không được để trống.");
+        }
+
+        // validate id customer
+        if (invoice.getIdCustomer() == null || invoice.getIdCustomer().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mã khách hàng đặt không được để trống.");
+        }
+
+        // validate id employee
+        if (invoice.getIdStaff() == null || invoice.getIdStaff().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mã nhân viên không được để trống.");
+        }
+
+        // validate date
+        if (invoice.getDate() == null) {
+            throw new IllegalArgumentException("Ngày lập hóa đơn không được để trống.");
+        }
+
+        // validate tickets
+        if (invoice.getTickets() <= 0) {
+            throw new IllegalArgumentException("Số lượng vé phải lớn hơn 0.");
+        }
+
+        // validate total cost
+        if (invoice.getCostTotal() == null || invoice.getCostTotal().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Tổng chi phí phải lớn hơn 0.");
+        }
+    }
+
+    public boolean deleteInvoice(String mahd){
         requireManagePermission();
 
-        InvoiceDTO hd=dao.timHoaDon(mahd);
-        boolean b=timHd(hd);
+        InvoiceDTO hd=dao.getInvoiceById(mahd);
+        boolean b=invoiceExisted(hd);
         if(hd==null){
             return false;
         }
@@ -85,14 +123,18 @@ public class InvoiceBUS {
         return true;
     }
 
-    public boolean suaHoaDon(InvoiceDTO hd){
+    public boolean updateInvoice(InvoiceDTO hd){
         requireManagePermission();
 
-        if(!timHd(hd)){
+        validateInvoiceData(hd);
+
+        if(!invoiceExisted(hd)){
             return false;
         }
-        if(dao.timHoaDon(hd.getIdInvoice())!=null){
-            boolean kt=dao.editInvoice(hd);
+        if(dao.getInvoiceById(hd.getIdInvoice())!=null){
+
+
+            boolean kt=dao.updateInvoice(hd);
 
             if(kt==true){
                 for(int i=0;i<ds.size();i++){
@@ -108,7 +150,7 @@ public class InvoiceBUS {
 
     public ArrayList<InvoiceDTO> timNangcao(String loai, String key){
         if(key.trim().isEmpty()){
-            return getDs();
+            return getAllInvoices();
         }
         String tencot="";
         if(loai.equals("Mã hóa đơn")){

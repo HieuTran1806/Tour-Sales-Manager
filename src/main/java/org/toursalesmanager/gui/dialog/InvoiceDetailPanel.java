@@ -11,6 +11,8 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.*;
 import org.toursalesmanager.dto.*;
+import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
@@ -21,12 +23,12 @@ public class InvoiceDetailPanel extends JDialog {
     InvoiceBUS invoiceBUS;
     CustomerBUS customerBUS;
 
+    JPanel formPanel, buttonPanel;
+
     JButton saveBtn, refreshBtn;
 
     JComboBox<String> cbmahd;
     JComboBox<String> cbmakh;
-
-    JLabel lbPrice, lbIdInvoice, lbIdStaff;
 
     JTextField txtPrice;
 
@@ -35,7 +37,8 @@ public class InvoiceDetailPanel extends JDialog {
         this.customerBUS = customerBUS;
 
         initComponents();
-        loadCbox();
+
+        loadData();
         this.setTitle("Chi tiết hóa đơn");
         this.bus=new InvoiceDetailBUS();
         this.setLocationRelativeTo(null);
@@ -44,119 +47,41 @@ public class InvoiceDetailPanel extends JDialog {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        lbIdInvoice = new JLabel();
-        lbIdStaff = new JLabel();
-        lbPrice = new JLabel();
-        txtPrice = new JTextField();
-        saveBtn = new JButton();
-        refreshBtn = new JButton();
+        this.setLayout(new BorderLayout());
+
+        formPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+        buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+
         cbmahd = new JComboBox<>();
+        AddComponentToForm.addFormRow(formPanel, "Mã hóa đơn", cbmahd = new JComboBox<>());
+
         cbmakh = new JComboBox<>();
+        AddComponentToForm.addFormRow(formPanel, "Mã khách hàng", cbmakh = new JComboBox<>());
 
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-        lbIdInvoice.setText("Mã hóa đơn");
-
-        lbIdStaff.setText("Mã khách hàng đi");
-
-        lbPrice.setText("Giá vé");
-
-        txtPrice.setToolTipText("");
+        txtPrice = new JTextField();
         txtPrice.setEnabled(false);
-        txtPrice.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) {
-                txtPriceFocusLost(evt);
-            }
-        });
-        txtPrice.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                txtPriceActionPerformed(evt);
-            }
-        });
+        txtPrice.setToolTipText("");
+        AddComponentToForm.addFormRow(formPanel, "Giá vé", txtPrice = new JTextField());
 
         // define handle function
         handleSave();
         handleRefresh();
 
-        cbmahd.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent evt) {
-                cbmahdItemStateChanged(evt);
-            }
-        });
-        cbmahd.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent evt) {
-                cbmahdFocusLost(evt);
-            }
-        });
+        buttonPanel.add(saveBtn);
+        buttonPanel.add(refreshBtn);
 
-        cbmakh.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                cbmakhActionPerformed(evt);
-            }
-        });
+        this.add(formPanel, BorderLayout.CENTER);
+        this.add(buttonPanel, BorderLayout.SOUTH);
 
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(31, 31, 31)
-                                .addComponent(saveBtn, GroupLayout.PREFERRED_SIZE, 75, GroupLayout.PREFERRED_SIZE)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(59, 59, 59)
-                                                .addComponent(refreshBtn))
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGap(41, 41, 41)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                        .addComponent(cbmakh, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                        .addComponent(cbmahd, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                        .addComponent(txtPrice, GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE))))
-                                .addContainerGap(11, Short.MAX_VALUE))
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createSequentialGroup()
-                                        .addGap(21, 21, 21)
-                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                .addComponent(lbIdInvoice, GroupLayout.PREFERRED_SIZE, 101, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(lbIdStaff, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(lbPrice, GroupLayout.PREFERRED_SIZE, 64, GroupLayout.PREFERRED_SIZE))
-                                        .addContainerGap(132, Short.MAX_VALUE)))
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addContainerGap(94, Short.MAX_VALUE)
-                                .addComponent(cbmahd, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cbmakh, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addGap(7, 7, 7)
-                                .addComponent(txtPrice, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(saveBtn)
-                                        .addComponent(refreshBtn))
-                                .addGap(47, 47, 47))
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createSequentialGroup()
-                                        .addGap(94, 94, 94)
-                                        .addComponent(lbIdInvoice)
-                                        .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(lbIdStaff)
-                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(lbPrice)
-                                        .addContainerGap(101, Short.MAX_VALUE)))
-        );
-
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-
-
-    public void loadCbox(){
+    public void loadData(){
         this.invoiceBUS =new InvoiceBUS();
         this.bus =new InvoiceDetailBUS();
         ArrayList<CustomerDTO> dskh = customerBUS.getAllCustomers();
-        ArrayList<InvoiceDTO> dshd = invoiceBUS.getDs();
+        ArrayList<InvoiceDTO> dshd = invoiceBUS.getAllInvoices();
         List<String> dsMa = new ArrayList<>();
 
         for(InvoiceDTO hd: dshd){
@@ -170,11 +95,9 @@ public class InvoiceDetailPanel extends JDialog {
         setupAutoComplete(cbmakh, dsMa);
     }
 
-    public void loadCbox(InvoiceDetailDTO ct){
-        this.invoiceBUS =new InvoiceBUS();
-        this.bus =new InvoiceDetailBUS();
+    public void loadCombobox(InvoiceDetailDTO ct){
         ArrayList<CustomerDTO> dskh = customerBUS.getAllCustomers();
-        ArrayList<InvoiceDTO> dshd = invoiceBUS.getDs();
+        ArrayList<InvoiceDTO> dshd = invoiceBUS.getAllInvoices();
         List<String> dsMa = new ArrayList<>();
 
         for(InvoiceDTO hd: dshd){
@@ -189,7 +112,6 @@ public class InvoiceDetailPanel extends JDialog {
         cbmahd.setSelectedItem(ct.getIdInvoice());
         cbmakh.setSelectedItem(ct.getIdCustomer());
         txtPrice.setText(String.format("%.0f", bus.getPrice(ct.getIdInvoice())));
-
     }
 
     public void setupAutoComplete(JComboBox<String> cbx, List<String> data) {
@@ -224,55 +146,8 @@ public class InvoiceDetailPanel extends JDialog {
         txtPrice.setText("");
     }
 
-    private void txtPriceActionPerformed(ActionEvent evt) {
-
-    }
-
-    private void saveBtnActionPerformed(ActionEvent evt) {
-
-
-    }
-
-    private void txtPriceFocusLost(FocusEvent evt) {
-        // TODO add your handling code here:
-
-    }
-
-    private void refreshBtnActionPerformed(ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void cbmakhActionPerformed(ActionEvent evt) {
-        // TODO add your handling code here:
-    }
-
-    private void cbmahdFocusLost(FocusEvent evt) {
-        // TODO add your handling code here:
-        String mahd =cbmahd.getSelectedItem().toString().trim();
-        System.out.println(mahd);
-        txtPrice.setText(String.format("%.0f", bus.getPrice(mahd)));
-    }
-
-    private void cbmahdItemStateChanged(ItemEvent evt) {
-        // TODO add your handling code here:
-        String mahd = cbmahd.getSelectedItem().toString().trim();
-        txtPrice.setText(String.format("%.0f", bus.getPrice(mahd)));
-    }
-
-
-
-
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-        return btn;
-    }
-
     private void handleSave(){
-        saveBtn = createBtn("Lưu", UIColors.SAVE);
+        saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(v -> {
             try{
                 String ma=cbmahd.getSelectedItem().toString().trim();
@@ -311,7 +186,7 @@ public class InvoiceDetailPanel extends JDialog {
     }
 
     private void handleRefresh(){
-        refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
+        refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(v -> {
             resetField();
         });

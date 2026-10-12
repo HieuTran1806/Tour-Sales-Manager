@@ -9,6 +9,7 @@ import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourBookingDTO;
 import org.toursalesmanager.dto.CustomerDTO;
 import org.toursalesmanager.dto.TourPlanDTO;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.validate.ValidationException;
@@ -35,7 +36,7 @@ public class TourBookingDialog extends JDialog {
 
     JDateChooser jBookingDate, dateCustomerDob;;
 
-    JPanel formPanel, southPanel, buttonPanel;
+    JPanel formPanel, southPanel;
 
     public enum Mode {
         ADD, EDIT
@@ -176,12 +177,10 @@ public class TourBookingDialog extends JDialog {
         txtTickets = new JTextField();
         AddComponentToForm.addFormRow(formPanel, "Số lượng vé: ", txtTickets);
 
-
         // row price
         txtPrice = new JTextField();
         txtPrice.setEditable(false);
         AddComponentToForm.addFormRow(formPanel, "Giá vé: ",txtPrice);
-
 
         // row cost total
         txtCostTotal = new JTextField();
@@ -199,9 +198,7 @@ public class TourBookingDialog extends JDialog {
         txtNote = new JTextArea();
         AddComponentToForm.addFormRow(formPanel, "Ghi chú: ",txtNote);
 
-
         southPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-
 
         // Events & Verifiers
         handleSave();
@@ -266,18 +263,8 @@ public class TourBookingDialog extends JDialog {
         // );
     }
 
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-
-        return btn;
-    }
-
     private void handleSave(){
-        saveBtn = createBtn("Lưu",  UIColors.SAVE);
+        saveBtn = ButtonFactory.create("Lưu",  UIColors.SAVE);
         saveBtn.addActionListener(v -> {
             // get data
             String idCustomer = txtIdCustomer.getText().trim();
@@ -414,7 +401,7 @@ public class TourBookingDialog extends JDialog {
     }
 
     private void cancel(){
-        closeBtn = createBtn("Đóng", UIColors.CANCEL);
+        closeBtn = ButtonFactory.create("Đóng", UIColors.CANCEL);
         closeBtn.addActionListener(v -> {
             this.dispose();
         });

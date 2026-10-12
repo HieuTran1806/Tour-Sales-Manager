@@ -3,15 +3,15 @@ package org.toursalesmanager.gui.dialog;
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.validate.ValidationException;
 import org.toursalesmanager.bus.CustomerBUS;
-import org.toursalesmanager.dao.CustomerDAO;
 import org.toursalesmanager.dto.CustomerDTO;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 
 import static java.sql.Date.valueOf;
@@ -22,8 +22,6 @@ public class CustomerDialog extends JDialog {
 
     JDateChooser jDob;
 
-    JLabel lbIDCustomer, lbLastName, lbAddress, lbDob, lbFirstName, lbPhoneNumber;
-
     JPanel panelForm, jpBtn;
 
     JTextField txtAddress, txtFirstName, txtIDCustomer, txtPhoneNumber, txtLastName;
@@ -32,21 +30,21 @@ public class CustomerDialog extends JDialog {
         ADD, EDIT
     }
 
+    CustomerBUS customerBUS;
+
     Mode mode;
     CustomerDTO currentKhachHang;
-    CustomerDAO ds;
 
-    public CustomerDialog(java.awt.Frame parent, boolean modal, CustomerDAO ds, Mode mode, CustomerDTO kh) {
+    public CustomerDialog(java.awt.Frame parent, boolean modal, CustomerBUS customerBUS, Mode mode, CustomerDTO kh) {
         super(parent, modal);
-        this.ds = ds;
+        this.customerBUS = customerBUS;
         this.mode = mode;
         this.currentKhachHang = kh;
 
         initComponents();
-        setLocationRelativeTo(null);
 
         if (mode == Mode.EDIT && kh != null) {
-            setDataCustomer(kh);
+            loadData(kh);
             txtIDCustomer.setEditable(false);
             txtFirstName.requestFocus();
             setTitle("Sửa thông tin khách hàng");
@@ -60,8 +58,33 @@ public class CustomerDialog extends JDialog {
         setLayout(new BorderLayout());
 
         panelForm = new JPanel(new GridLayout(6, 2, 10, 10));
-
         jpBtn = new JPanel(new FlowLayout());
+
+        //row idCustomer
+        txtIDCustomer = new JTextField();
+        AddComponentToForm.addFormRow(panelForm, "Mã khách hàng:", txtIDCustomer);
+
+        //row FirstName
+        txtFirstName = new JTextField();
+        AddComponentToForm.addFormRow(panelForm, "Họ:", txtFirstName);
+
+        //row LastName
+        txtLastName = new JTextField();
+        AddComponentToForm.addFormRow(panelForm, "Tên:", txtLastName);
+
+        //row Dob
+        jDob = new JDateChooser();
+        jDob.setDateFormatString("dd/MM/yyyy");
+        jDob.setDate(valueOf(LocalDate.now()));
+        AddComponentToForm.addFormRow(panelForm, "Ngày sinh:", jDob);
+
+        //row PhoneNumber
+        txtPhoneNumber = new JTextField();
+        AddComponentToForm.addFormRow(panelForm, "Số điện thoại:", txtPhoneNumber);
+
+        //row Address
+        txtAddress = new JTextField();
+        AddComponentToForm.addFormRow(panelForm, "Địa chỉ:", txtAddress);
 
         // Save button
         save();
@@ -71,88 +94,16 @@ public class CustomerDialog extends JDialog {
         cancel();
         jpBtn.add(cancelBtn);
 
-        //row idCustomer
-        lbIDCustomer = new JLabel("Mã khách hàng:");
-        lbIDCustomer.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbIDCustomer);
-        txtIDCustomer = new JTextField();
-        panelForm.add(txtIDCustomer);
-        txtIDCustomer.addActionListener(this::txtIDCustomerActionPerformed);
-
-        //row FirstName
-        lbFirstName = new JLabel("Họ: ");
-        lbFirstName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbFirstName);
-        txtFirstName = new JTextField();
-        panelForm.add(txtFirstName);
-        txtFirstName.addActionListener(this::txtFirstNameActionPerformed);
-
-        //row LastName
-        lbLastName = new JLabel("Tên: ");
-        lbLastName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbLastName);
-        txtLastName = new JTextField();
-        panelForm.add(txtLastName);
-
-        txtLastName.addActionListener(this::txtLastNameActionPerformed);
-
-        //row Dob
-        lbDob = new JLabel("Ngày sinh");
-        lbDob.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbDob);
-        jDob = new JDateChooser();
-        jDob.setDateFormatString("dd/MM/yyyy");
-        jDob.setDate(valueOf(LocalDate.now()));
-        panelForm.add(jDob);
-
-        //row PhoneNumber
-        lbPhoneNumber = new JLabel("Số điện thoại");
-        lbPhoneNumber.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbPhoneNumber);
-        txtPhoneNumber = new JTextField();
-        panelForm.add(txtPhoneNumber);
-        txtPhoneNumber.addActionListener(this::txtPhoneNumberActionPerformed);
-
-        //row Address
-        lbAddress = new JLabel("Địa chỉ");
-        lbAddress.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(lbAddress);
-        txtAddress = new JTextField();
-        panelForm.add(txtAddress);
-        txtAddress.addActionListener(this::txtAddressActionPerformed);
-
         add(panelForm, BorderLayout.NORTH);
-        jpBtn.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         add(jpBtn, BorderLayout.SOUTH);
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
         pack();
     }
 
-    private void txtIDCustomerActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtIDCustomerActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtIDCustomerActionPerformed
-
-    private void txtLastNameActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtLastNameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtLastNameActionPerformed
-
-    private void txtAddressActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtAddressActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtAddressActionPerformed
-
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-
-        return btn;
-    }
-
     private void save(){
-        saveBtn = createBtn("Lưu", UIColors.SAVE);
+        saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(v -> {
             // get data from form
             String idCustomer = txtIDCustomer.getText().trim();
@@ -207,7 +158,7 @@ public class CustomerDialog extends JDialog {
     }
 
     private boolean isIdDuplicated(String id){
-        for (CustomerDTO kh : ds.getAllCustomers()) {
+        for (CustomerDTO kh : customerBUS.getAllCustomers()) {
             if (kh.getIdCustomer().equals(id))
                 return true;
         }
@@ -245,22 +196,14 @@ public class CustomerDialog extends JDialog {
     }
 
     private void cancel(){
-        cancelBtn = createBtn("Hủy", UIColors.CANCEL);
+        cancelBtn = ButtonFactory.create("Hủy", UIColors.CANCEL);
         cancelBtn.addActionListener(v -> {
             dispose();
         });
     }
-    private void txtFirstNameActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtFirstNameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtFirstNameActionPerformed
 
-    private void txtPhoneNumberActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtPhoneNumberActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtPhoneNumberActionPerformed
-
-    private void setDataCustomer(CustomerDTO kh) {
+    private void loadData(CustomerDTO kh) {
         txtIDCustomer.setText(kh.getIdCustomer());
-
         txtFirstName.setText(kh.getFirstName());
         txtLastName.setText(kh.getLastName());
         txtAddress.setText(kh.getAddress());
