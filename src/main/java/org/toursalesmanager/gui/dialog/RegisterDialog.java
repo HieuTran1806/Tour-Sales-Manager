@@ -9,11 +9,11 @@ import org.toursalesmanager.bus.AccountBUS;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.AddComponentToForm;
+import org.toursalesmanager.gui.helper.DateHelper;
 import org.toursalesmanager.gui.helper.PasswordFieldWithReveal;
 import org.toursalesmanager.gui.helper.UIColors;
 
@@ -104,79 +104,48 @@ public class RegisterDialog extends JDialog {
         String lastName = txtLastName.getText().trim();
         String address = txtAddress.getText().trim();
         String phone = txtPhoneNumber.getText().trim();
-        LocalDate d = dob.getDate() != null ? dob.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : null;
-
-        if (username.isBlank()
-                || password.isBlank()
-                || firstName.isBlank()
-                || lastName.isBlank()
-                || address.isBlank()
-                || phone.isBlank()
-                || d == null
-        ) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Vui lòng nhập đầy đủ thông tin bắt buộc"
-            );
-            return;
-        }
-
-        if (!password.equals(confirmPassword)) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Mật khẩu xác nhận không khớp"
-            );
-            return;
-        }
+        Date selectedDob = dob.getDate();
+        LocalDate dateOfBirth = DateHelper.toLocalDateFromUtil(selectedDob);
 
         try {
-            Date date = dob.getDate();
-            LocalDate localDate = null;
-            if (date != null) {
-                localDate = date.toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate();
-            }
-            try {
-                boolean success = accountBUS.registerCustomer(
-                        username,
-                        password,
-                        firstName,
-                        lastName,
-                        address,
-                        phone,
-                        localDate,
-                        confirmPassword
-                );
-                if (success) {
-                    registeredUsername = username;
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Đăng ký tài khoản thành công"
-                    );
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Đăng ký tài khoản thất bại",
-                            "Lỗi",
-                            JOptionPane.ERROR_MESSAGE
-                    );
-                }
-            } catch (IllegalArgumentException ex) {
+            boolean success = accountBUS.registerCustomer(
+                    username,
+                    password,
+                    firstName,
+                    lastName,
+                    address,
+                    phone,
+                    dateOfBirth,
+                    confirmPassword
+            );
+
+            if (success) {
+                registeredUsername = username;
                 JOptionPane.showMessageDialog(
                         this,
-                        ex.getMessage(),
-                        "Dữ liệu không hợp lệ",
-                        JOptionPane.WARNING_MESSAGE
+                        "Đăng ký tài khoản thành công"
                 );
-                return;
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Đăng ký tài khoản thất bại",
+                        "Lỗi",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
-        }catch (Exception e) {
+        } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(
                     this,
-                    "Đã xảy ra lỗi khi đăng ký tài khoản",
+                    ex.getMessage(),
+                    "Dữ liệu không hợp lệ",
+                    JOptionPane.WARNING_MESSAGE
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Đã xảy ra lỗi khi đăng ký tài khoản: " + e.getMessage(),
                     "Lỗi",
                     JOptionPane.ERROR_MESSAGE
             );

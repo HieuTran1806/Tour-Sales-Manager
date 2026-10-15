@@ -8,6 +8,7 @@ import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.login.SessionManager;
 
 import javax.swing.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,9 +44,8 @@ public class InvoiceBUS {
 
         validateInvoiceData(hd);
 
-        if(invoiceExisted(hd)){if (invoiceExisted(hd)) {
+        if (invoiceExisted(hd)) {
             throw new IllegalArgumentException("Mã hóa đơn " + hd.getIdInvoice() + " đã tồn tại.");
-        }
         }
 
         boolean kq=dao.addInvoice(hd);
@@ -57,42 +57,52 @@ public class InvoiceBUS {
     }
 
     private void validateInvoiceData(InvoiceDTO invoice) {
-        // validate id invoice
-        if (invoice.getIdInvoice() == null || invoice.getIdInvoice().trim().isEmpty()) {
+        if (invoice == null) {
+            throw new IllegalArgumentException("Thông tin hóa đơn không được để trống.");
+        }
+
+        String invoiceId = invoice.getIdInvoice();
+        if (invoiceId == null || invoiceId.isBlank()) {
             throw new IllegalArgumentException("Mã hóa đơn không được để trống.");
         }
-        if(!invoice.getIdInvoice().matches("^HD\\d{3}$")){
-            throw new IllegalArgumentException("Mã hóa đơn phải có dạng HDxx!");
+        if (!invoiceId.trim().matches("^HD\\d{3}$")) {
+            throw new IllegalArgumentException("Mã hóa đơn phải có dạng HDxxx (ví dụ: HD001).");
         }
 
-        // validate id tour plan
-        if (invoice.getIdTourPlan() == null || invoice.getIdTourPlan().trim().isEmpty()) {
-            throw new IllegalArgumentException("Mã kế hoạch tour không được để trống.");
-        }
+        validateRequiredId(invoice.getIdTourPlan(), "Mã kế hoạch tour");
+        validateRequiredId(invoice.getIdCustomer(), "Mã khách hàng đặt");
+        validateRequiredId(invoice.getIdStaff(), "Mã nhân viên");
+        validateOptionalId(invoice.getIdPromotion(), "Mã khuyến mãi");
 
-        // validate id customer
-        if (invoice.getIdCustomer() == null || invoice.getIdCustomer().trim().isEmpty()) {
-            throw new IllegalArgumentException("Mã khách hàng đặt không được để trống.");
-        }
-
-        // validate id employee
-        if (invoice.getIdStaff() == null || invoice.getIdStaff().trim().isEmpty()) {
-            throw new IllegalArgumentException("Mã nhân viên không được để trống.");
-        }
-
-        // validate date
         if (invoice.getDate() == null) {
             throw new IllegalArgumentException("Ngày lập hóa đơn không được để trống.");
         }
 
-        // validate tickets
         if (invoice.getTickets() <= 0) {
             throw new IllegalArgumentException("Số lượng vé phải lớn hơn 0.");
         }
 
-        // validate total cost
-        if (invoice.getCostTotal() == null || invoice.getCostTotal().compareTo(java.math.BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Tổng chi phí phải lớn hơn 0.");
+        BigDecimal total = invoice.getCostTotal();
+        if (total == null || total.signum() < 0) {
+            throw new IllegalArgumentException("Tổng tiền không được để trống hoặc âm.");
+        }
+        if (total.compareTo(new BigDecimal("9999999999")) > 0) {
+            throw new IllegalArgumentException("Tổng tiền vượt quá giới hạn lưu trữ của hóa đơn.");
+        }
+    }
+
+    private void validateRequiredId(String id, String fieldName) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " không được để trống.");
+        }
+        if (id.trim().length() > 10) {
+            throw new IllegalArgumentException(fieldName + " không được dài quá 10 ký tự.");
+        }
+    }
+
+    private void validateOptionalId(String id, String fieldName) {
+        if (id != null && !id.isBlank() && id.trim().length() > 10) {
+            throw new IllegalArgumentException(fieldName + " không được dài quá 10 ký tự.");
         }
     }
 
