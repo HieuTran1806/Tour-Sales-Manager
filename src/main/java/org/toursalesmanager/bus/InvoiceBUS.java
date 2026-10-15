@@ -28,25 +28,14 @@ public class InvoiceBUS {
     }
 
     public boolean invoiceExisted(InvoiceDTO h){
-        if(dao.getInvoiceById(h.getIdInvoice())!=null){
-            for(InvoiceDTO hd: ds){
-                if(hd.getIdInvoice().equals(h.getIdInvoice())){
-                    return true;
-                }
-            }
+        if (h == null || h.getIdInvoice() == null) {
+            return false;
         }
-        return false;
+        return dao.getInvoiceById(h.getIdInvoice()) != null;
     }
 
     public InvoiceDTO getInvoiceById(String mahd){
-        if(dao.getInvoiceById(mahd)!=null){
-            for(InvoiceDTO hd: ds){
-                if(hd.getIdInvoice().equals(mahd)){
-                    return dao.getInvoiceById(mahd);
-                }
-            }
-        }
-        return null;
+        return mahd == null ? null : dao.getInvoiceById(mahd);
     }
 
     public boolean addInvoice(InvoiceDTO hd){
@@ -54,8 +43,9 @@ public class InvoiceBUS {
 
         validateInvoiceData(hd);
 
-        if(invoiceExisted(hd)){
-            return false;
+        if(invoiceExisted(hd)){if (invoiceExisted(hd)) {
+            throw new IllegalArgumentException("Mã hóa đơn " + hd.getIdInvoice() + " đã tồn tại.");
+        }
         }
 
         boolean kq=dao.addInvoice(hd);
@@ -110,16 +100,16 @@ public class InvoiceBUS {
         requireManagePermission();
 
         InvoiceDTO hd=dao.getInvoiceById(mahd);
-        boolean b=invoiceExisted(hd);
         if(hd==null){
             return false;
         }
 
-        if(b!=true){
+        if (!dao.deleteInvoice(hd)) {
             return false;
         }
-        dao.deleteInvoice(hd);
-        ds.remove(hd);
+        if (ds != null) {
+            ds.removeIf(invoice -> invoice.getIdInvoice().equals(mahd));
+        }
         return true;
     }
 

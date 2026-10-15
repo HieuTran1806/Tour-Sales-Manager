@@ -15,13 +15,15 @@ import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Objects;
+import java.util.Date;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvoiceDialog extends JDialog {
@@ -42,40 +44,24 @@ public class InvoiceDialog extends JDialog {
     TourPlanBUS tourPlanBUS;
     PromotionBUS promotionBUS;
     StaffBUS staffBUS;
+    InvoiceDAO invoiceDAO;
 
     InvoiceDTO invoiceDTO;
 
-    public InvoiceDialog(InvoiceBUS invoiceBUS, TourPlanBUS tourPlanBUS, CustomerBUS customerBUS, PromotionBUS promotionBUS, InvoiceDTO invoiceDTO) {
+    public InvoiceDialog(InvoiceBUS invoiceBUS, TourPlanBUS tourPlanBUS, CustomerBUS customerBUS,
+                         PromotionBUS promotionBUS, StaffBUS staffBUS, InvoiceDTO invoiceDTO) {
         this.invoiceBUS= invoiceBUS;
         this.tourPlanBUS= tourPlanBUS;
         this.promotionBUS = promotionBUS;
         this.customerBUS = customerBUS;
+        this.staffBUS = staffBUS;
+        this.invoiceDAO = new InvoiceDAO();
+        this.invoiceDTO = invoiceDTO;
 
         initComponents();
 
-        this.setTitle(invoiceBUS == null ? "Thêm hóa đơn" : "Sửa hóa đơn");
-
-        // load invoice data
-        if(invoiceDTO != null){
-            loadData();
-        }
-    }
-
-    public InvoiceDialog(InvoiceDTO hd) {
-        initComponents();
-        this.setTitle("Sửa hóa đơn");
-        this.setLocationRelativeTo(null);
-
+        this.setTitle(invoiceDTO == null ? "Thêm hóa đơn" : "Sửa hóa đơn");
         loadData();
-        if (hd.getIdPromotion() != null) {
-            for (int i = 0; i < cbKM.getItemCount(); i++) {
-                PromotionDTO km = cbKM.getItemAt(i);
-                if (km.getIdPromotion().equals(hd.getIdPromotion())) {
-                    cbKM.setSelectedItem(km);
-                    break;
-                }
-            }
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -214,28 +200,28 @@ public class InvoiceDialog extends JDialog {
             promotionModel.addElement(km);
         }
         cbKM.setModel(promotionModel);
-        // set txt DiaDiemKhoiHanh when init
-        cbKM.addActionListener(e -> {
-            PromotionDTO selected = (PromotionDTO) cbKM.getSelectedItem();
-            if(selected != null){
-                String makht = cbmakht.getSelectedItem().toString().trim();
+        cbKM.setSelectedItem(null);
 
-                int sl = Integer.parseInt(txtsoluong.getText().trim());
-
-                InvoiceDAO dao = new InvoiceDAO();
-                float gia = dao.getPrice(makht);
-                float tong = gia * sl;
-
-                if (selected.getIdPromotion() != null) {
-                    PromotionDTO km = promotionBUS.getFullCTrinhKM(selected.getIdPromotion());
-                    if (km != null) {
-                        float chietKhau = km.getDiscount();
-                        tong = tong - tong * chietKhau / 100;
-                    }
+        if (invoiceDTO != null) {
+            txtmahd.setText(invoiceDTO.getIdInvoice());
+            txtmahd.setEditable(false);
+            cbmakht.setSelectedItem(invoiceDTO.getIdTourPlan());
+            cbmakh.setSelectedItem(invoiceDTO.getIdCustomer());
+            cbmanv.setSelectedItem(invoiceDTO.getIdStaff());
+            jDate.setDate(DateHelper.toUtilDate(invoiceDTO.getDate()));
+            txtsoluong.setText(String.valueOf(invoiceDTO.getTickets()));
+            txttongtien.setText(invoiceDTO.getCostTotal() == null ? "" : invoiceDTO.getCostTotal().toPlainString());
+            for (int i = 0; i < cbKM.getItemCount(); i++) {
+                PromotionDTO promotion = cbKM.getItemAt(i);
+                if (Objects.equals(promotion.getIdPromotion(), invoiceDTO.getIdPromotion())) {
+                    cbKM.setSelectedIndex(i);
+                    break;
                 }
-                txttongtien.setText(String.format("%.0f", tong));
             }
-        });
+        }
+
+        cbmakht.addActionListener(e -> updateTotal());
+        cbKM.addActionListener(e -> updateTotal());
     }
 
 
@@ -244,103 +230,78 @@ public class InvoiceDialog extends JDialog {
         saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(v -> {
             try {
-                // get Data
                 String ma = txtmahd.getText().trim();
-                String makht = Objects.requireNonNull(cbmakht.getSelectedItem()).toString().trim();
-                String makh = Objects.requireNonNull(cbmakh.getSelectedItem()).toString().trim();
-                String manv = Objects.requireNonNull(cbmanv.getSelectedItem()).toString().trim();
-                PromotionDTO km = (PromotionDTO) cbKM.getSelectedItem();
-                String maKM = km != null ? km.getIdPromotion() : null;
-                int sl = Integer.parseInt(txtsoluong.getText().trim());
-                BigDecimal tongTien = BigDecimal.valueOf(Float.parseFloat(txttongtien.getText().trim()));
+                String makht = selectedCode(cbmakht, "Mã kế hoạch tour");
+                String makh = selectedCode(cbmakh, "Mã khách hàng");
+                String manv = selectedCode(cbmanv, "Mã nhân viên");
+                Date selectedDate = jDate.getDate();
+                int tickets = Integer.parseInt(txtsoluong.getText().trim());
 
-                InvoiceDTO kt = invoiceBUS.getInvoiceById(ma);
-                if (kt != null) {
-                    invoiceBUS.updateInvoice(new InvoiceDTO(
-                            ma, makht, makh, manv,
-                            kt.getDate(),
-                            sl,maKM, tongTien
-                    ));
-                    if (invoiceBUS.updateInvoice(hd)) {
-                        if (sl > invoiceDTO.getTickets()) {
-                            int canThem = sl - this.soluong;
-                            JOptionPane.showMessageDialog(this,
-                                    "Số lượng tăng. Nhập thêm " + canThem + " vé.");
+                LocalDate date = DateHelper.toLocalDateFromUtil(selectedDate);
+                PromotionDTO promotion = (PromotionDTO) cbKM.getSelectedItem();
+                String promotionId = promotion == null ? null : promotion.getIdPromotion();
+                BigDecimal total = calculateTotal(makht, tickets, promotionId);
 
-                            NhapCTHD nhap = new NhapCTHD(null, true, ma, canThem);
-                            nhap.setVisible(true);
+                InvoiceDTO updatedInvoice = new InvoiceDTO(
+                        ma, makht, makh, manv, date, tickets, promotionId, total
+                );
 
-                        } else if (sl < this.soluong) {
-                            int veDu = this.soluong - sl;
-
-                            JOptionPane.showMessageDialog(this,
-                                    "Số lượng giảm. Xóa " + veDu + " vé.");
-
-                            org.toursalesmanager.gui.panel.InvoiceDetailPanel panelXoa = new InvoiceDetailPanel(ma, veDu);
-                            JOptionPane.showConfirmDialog(null, panelXoa,
-                                    "Xóa chi tiết",
-                                    JOptionPane.DEFAULT_OPTION,
-                                    JOptionPane.PLAIN_MESSAGE);
-                        } else {
-                            JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
-                        }
-                        this.dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
-                    }
+                if(invoiceBUS.addInvoice(updatedInvoice)){
+                    JOptionPane.showMessageDialog(this, "Thêm hóa đơn thành công.");
+                    new NhapCTHD(null, true, ma, tickets).setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Thêm hóa đơn thất bại.");
                 }
-                else {
-                    Date ngaydl = jDate.getDate();
-                    if (ngaydl == null) {
-                        JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày!");
-                        return;
-                    }
-                    LocalDate ngay = DateHelper.toLocalDateFromUtil(ngaydl);
 
-                    makht = cbmakht.getSelectedItem().toString().trim();
-                    makh = cbmakh.getSelectedItem().toString().trim();
-                    manv = cbmanv.getSelectedItem().toString().trim();
-
-                    // int sl = Integer.parseInt(txtsoluong.getText().trim());
-
-                    InvoiceDAO dao = new InvoiceDAO();
-                    BigDecimal gia = BigDecimal.valueOf(dao.getPrice(makht));
-                    BigDecimal tong = gia.multiply(BigDecimal.valueOf(soluong));
-
-                    if (maKM != null && !maKM.isBlank()) {
-                        km = promotionBUS.getFullCTrinhKM(maKM);
-
-                        if (km != null) {
-                            BigDecimal chietKhau = new BigDecimal(String.valueOf(km.getDiscount()));
-
-                            BigDecimal tyLeGiam = chietKhau.movePointLeft(2);
-
-                            BigDecimal tienGiam = tong.multiply(tyLeGiam);
-
-                            tong = tong.subtract(tienGiam);
-                        }
-                    }
-
-                    txttongtien.setText(String.format("%.0f", tong));
-
-                    InvoiceDTO hdmoi = new InvoiceDTO(ma, makht, makh, manv, ngay, sl,maKM, tong);
-
-                    if (invoiceBUS.addInvoice(hdmoi)) {
-                        JOptionPane.showMessageDialog(this, "Thêm thành công!");
-
-                        NhapCTHD nhap = new NhapCTHD(null, true, ma, sl);
-                        nhap.setVisible(true);
-
-                        this.dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Thêm thất bại!");
-                    }
-                }
+                dispose();
             } catch (Exception e) {
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Lỗi dữ liệu!");
+                JOptionPane.showMessageDialog(this,
+                        e.getMessage() == null ? "Lỗi dữ liệu hóa đơn." : e.getMessage(),
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
+    }
+
+    private String selectedCode(JComboBox<String> comboBox, String fieldName) {
+        Object value = comboBox.getEditor().getItem();
+        if (value == null || value.toString().trim().isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " không được để trống.");
+        }
+        return value.toString().trim();
+    }
+
+    private BigDecimal calculateTotal(String tourPlanId, int tickets, String promotionId) {
+        BigDecimal total = BigDecimal.valueOf(invoiceDAO.getPrice(tourPlanId))
+                .multiply(BigDecimal.valueOf(tickets));
+        if (promotionId != null && !promotionId.isBlank()) {
+            PromotionDTO promotion = promotionBUS.getFullCTrinhKM(promotionId);
+            if (promotion != null) {
+                BigDecimal discountRate = BigDecimal.valueOf(promotion.getDiscount())
+                        .movePointLeft(2);
+                total = total.subtract(total.multiply(discountRate));
+            }
+        }
+        return total;
+    }
+
+    private void updateTotal() {
+        try {
+            Object selectedTourPlan = cbmakht.getSelectedItem();
+            if (selectedTourPlan == null || txtsoluong.getText().isBlank()) {
+                return;
+            }
+            int tickets = Integer.parseInt(txtsoluong.getText().trim());
+            if (tickets <= 0) {
+                return;
+            }
+            PromotionDTO promotion = (PromotionDTO) cbKM.getSelectedItem();
+            String promotionId = promotion == null ? null : promotion.getIdPromotion();
+            txttongtien.setText(calculateTotal(selectedTourPlan.toString().trim(),
+                    tickets, promotionId).toPlainString());
+        } catch (NumberFormatException ignored) {
+            txttongtien.setText("");
+        }
     }
 
     public void resetField(){
@@ -362,28 +323,6 @@ public class InvoiceDialog extends JDialog {
     }
 
     private void txtsoluongFocusLost(FocusEvent evt) {
-        try{
-            String makht = cbmakht.getSelectedItem() != null ? cbmakht.getSelectedItem().toString().trim() : "";
-            int sl=Integer.parseInt(txtsoluong.getText().trim());
-
-            if(!makht.isEmpty()){
-                InvoiceDAO dao =new InvoiceDAO();
-                float gia=dao.getPrice(makht);
-
-                float tong = gia * sl;
-                // áp dụng khuyến mãi
-                String maKm = cbKM.getSelectedItem() != null ? cbKM.getSelectedItem().toString().trim() : "";
-                if(!maKm.isEmpty()){
-                    PromotionDTO km = promotionBUS.getFullCTrinhKM(maKm);
-                    if(km != null){
-                        float chietKhau = km.getDiscount();
-                        tong = tong - tong * chietKhau / 100;
-                    }
-                }
-                txttongtien.setText(String.format("%.0f", gia*sl));
-            }
-        }catch (Exception e){
-            txttongtien.setText("0");
-        }
+        updateTotal();
     }
 }

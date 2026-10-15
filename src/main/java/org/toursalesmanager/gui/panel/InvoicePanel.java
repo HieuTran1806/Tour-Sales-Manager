@@ -43,13 +43,18 @@ public class InvoicePanel extends JPanel {
     CustomerBUS customerBUS;
     TourPlanBUS tourPlanBUS;
     PromotionBUS promotionBUS;
+    StaffBUS staffBUS;
 
     public InvoicePanel() {
+        bus = new InvoiceBUS();
+        customerBUS = new CustomerBUS();
+        tourPlanBUS = new TourPlanBUS();
+        promotionBUS = new PromotionBUS();
+        staffBUS = new StaffBUS();
         initComponents();
-        bus=new InvoiceBUS();
         model=(DefaultTableModel) tblhoadon.getModel();
         txtday.setVisible(false);
-        loadData();;
+        loadData();
     }
 
     private void loadData(){
@@ -70,7 +75,7 @@ public class InvoicePanel extends JPanel {
         if(ds==null) return;
         for(InvoiceDTO hd: ds){
             model.addRow(new Object[]{
-                    hd.getIdInvoice(),hd.getIdTourPlan(),hd.getIdCustomer(),hd.getIdStaff(),DateHelper.toString(hd.getDate()),hd.getTickets(),hd.getIdInvoice(),String.format("%.0f",hd.getCostTotal())
+                    hd.getIdInvoice(),hd.getIdTourPlan(),hd.getIdCustomer(),hd.getIdStaff(),DateHelper.toString(hd.getDate()),hd.getTickets(),hd.getIdPromotion(),String.format("%.0f",hd.getCostTotal())
             });
         }
     }
@@ -81,7 +86,7 @@ public class InvoicePanel extends JPanel {
         if(ds==null) return;
         for(InvoiceDTO hd: ds){
             model.addRow(new Object[]{
-                    hd.getIdInvoice(),hd.getIdTourPlan(),hd.getIdCustomer(),hd.getIdStaff(),DateHelper.toString(hd.getDate()),hd.getTickets(), hd.getIdInvoice(),hd.getCostTotal()
+                    hd.getIdInvoice(),hd.getIdTourPlan(),hd.getIdCustomer(),hd.getIdStaff(),DateHelper.toString(hd.getDate()),hd.getTickets(), hd.getIdPromotion(),hd.getCostTotal()
             });
         }
     }
@@ -231,15 +236,16 @@ public class InvoicePanel extends JPanel {
             if (!requireManagePermission()) {
                 return;
             }
-            invoiceDTO = new InvoiceDTO();
-            openDiaLog(invoiceDTO);
+            openDiaLog(null);
         });
     }
 
     private void openDiaLog(InvoiceDTO invoiceDTO){
-        InvoiceDialog invoiceDialog = new InvoiceDialog(bus, tourPlanBUS, customerBUS, promotionBUS, invoiceDTO);
-        invoiceDialog.setVisible(true);
+        InvoiceDialog invoiceDialog = new InvoiceDialog(bus, tourPlanBUS, customerBUS,
+                promotionBUS, staffBUS, invoiceDTO);
         invoiceDialog.setModal(true);
+        invoiceDialog.setLocationRelativeTo(this);
+        invoiceDialog.setVisible(true);
         loadData();
     }
 
@@ -261,8 +267,6 @@ public class InvoicePanel extends JPanel {
                 int cf =JOptionPane.showConfirmDialog(this, "Bạn có muốn xóa không?","Xác nhận",JOptionPane.YES_NO_OPTION);
                 if(cf==JOptionPane.YES_OPTION){
                     String ma = tblhoadon.getValueAt(row, 0).toString();
-                    InvoiceDTO hd=bus.getInvoiceById(ma);
-
                     if(bus.deleteInvoice(ma)){
                         DefaultTableModel model=(DefaultTableModel) tblhoadon.getModel();
 
@@ -294,7 +298,8 @@ public class InvoicePanel extends JPanel {
             String ma =tblhoadon.getValueAt(row, 0).toString().trim();
             InvoiceDTO hd=bus.getInvoiceById(ma);
             if(hd!=null){
-                InvoiceDialog hdd=new InvoiceDialog(hd);
+                InvoiceDialog hdd=new InvoiceDialog(bus, tourPlanBUS, customerBUS,
+                        promotionBUS, staffBUS, hd);
                 hdd.setModal(true);
                 hdd.setVisible(true);
                 loadData();
@@ -308,12 +313,13 @@ public class InvoicePanel extends JPanel {
         viewDetailBtn = ButtonFactory.create("Xem chi tiết", UIColors.VIEW);
         viewDetailBtn.addActionListener(v -> {
             int row=tblhoadon.getSelectedRow();
-            String ma =tblhoadon.getValueAt(row, 0).toString().trim();
             if(row!=-1){
-                viewDetailBtn.setEnabled(true);
+                String ma =tblhoadon.getValueAt(row, 0).toString().trim();
                 NhapCTHD nhap=new NhapCTHD(ma);
                 nhap.setModal(true);
                 nhap.setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn cần xem chi tiết.");
             }
         });
     }
@@ -337,7 +343,9 @@ public class InvoicePanel extends JPanel {
     }
 
     private void txttimKeyReleased(KeyEvent evt) {
-        // TODO add your handling code here:
+        if ("Ngày".equals(cbtim.getSelectedItem())) {
+            return;
+        }
         String text=txttim.getText().trim();
         String loai =cbtim.getSelectedItem().toString().trim();
         loadData(loai, text);
@@ -360,24 +368,25 @@ public class InvoicePanel extends JPanel {
     }
 
     private void txtdayPropertyChange(java.beans.PropertyChangeEvent evt) {
-        // TODO add your handling code here:
-        java.util.Date ngay = txtday.getDate();
-        loadData(ngay);
+        if ("date".equals(evt.getPropertyName()) && txtday.getDate() != null) {
+            loadData(txtday.getDate());
+        }
     }
 
     private void tblhoadonMouseClicked(MouseEvent evt) {
         // TODO add your handling code here:
         int row=tblhoadon.getSelectedRow();
+        if(row == -1) {
+            return;
+        }
         String ma =tblhoadon.getValueAt(row, 0).toString().trim();
-        if(row!=-1){
-            editBtn.setEnabled(true);
-            deleteBtn.setEnabled(true);
-            viewDetailBtn.setEnabled(true);
-            if(evt.getClickCount()==2){
-                int cf=JOptionPane.showConfirmDialog(this, "Bạn có muốn xuất excel dòng này không?");
-                if(cf==JOptionPane.YES_OPTION){
-                    ExcelHelper.xuatExcel1Dong(tblhoadon, row, refreshBtn, ma);
-                }
+        editBtn.setEnabled(true);
+        deleteBtn.setEnabled(true);
+        viewDetailBtn.setEnabled(true);
+        if(evt.getClickCount()==2){
+            int cf=JOptionPane.showConfirmDialog(this, "Bạn có muốn xuất excel dòng này không?");
+            if(cf==JOptionPane.YES_OPTION){
+                ExcelHelper.xuatExcel1Dong(tblhoadon, row, refreshBtn, ma);
             }
         }
     }

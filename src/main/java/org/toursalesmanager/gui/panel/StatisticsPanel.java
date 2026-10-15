@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.*;
 import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.ExcelHelper;
 
 import javax.swing.*;
@@ -53,19 +54,17 @@ public class StatisticsPanel extends JPanel {
 
         Dimension dateSize = new Dimension(130, 30);
 
-        filterPanel.add(new JLabel("Ngày bắt đầu:"));
         dateFrom = new JDateChooser();
         dateFrom.setDateFormatString("dd/MM/yyyy");
         dateFrom.setDate(valueOf(LocalDate.now().minusMonths(1)));
         dateFrom.setPreferredSize(dateSize);
-        filterPanel.add(dateFrom);
+        AddComponentToForm.addFormRow(filterPanel, "Ngày bắt đầu:", dateFrom);
 
-        filterPanel.add(new JLabel("Đến ngày:"));
         dateTo = new JDateChooser();
         dateTo.setDateFormatString("dd/MM/yyyy");
         dateTo.setDate(valueOf(LocalDate.now()));
         dateTo.setPreferredSize(dateSize);
-        filterPanel.add(dateTo);
+        AddComponentToForm.addFormRow(filterPanel, "Đến ngày:", dateTo);
 
         btnFilter = ButtonFactory.create("Lọc", new Color(33, 150, 243));
         btnFilter.addActionListener(e -> updateCards()); // Nút lọc chỉ update Cards
@@ -96,7 +95,6 @@ public class StatisticsPanel extends JPanel {
         filterPanel.add(btnExportExcel);
 
         btnExportExcel.addActionListener(e->xuatThongke());
-        filterPanel.add(btnExportExcel);
         // Load dữ liệu ban đầu
         updateCards();
         updateChart();
@@ -114,11 +112,24 @@ public class StatisticsPanel extends JPanel {
 
     //  logic statistic card
     private void updateCards() {
-        cardsPanel.removeAll();
         try {
-            LocalDate fromDate = dateFrom.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate toDate = dateTo.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            java.util.Date selectedFromDate = dateFrom.getDate();
+            java.util.Date selectedToDate = dateTo.getDate();
+            if (selectedFromDate == null || selectedToDate == null) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc.", "Thiếu ngày", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
+            LocalDate fromDate = java.time.Instant.ofEpochMilli(selectedFromDate.getTime())
+                    .atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate toDate = java.time.Instant.ofEpochMilli(selectedToDate.getTime())
+                    .atZone(ZoneId.systemDefault()).toLocalDate();
+            if (fromDate.isAfter(toDate)) {
+                JOptionPane.showMessageDialog(this, "Ngày bắt đầu không được sau ngày kết thúc.", "Khoảng ngày không hợp lệ", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            cardsPanel.removeAll();
             float totalIncome = invoiceBus.getTongThuDuKien(fromDate, toDate);
             float totalExpenditure = invoiceBus.getTongchiDuKien(fromDate, toDate);
 
@@ -269,6 +280,7 @@ public class StatisticsPanel extends JPanel {
 
             int[] monthlyIncome = invoiceBus.getTongThuTungThang(selectedYear);
             int[] monthlyCost = invoiceBus.getTongChiTungThang(selectedYear);
+
             float totalIncomeYear = 0;
             float totalCostYear=0;
 
@@ -294,7 +306,7 @@ public class StatisticsPanel extends JPanel {
                 });
             }
 
-            model.addRow(new Object[]{"TỔNG CỘNG", formatter.format(totalIncomeYear), formatter.format(totalCostYear), formatter.format(totalIncomeYear)});
+            model.addRow(new Object[]{"TỔNG CỘNG", formatter.format(totalIncomeYear), formatter.format(totalCostYear), formatter.format(totalIncomeYear - totalCostYear)});
 
             ExcelHelper.xuatExcel(new JTable(model), null, "ThongKe_" + selectedYear);
 
