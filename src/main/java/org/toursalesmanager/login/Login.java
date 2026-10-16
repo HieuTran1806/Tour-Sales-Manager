@@ -161,8 +161,6 @@ public class Login extends JFrame {
     }
 
     private void loginAccount(){
-
-
         loginBtn = ButtonFactory.create("Đăng nhập", UIColors.SAVE);
         loginBtn.addActionListener(v -> {
             String username = txtUsername.getText().trim();

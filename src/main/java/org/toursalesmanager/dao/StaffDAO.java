@@ -2,6 +2,7 @@ package org.toursalesmanager.dao;
 
 import org.toursalesmanager.dto.StaffDTO;
 import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.gui.helper.PasswordUtil;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -69,7 +70,7 @@ public class StaffDAO {
 
                 try (PreparedStatement pstmt = conn.prepareStatement(accountSql)) {
                     pstmt.setString(1, nv.getIdStaff());
-                    pstmt.setString(2, "123456");
+                    pstmt.setString(2, PasswordUtil.hash("123456"));
                     pstmt.setString(3, role.name());
                     pstmt.setString(4, "ACTIVE");
                     pstmt.setString(5, nv.getIdStaff());

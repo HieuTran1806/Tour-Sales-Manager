@@ -2,6 +2,7 @@ package org.toursalesmanager.dao;
 
 import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.gui.helper.PasswordUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,14 +13,12 @@ import java.time.LocalDate;
 
 public class AccountDAO {
 
-    public AccountDTO loginAccount(String username, String password) {
-        String sql = "SELECT idAccount, userName, password, role, status, idstaff, idCustomer FROM taikhoan WHERE username = ? AND password = ?";
-
+    public AccountDTO loginAccount(String username) {
+        String sql = "SELECT * FROM taikhoan WHERE username = ?";
         try (Connection conn = MyConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
 
             try (ResultSet rs = pstmt.executeQuery()) {
 
@@ -44,6 +43,18 @@ public class AccountDAO {
         return null;
     }
 
+    public boolean updatePassword(String username, String hashedPassword) {
+        String sql = "UPDATE taikhoan SET password = ? WHERE username = ?";
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, hashedPassword);
+            pstmt.setString(2, username);
+            return pstmt.executeUpdate() == 1;
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể cập nhật mật khẩu tài khoản.", e);
+        }
+    }
+
     public boolean createStaffAccount(String idStaff, Role role) {
 
         String defaultPass = "123456";
@@ -53,7 +64,7 @@ public class AccountDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, idStaff);
-            pstmt.setString(2, defaultPass);
+            pstmt.setString(2, PasswordUtil.hash(defaultPass));
             pstmt.setString(3, role.name());
             pstmt.setString(4, "ACTIVE");
             pstmt.setString(5, idStaff);
@@ -166,7 +177,7 @@ public class AccountDAO {
 
                 try (PreparedStatement pstmt = conn.prepareStatement(accountSql)) {
                     pstmt.setString(1, username);
-                    pstmt.setString(2, password);
+                    pstmt.setString(2, PasswordUtil.hash(password));
                     pstmt.setString(3, role.name());
                     pstmt.setString(4, "ACTIVE");
                     pstmt.setString(5, customerId);

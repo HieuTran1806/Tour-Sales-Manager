@@ -3,7 +3,9 @@ package org.toursalesmanager.bus;
 import org.toursalesmanager.dao.AccountDAO;
 import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.gui.helper.PasswordUtil;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 
 public class AccountBUS {
@@ -34,10 +36,24 @@ public class AccountBUS {
             );
         }
 
-        return accountDAO.loginAccount(
-                username.trim(),
-                password
-        );
+        AccountDTO account = accountDAO.loginAccount(username.trim());
+        if (account == null) {
+            return null;
+        }
+
+        String storedPassword = account.getPassword();
+        if (PasswordUtil.matches(password, storedPassword)) {
+            return account;
+        }
+
+        if (!PasswordUtil.isBCryptHash(storedPassword) && password.equals(storedPassword)) {
+            String hashedPassword = PasswordUtil.hash(password);
+            if (accountDAO.updatePassword(account.getUsername(), hashedPassword)) {
+                account.setPassword(hashedPassword);
+            }
+            return account;
+        }
+        return null;
     }
 
     public boolean createStaffAccount(
@@ -176,8 +192,8 @@ public class AccountBUS {
                     "Mật khẩu phải có ít nhất 6 ký tự"
             );
         }
-        if (password.length() > 30) {
-            throw new IllegalArgumentException("Mật khẩu không được dài quá 30 ký tự");
+        if (password.getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new IllegalArgumentException("Mật khẩu không được vượt quá 72 byte UTF-8");
         }
 
         if (firstName == null || firstName.isBlank()) {
