@@ -14,14 +14,17 @@ import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Locale;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TourDiaLog extends JDialog {
     // label and txt
-    JLabel jlbMaTour, jlbTen, jlbSoNgay, jlbDonGia, jlbSoCho, jlbDiaDiemKhoiHanh, jlbMaLoaiTour, jlbImgLink, jlbPreview, jlbMaDiaDiem;
+    JLabel jlbImgLink, jlbPreview;
     JTextField txtMaTour, txtTen, txtSoNgay, txtDonGia, txtSoCho, txtDiaDiemKhoiHanh, txtImgLink;
 
     // define btn
@@ -59,6 +62,8 @@ public class TourDiaLog extends JDialog {
         setModal(true);
 
         init();
+        requestFocusName();
+
 
         if(tourDTO != null){
             loadData();
@@ -287,25 +292,30 @@ public class TourDiaLog extends JDialog {
     }
 
     private void chooseImage(){
-        chooseImageBtn = ButtonFactory.create("Chọn", UIColors.CHOSE);
+        chooseImageBtn = ButtonFactory.create("Chọn ảnh...", UIColors.CHOSE);
         chooseImageBtn.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser();
-            int result = chooser.showOpenDialog(this);
+            FileDialog chooser = new FileDialog(this, "Chọn ảnh tour", FileDialog.LOAD);
+            File currentDirectory = new File(System.getProperty("user.dir"));
+            File rootDirectory = currentDirectory.toPath().getRoot().toFile();
+            chooser.setDirectory(rootDirectory.getAbsolutePath());
+            chooser.setFilenameFilter((directory, name) -> {
+                String lowerCaseName = name.toLowerCase(Locale.ROOT);
+                return lowerCaseName.endsWith(".png")
+                        || lowerCaseName.endsWith(".jpg")
+                        || lowerCaseName.endsWith(".jpeg")
+                        || lowerCaseName.endsWith(".gif")
+                        || lowerCaseName.endsWith(".bmp");
+            });
+            chooser.setVisible(true);
 
-            if(result == JFileChooser.APPROVE_OPTION){
-                fileSelected = chooser.getSelectedFile();
-                path = fileSelected.getAbsolutePath(); // get absolute path of file
-
+            String selectedFile = chooser.getFile();
+            if(selectedFile != null){
+                fileSelected = new File(chooser.getDirectory(), selectedFile);
+                path = fileSelected.getAbsolutePath();
                 txtImgLink.setText(path);
 
                 ImageIcon icon = new ImageIcon(path);
-
-                Image img = icon.getImage().getScaledInstance(
-                        120,
-                        80,
-                        Image.SCALE_SMOOTH
-                );
-
+                Image img = icon.getImage().getScaledInstance(120, 80, Image.SCALE_SMOOTH);
                 jlbPreview.setIcon(new ImageIcon(img));
             }
         });
@@ -318,5 +328,14 @@ public class TourDiaLog extends JDialog {
             }
         }
         return false;
+    }
+
+    private void requestFocusName(){
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                SwingUtilities.invokeLater(txtTen::requestFocusInWindow);
+            }
+        });
     }
 }
