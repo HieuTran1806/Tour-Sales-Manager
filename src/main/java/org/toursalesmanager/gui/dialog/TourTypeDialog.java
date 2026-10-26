@@ -5,10 +5,13 @@ import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourTypeBUS;
 import org.toursalesmanager.dto.TourTypeDTO;
 import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TourTypeDialog extends JDialog{
@@ -35,6 +38,8 @@ public class TourTypeDialog extends JDialog{
         setModal(true);
 
         init();
+        requestFocusOfTourType();
+
         if(tourTypeDTO != null){
             loadData();
         }
@@ -68,35 +73,28 @@ public class TourTypeDialog extends JDialog{
         jpBtn.add(cancelBtn);
 
         //row MaLoai
-        jlbMaLoaiTour = new JLabel("Mã loại");
-        jlbMaLoaiTour.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(jlbMaLoaiTour);
         txtMaLoaiTour = new JTextField();
-        panelForm.add(txtMaLoaiTour);
+        txtMaLoaiTour.setEditable(false);
+        if(tourTypeDTO == null){
+            txtMaLoaiTour.setText(tourTypeBUS.getNextTourTypeId());
+        }
+        AddComponentToForm.addFormRow(panelForm, "Mã loại", txtMaLoaiTour);
 
         // row the loai
-        jlbTheLoai = new JLabel("Thể loại");
-        jlbTheLoai.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(jlbTheLoai);
         txtTheLoai = new JTextField();
-        panelForm.add(txtTheLoai);
+        AddComponentToForm.addFormRow(panelForm, "Thể loại", txtTheLoai);
 
         // row mo ta
-        jlbMoTa = new JLabel("Mô tả");
-        jlbMoTa.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        panelForm.add(jlbMoTa);
         txtMoTa = new JTextField();
-        panelForm.add(txtMoTa);
+        AddComponentToForm.addFormRow(panelForm, "Mô tả", txtMoTa);
 
         // row trang thai
-        jlbTrangThai = new JLabel("Trạng thái");
-        jlbTrangThai.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 0));
-        panelForm.add(jlbTrangThai);
-
         String[] status = {"Đang hoạt động", "Ngưng"};
         cbTrangThai = new JComboBox<>(status);
         panelForm.add(cbTrangThai);
+        AddComponentToForm.addFormRow(panelForm, "Trạng thái", cbTrangThai);
 
+        // panel add components
         jpBtn.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         add(panelForm, BorderLayout.CENTER);
@@ -140,6 +138,15 @@ public class TourTypeDialog extends JDialog{
         cancelBtn = ButtonFactory.create("Hủy", UIColors.CANCEL);
         cancelBtn.addActionListener(e -> {
             dispose();
+        });
+    }
+
+    private void requestFocusOfTourType(){
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                SwingUtilities.invokeLater(txtTheLoai::requestFocusInWindow);
+            }
         });
     }
 }

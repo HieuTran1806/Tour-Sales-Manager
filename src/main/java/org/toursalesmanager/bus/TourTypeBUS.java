@@ -17,7 +17,7 @@ public class TourTypeBUS {
     }
 
     public ArrayList<TourTypeDTO> getAllLoaiTour(){
-        lsCate = tourTypeDAO.getAllLoaiTour();
+        lsCate = tourTypeDAO.getAllTourTypes();
         return lsCate;
     }
 
@@ -25,20 +25,25 @@ public class TourTypeBUS {
         requireManagePermission();
         if(cate == null) return false;
 
-        boolean success = tourTypeDAO.addLoaiTour(cate);
+        boolean success = tourTypeDAO.addTourType(cate);
         if(success) lsCate.add(cate);
 
         return success;
     }
 
+    public String getNextTourTypeId(){
+        requireManagePermission();
+        return tourTypeDAO.getNextTourTypeId();
+    }
+
     public boolean editLoaiTour(TourTypeDTO cate){
         requireManagePermission();
-        return tourTypeDAO.editLoaiTour(cate);
+        return tourTypeDAO.editTourType(cate);
     }
 
     public boolean removeLoaiTour(String maLoaiTour){
         requireManagePermission();
-        return tourTypeDAO.removeLoaiTour(maLoaiTour);
+        return tourTypeDAO.removeTourType(maLoaiTour);
     }
 
     public ArrayList<TourTypeDTO> search(String keyWord){
@@ -54,7 +59,7 @@ public class TourTypeBUS {
 
     public TourTypeDTO getById(String maLoaiTour){
         TourTypeDTO result = null;
-        lsCate = tourTypeDAO.getAllLoaiTour();
+        lsCate = tourTypeDAO.getAllTourTypes();
         for (TourTypeDTO lt : lsCate){
             if(lt.getIdTourType().trim().equalsIgnoreCase(maLoaiTour)) {
                 result = lt;

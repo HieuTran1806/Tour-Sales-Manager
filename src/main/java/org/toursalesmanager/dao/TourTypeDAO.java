@@ -5,6 +5,9 @@ import org.toursalesmanager.dto.TourDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TourTypeDAO {
     Connection c = MyConnection.getConnection();
@@ -15,7 +18,7 @@ public class TourTypeDAO {
     }
 
     //get all tours
-    public ArrayList<TourTypeDTO> getAllLoaiTour(){
+    public ArrayList<TourTypeDTO> getAllTourTypes(){
         ArrayList<TourTypeDTO> lsCate = new ArrayList<>();
         try {
             String sql = "select * from loaitour";
@@ -39,7 +42,7 @@ public class TourTypeDAO {
     }
 
     //add
-    public boolean addLoaiTour(TourTypeDTO t){
+    public boolean addTourType(TourTypeDTO t){
         try{
             String sql = "Insert into loaitour values(";
             sql += "'" +  t.getIdTourType() + "'";
@@ -55,7 +58,35 @@ public class TourTypeDAO {
         }
     }
 
-    public boolean removeLoaiTour(String maLoaiTour){
+    public String getNextTourTypeId(){
+        String sql = "SELECT maloaitour from loaitour";
+        Pattern tourTypeIdPattern = Pattern.compile("^LT([0-9]+)$", Pattern.CASE_INSENSITIVE);
+        long maxSequence = 0;
+        int sequenceWidth = 2;
+
+        try(PreparedStatement ps = c.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()){
+            while(rs.next()){
+                Matcher matcher = tourTypeIdPattern.matcher(rs.getString("maloaitour"));
+                if (matcher.matches()) {
+                    long sequence = Long.parseLong(matcher.group(1));
+                    maxSequence = Math.max(maxSequence, sequence);
+                    sequenceWidth = Math.max(sequenceWidth, matcher.group(1).length());
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể tạo mã loại tour tiếp theo", e);
+        }
+        long nextSequence = Math.addExact(maxSequence, 1);
+        return String.format(
+                Locale.ROOT,
+                "LT%0" + sequenceWidth + "d",
+                nextSequence
+        );
+    }
+
+    public boolean removeTourType(String maLoaiTour){
         try{
             String sql = "delete from loaitour where maloaitour = ?";
             PreparedStatement ps = c.prepareStatement(sql);
@@ -69,7 +100,7 @@ public class TourTypeDAO {
     }
 
     //edit
-    public boolean editLoaiTour(TourTypeDTO t){
+    public boolean editTourType(TourTypeDTO t){
         String id = t.getIdTourType();
         try{
             String qry = "update loaitour set ";
