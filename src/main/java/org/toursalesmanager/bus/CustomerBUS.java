@@ -58,12 +58,7 @@ public class CustomerBUS {
         }
     }
     public CustomerDTO findCustomerById(String maKH){
-        for (CustomerDTO kh : dsKH) {
-            if (kh.getIdCustomer().equals(maKH)) {
-                return dao.findCustomerWithId(maKH);
-            }
-        }
-        return null;
+        return dao.findCustomerWithId(maKH);
     }
 
     public List<CustomerDTO> findCustomer(String column, String keyword) {

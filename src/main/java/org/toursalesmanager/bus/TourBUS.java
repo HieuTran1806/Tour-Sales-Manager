@@ -39,6 +39,11 @@ public class TourBUS {
         return success;
     }
 
+    public String getNextTourId() {
+        requirePermission(Permission.MANAGE_TOUR);
+        return tourDAO.getNextTourId();
+    }
+
     public boolean editTour(TourDTO t){
         requirePermission(Permission.MANAGE_TOUR);
         if (t == null) return false;

@@ -2,8 +2,13 @@ package org.toursalesmanager.gui;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.toursalesmanager.bus.CustomerBUS;
+import org.toursalesmanager.bus.StaffBUS;
 import org.toursalesmanager.dto.AccountDTO;
+import org.toursalesmanager.dto.CustomerDTO;
+import org.toursalesmanager.dto.StaffDTO;
 import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.enums.Role;
 import org.toursalesmanager.gui.panel.*;
 import org.toursalesmanager.login.SessionManager;
 
@@ -22,6 +27,8 @@ public class MainFrame extends JFrame {
     JPanel contentArea;
     JButton activeButton;
 
+    AccountDTO account;
+
     private record MenuItem(
             String label,
             String cardName,
@@ -30,11 +37,7 @@ public class MainFrame extends JFrame {
     }
 
     public MainFrame() {
-        AccountDTO account = SessionManager.getCurrentAccount();
-
-        System.out.println(account.getIdAccount());
-        System.out.println(account.getRole());
-
+        account = SessionManager.getCurrentAccount();
 
         // Set favicon
         try {
@@ -94,6 +97,9 @@ public class MainFrame extends JFrame {
             sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
         }
 
+        sidebar.add(createMenuButton("Thông tin cá nhân", "ThongTinCaNhan", null));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
+
         sidebar.add(Box.createVerticalGlue());
 
         JButton logoutBtn = createMenuButton("Đăng xuất", null, Color.RED);
@@ -139,8 +145,33 @@ public class MainFrame extends JFrame {
         if(SessionManager.hasPermission(Permission.VIEW_PROMOTION_CALENDAR))
             contentArea.add(new CalendarKMPanel(), "CalendarKM");
 
-        if(SessionManager.hasPermission(Permission.VIEW_STATISTICS))
+        if(SessionManager.hasPermission(Permission.VIEW_STATISTICS)){
             contentArea.add(new StatisticsPanel(), "ThongKe");
+        }
+
+
+        CustomerDTO customerDTO = null;
+        StaffDTO staffDTO = null;
+        if(account.getIdCustomer() != null){
+            CustomerBUS bus = new CustomerBUS();
+            customerDTO = bus.findCustomerById(account.getIdCustomer());
+        }else if(account.getRole() == Role.CUSTOMER){
+            CustomerBUS bus = new CustomerBUS();
+            customerDTO = bus.findCustomerById(account.getUsername());
+        }else if(account.getIdStaff() != null || account.getRole() != Role.CUSTOMER){
+            StaffBUS bus = new StaffBUS(false);
+            String staffId = account.getIdStaff() != null
+                    ? account.getIdStaff()
+                    : account.getUsername();
+            staffDTO = bus.findStaffById(staffId);
+            if (staffDTO != null && staffDTO.getRole() == null) {
+                staffDTO.setRole(account.getRole());
+            }
+        }else{
+            System.err.println("Tài khoản khách hàng chưa được liên kết với mã khách hàng.");
+        }
+
+        contentArea.add(new ProfilePanel(staffDTO, customerDTO), "ThongTinCaNhan");
 
         return contentArea;
     }

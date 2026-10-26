@@ -83,6 +83,10 @@ public class TourDiaLog extends JDialog {
 
         //row maTour
         txtMaTour = new JTextField();
+        txtMaTour.setEditable(false);
+        if (tourDTO == null) {
+            txtMaTour.setText(tourBUS.getNextTourId());
+        }
         AddComponentToForm.addFormRow(formPanel, "Mã tour", txtMaTour);
 
         // row ten
@@ -210,7 +214,7 @@ public class TourDiaLog extends JDialog {
     private void save(){
         saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(e -> {
-            if(isEmpty(txtMaTour, txtTen, txtSoNgay, txtDonGia, txtSoCho, txtDiaDiemKhoiHanh, txtImgLink)){
+            if(isEmpty(txtTen, txtSoNgay, txtDonGia, txtSoCho, txtDiaDiemKhoiHanh, txtImgLink)){
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin");
                 return;
             }
@@ -229,26 +233,22 @@ public class TourDiaLog extends JDialog {
             }
 
             if(tourDTO == null){
-                if(tourBUS.existedTourWithID(txtMaTour.getText())){
-                    JOptionPane.showMessageDialog(null, "Mã tour đã tồn tại, vui lòng nhập mã khác!");
-                }else{
-                    TourTypeDTO selectedLoaiTour = (TourTypeDTO) cbLoaiTours.getSelectedItem();
-                    String maLoaiTour = selectedLoaiTour.getIdTourType();
-                    LocationDTO selectedLocation = (LocationDTO) cbDiaDiem.getSelectedItem();
-                    String maDiaDiem = selectedLocation.getIdLocation();
+                TourTypeDTO selectedLoaiTour = (TourTypeDTO) cbLoaiTours.getSelectedItem();
+                String maLoaiTour = selectedLoaiTour.getIdTourType();
+                LocationDTO selectedLocation = (LocationDTO) cbDiaDiem.getSelectedItem();
+                String maDiaDiem = selectedLocation.getIdLocation();
 
-                    TourDTO tourMoi = new TourDTO(
-                            txtMaTour.getText(), txtTen.getText(),
-                            soNgay,BigDecimal.valueOf(donGia), soCho, txtDiaDiemKhoiHanh.getText(),
-                            txtImgLink.getText(), maLoaiTour, maDiaDiem
-                    );
-                    boolean result = tourBUS.addTour(tourMoi);
-                    if (result){
-                        JOptionPane.showMessageDialog(this, "Đã thêm");
-                        dispose();
-                    }else{
-                        JOptionPane.showMessageDialog(this, "Thêm thất bại");
-                    }
+                TourDTO tourMoi = new TourDTO(
+                        txtMaTour.getText(), txtTen.getText(),
+                        soNgay,BigDecimal.valueOf(donGia), soCho, txtDiaDiemKhoiHanh.getText(),
+                        txtImgLink.getText(), maLoaiTour, maDiaDiem
+                );
+                boolean result = tourBUS.addTour(tourMoi);
+                if (result){
+                    JOptionPane.showMessageDialog(this, "Đã thêm");
+                    dispose();
+                }else{
+                    JOptionPane.showMessageDialog(this, "Thêm thất bại");
                 }
             }else{
                 tourDTO.setTourName(txtTen.getText());

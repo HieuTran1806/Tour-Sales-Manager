@@ -1,7 +1,6 @@
 package org.toursalesmanager.bus;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,8 +17,12 @@ public class StaffBUS {
     public StaffDAO dao = new StaffDAO();
 
     public StaffBUS() {
+        this(true);
+    }
+
+    public StaffBUS(boolean preloadStaff) {
         if (dsNV == null) {
-            dsNV = dao.getAllStaffs();
+            dsNV = preloadStaff ? dao.getAllStaffs() : null;
         }
     }
 
@@ -27,27 +30,25 @@ public class StaffBUS {
         return dao.getAllStaffs();
     }
 
-    public boolean addStaff(StaffDTO nv, Role role) {
+    public boolean addStaff(StaffDTO nv, Role role) throws SQLException {
         if(!requirePermission()){
             throw new SecurityException(
                     "Bạn không có quyền thêm nhân viên"
             );
         }
 
+        if (nv == null) {
+            throw new IllegalArgumentException("Thông tin nhân viên không được để trống");
+        }
+        validateRole(role);
+        validateStaffData(
+                nv.getIdStaff(), nv.getFirstName(), nv.getLastName(),
+                nv.getDob(), nv.getPhoneNumber(), nv.getAddress(), true
+        );
+
         try{
             if (dsNV == null) {
                 dsNV = new ArrayList<>();
-            }
-            if (nv == null) {
-                return false;
-            }
-            if (nv.getIdStaff() == null || nv.getIdStaff().isEmpty()) {
-                return false;
-            }
-            for (StaffDTO existingNV : dsNV) {
-                if (existingNV.getIdStaff().equals(nv.getIdStaff())) {
-                    return false;
-                }
             }
             boolean success = dao.addStaff(nv, role);
             if (success) {
@@ -80,58 +81,69 @@ public class StaffBUS {
     }
 
     public void validateStaffData(String idStaff, String firstName, String lastName, LocalDate dob, String phoneNumber, String address) throws SQLException {
-        // validate idStaff
-        if (idStaff == null || idStaff.isEmpty()) {
+        validateStaffData(idStaff, firstName, lastName, dob, phoneNumber, address, true);
+    }
+
+    private void validateStaffData(
+            String idStaff,
+            String firstName,
+            String lastName,
+            LocalDate dob,
+            String phoneNumber,
+            String address,
+            boolean isNewStaff
+    ) throws SQLException {
+        if (idStaff == null || idStaff.isBlank()) {
             throw new IllegalArgumentException("Mã nhân viên không được để trống");
         }
-        if (!idStaff.matches("^NV\\d{3}$")) {
-            throw new IllegalArgumentException("Mã nhân viên phải có dạng NVxxx!");
+
+        String normalizedId = idStaff.trim();
+        if (isNewStaff && !normalizedId.matches("^NV\\d{3}$")) {
+            throw new IllegalArgumentException("Mã nhân viên phải có dạng NVxxx");
         }
-        if(dao.recordExists(idStaff)){
-            throw new IllegalArgumentException("Mã nhân viên đã tồn tại!");
+        if (isNewStaff && dao.recordExists(normalizedId)) {
+            throw new IllegalArgumentException("Mã nhân viên đã tồn tại");
         }
 
-        if(firstName == null || firstName.isEmpty()) {
+        if (firstName == null || firstName.isBlank()) {
             throw new IllegalArgumentException("Tên nhân viên không được để trống");
         }
+        if (firstName.trim().length() > 45) {
+            throw new IllegalArgumentException("Tên nhân viên không được dài quá 45 ký tự");
+        }
 
-        //validate lastName
-        if(lastName == null || lastName.isEmpty()) {
+        if (lastName == null || lastName.isBlank()) {
             throw new IllegalArgumentException("Họ nhân viên không được để trống");
         }
+        if (lastName.trim().length() > 45) {
+            throw new IllegalArgumentException("Họ nhân viên không được dài quá 45 ký tự");
+        }
 
-        // validate dob
         if (dob == null) {
-            throw new IllegalArgumentException("Ngày sinh không được để trống!");
+            throw new IllegalArgumentException("Ngày sinh không được để trống");
         }
-        if (dob.isAfter(YearMonth.now().atEndOfMonth())) {
-            throw new IllegalArgumentException("Ngày sinh không được sau ngày hiện tại!");
-        }
-
-        // validate phoneNumber
-        if (!phoneNumber.matches("^0\\d{9}$")) {
-            throw new IllegalArgumentException("Số điện thoại phải có 10 chữ số và bắt đầu bằng 0!");
-        }
-        if (phoneNumber.isEmpty()) {
-            throw new IllegalArgumentException("Số điện thoại không được để trống!");
+        if (dob.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Ngày sinh không được sau ngày hiện tại");
         }
 
-        // validate address
-        if(address == null || address.isEmpty()) {
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            throw new IllegalArgumentException("Số điện thoại không được để trống");
+        }
+        if (!phoneNumber.trim().matches("^0\\d{9}$")) {
+            throw new IllegalArgumentException("Số điện thoại phải có 10 chữ số và bắt đầu bằng 0");
+        }
+
+        if (address == null || address.isBlank()) {
             throw new IllegalArgumentException("Địa chỉ không được để trống");
         }
-
-        if (!address.matches("^[\\p{L}0-9\\s,.-]+$")) {
-            throw new IllegalArgumentException("Địa chỉ chỉ được chứa chữ cái, số, khoảng trắng và các ký tự ,.-!");
+        if (address.trim().length() > 255) {
+            throw new IllegalArgumentException("Địa chỉ không được dài quá 255 ký tự");
         }
     }
 
     public StaffDTO findStaffById(String maNV) {
-        if (dsNV == null) {
-            return null;
-        }
         StaffDTO staff = dao.findStaffById(maNV);
-        if (staff != null) {
+        if (staff != null && dsNV != null) {
             for (int i = 0; i < dsNV.size(); i++) {
                 if (dsNV.get(i).getIdStaff().equals(maNV)) {
                     dsNV.set(i, staff);
@@ -166,19 +178,25 @@ public class StaffBUS {
         );
     }
 
-    public boolean updateStaff(StaffDTO nv, Role role) {
+    public boolean updateStaff(StaffDTO nv, Role role) throws SQLException {
         if(!requirePermission()){
             throw new SecurityException(
                     "Bạn không có quyền cập nhật nhân viên"
             );
         }
 
+        if (nv == null) {
+            throw new IllegalArgumentException("Thông tin nhân viên không được để trống");
+        }
+        validateRole(role);
+        validateStaffData(
+                nv.getIdStaff(), nv.getFirstName(), nv.getLastName(),
+                nv.getDob(), nv.getPhoneNumber(), nv.getAddress(), false
+        );
+
         try {
-            if (dsNV == null) {
-                return false;
-            }
             boolean success = dao.updateStaff(nv, role);
-            if (success) {
+            if (success && dsNV != null) {
                 nv.setRole(role);
                 for (int i = 0; i < dsNV.size(); i++) {
                     if (dsNV.get(i).getIdStaff().equals(nv.getIdStaff())) {
@@ -191,6 +209,12 @@ public class StaffBUS {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private void validateRole(Role role) {
+        if (role == null || role == Role.CUSTOMER) {
+            throw new IllegalArgumentException("Vai trò nhân viên không hợp lệ");
         }
     }
 

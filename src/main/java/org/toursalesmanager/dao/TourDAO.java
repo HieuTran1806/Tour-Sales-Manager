@@ -5,6 +5,9 @@ import org.toursalesmanager.dto.TourDTO;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TourDAO {
     Connection c = MyConnection.getConnection();
@@ -65,6 +68,34 @@ public class TourDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public String getNextTourId() {
+        String sql = "SELECT matour FROM tour";
+        Pattern tourIdPattern = Pattern.compile("^T([0-9]+)$", Pattern.CASE_INSENSITIVE);
+        long maxSequence = 0;
+        int sequenceWidth = 2;
+
+        try (PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Matcher matcher = tourIdPattern.matcher(rs.getString("matour"));
+                if (matcher.matches()) {
+                    long sequence = Long.parseLong(matcher.group(1));
+                    maxSequence = Math.max(maxSequence, sequence);
+                    sequenceWidth = Math.max(sequenceWidth, matcher.group(1).length());
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể tạo mã tour tiếp theo", e);
+        }
+
+        long nextSequence = Math.addExact(maxSequence, 1);
+        return String.format(
+                Locale.ROOT,
+                "T%0" + sequenceWidth + "d",
+                nextSequence
+        );
     }
 
     public boolean removeTour(String matour){

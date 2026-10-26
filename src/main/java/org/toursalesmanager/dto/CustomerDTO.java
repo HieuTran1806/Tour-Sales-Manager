@@ -12,8 +12,8 @@ import java.time.LocalDate;
 public class CustomerDTO extends Person {
     String idCustomer;
 
-    public CustomerDTO(String idStaff, String firstName, String lastName, String address, String phoneNumber, LocalDate dob) {
+    public CustomerDTO(String idCustomer, String firstName, String lastName, String address, String phoneNumber, LocalDate dob) {
         super(firstName, lastName, address, phoneNumber, dob);
-        this.idCustomer = idStaff;
+        this.idCustomer = idCustomer;
     }
 }

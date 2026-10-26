@@ -139,33 +139,54 @@ public class StaffDialog extends JDialog {
             String phoneNumber = txtPhoneNumber.getText().trim();
             String address = txtAddress.getText().trim();
 
-            try {
-                bus.validateStaffData(idStaff, firstName, lastName, dob, phoneNumber, address);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+
 
             if (mode == Mode.ADD) {
                 StaffDTO newStaff = new StaffDTO(idStaff, firstName, lastName, address, phoneNumber, dob);
-                if (!bus.addStaff(newStaff, role)) {
+                try {
+                    if (!bus.addStaff(newStaff, role)) {
+                        JOptionPane.showMessageDialog(this,
+                                "Thêm nhân viên thất bại. Vui lòng kiểm tra dữ liệu hoặc kết nối cơ sở dữ liệu.",
+                                "Lỗi",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (IllegalArgumentException e) {
+                    JOptionPane.showMessageDialog(this, e.getMessage(), "Dữ liệu không hợp lệ", JOptionPane.WARNING_MESSAGE);
+                    return;
+                } catch (SQLException e) {
+                    e.printStackTrace();
                     JOptionPane.showMessageDialog(this,
-                            "Thêm nhân viên thất bại. Vui lòng kiểm tra dữ liệu hoặc kết nối cơ sở dữ liệu.",
-                            "Lỗi",
-                            JOptionPane.ERROR_MESSAGE);
+                            "Không thể thêm nhân viên do lỗi cơ sở dữ liệu.",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             } else if (mode == Mode.EDIT && currentNhanVien != null) {
-                currentNhanVien.setFirstName(firstName);
-                currentNhanVien.setLastName(lastName);
-                currentNhanVien.setAddress(address);
-                currentNhanVien.setPhoneNumber(phoneNumber);
-                currentNhanVien.setDob(dob);
+                StaffDTO updatedStaff = new StaffDTO(
+                        currentNhanVien.getIdStaff(),
+                        firstName,
+                        lastName,
+                        address,
+                        phoneNumber,
+                        dob
+                );
 
-                if (!bus.updateStaff(currentNhanVien, role)) {
+                try {
+                    if (!bus.updateStaff(updatedStaff, role)) {
+                        JOptionPane.showMessageDialog(this,
+                                "Cập nhật nhân viên thất bại. Vui lòng kiểm tra dữ liệu hoặc kết nối cơ sở dữ liệu.",
+                                "Lỗi",
+                                JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (IllegalArgumentException e) {
+                    JOptionPane.showMessageDialog(this, e.getMessage(), "Dữ liệu không hợp lệ", JOptionPane.WARNING_MESSAGE);
+                    return;
+                } catch (SQLException e) {
+                    e.printStackTrace();
                     JOptionPane.showMessageDialog(this,
-                            "Cập nhật nhân viên thất bại. Vui lòng kiểm tra dữ liệu hoặc kết nối cơ sở dữ liệu.",
-                            "Lỗi",
-                            JOptionPane.ERROR_MESSAGE);
+                            "Không thể cập nhật nhân viên do lỗi cơ sở dữ liệu.",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
             }

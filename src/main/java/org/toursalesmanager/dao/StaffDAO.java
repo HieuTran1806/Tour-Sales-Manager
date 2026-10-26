@@ -98,7 +98,9 @@ public class StaffDAO {
         String sql = """
                 SELECT nv.*, tk.role
                 FROM NhanVien nv
-                LEFT JOIN taikhoan tk ON tk.idstaff = nv.MaNV
+                LEFT JOIN taikhoan tk
+                    ON tk.idstaff = nv.MaNV
+                    OR (tk.idstaff IS NULL AND tk.username = nv.MaNV)
                 WHERE nv.MaNV = ?
                 """;
 
@@ -161,19 +163,26 @@ public class StaffDAO {
         }
 
         String staffExistsSql = "SELECT 1 FROM NhanVien WHERE MaNV = ? FOR UPDATE";
-        String accountExistsSql = "SELECT 1 FROM taikhoan WHERE idstaff = ? FOR UPDATE";
+        String accountExistsSql = """
+                SELECT 1 FROM taikhoan
+                WHERE idstaff = ? OR (idstaff IS NULL AND username = ?)
+                FOR UPDATE
+                """;
         String updateStaffSql = """
                 UPDATE NhanVien
                 SET Ho = ?, Ten = ?, DiaChi = ?, SDT = ?, NgaySinh = ?
                 WHERE MaNV = ?
                 """;
-        String updateRoleSql = "UPDATE taikhoan SET role = ? WHERE idstaff = ?";
+        String updateRoleSql = """
+                UPDATE taikhoan SET role = ?
+                WHERE idstaff = ? OR (idstaff IS NULL AND username = ?)
+                """;
 
         try (Connection conn = MyConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                if (!recordExists(nv.getIdStaff())
-                        || !recordExists(nv.getIdStaff())) {
+                if (!recordExists(conn, staffExistsSql, nv.getIdStaff())
+                        || !recordExists(conn, accountExistsSql, nv.getIdStaff(), nv.getIdStaff())) {
                     conn.rollback();
                     return false;
                 }
@@ -195,6 +204,7 @@ public class StaffDAO {
                 try (PreparedStatement pstmt = conn.prepareStatement(updateRoleSql)) {
                     pstmt.setString(1, role.name());
                     pstmt.setString(2, nv.getIdStaff());
+                    pstmt.setString(3, nv.getIdStaff());
                     pstmt.executeUpdate();
                 }
 
@@ -207,6 +217,18 @@ public class StaffDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private boolean recordExists(Connection conn, String sql, String... values)
+            throws SQLException {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            for (int i = 0; i < values.length; i++) {
+                pstmt.setString(i + 1, values[i]);
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
         }
     }
 
@@ -244,7 +266,8 @@ public class StaffDAO {
         String ten = rs.getString("Ten");
         String diaChi = rs.getString("DiaChi");
         String sdt = rs.getString("SDT");
-        LocalDate ngaySinh = rs.getDate("NgaySinh").toLocalDate();
+        Date dob = rs.getDate("NgaySinh");
+        LocalDate ngaySinh = dob == null ? null : dob.toLocalDate();
 
         return new StaffDTO(maNV, ho, ten, diaChi, sdt, ngaySinh);
     }
@@ -263,8 +286,9 @@ public class StaffDAO {
                 nv.NgaySinh,
                 tk.role
             FROM NhanVien nv
-            LEFT JOIN TaiKhoan tk
+            LEFT JOIN taikhoan tk
                 ON tk.idstaff = nv.MaNV
+                OR (tk.idstaff IS NULL AND tk.username = nv.MaNV)
             """;
 
         try (

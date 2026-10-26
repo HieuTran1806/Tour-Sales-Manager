@@ -113,7 +113,8 @@ public class CustomerDAO {
         String ten = rs.getString("Ten");
         String diaChi = rs.getString("DiaChi");
         String sdt = rs.getString("SDT");
-        LocalDate ngaySinh = rs.getDate("NgaySinh").toLocalDate();
+        Date dob = rs.getDate("NgaySinh");
+        LocalDate ngaySinh = dob == null ? null : dob.toLocalDate();
 
         return new CustomerDTO(maKH, ho, ten, diaChi, sdt, ngaySinh);
     }
