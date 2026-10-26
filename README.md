@@ -17,6 +17,20 @@ java/
 git clone <repository-url>
 cd <repository-folder>
 
+## Database configuration
+
+Copy `src/main/resources/config.properties.example` to
+`src/main/resources/config.properties`, then set the MySQL username and password
+for your local database. The real `config.properties` is ignored by Git; commit
+changes to the example file only when the required configuration keys change,
+and never put a real password in the example.
+
+PowerShell:
+
+```powershell
+Copy-Item src\main\resources\config.properties.example src\main\resources\config.properties
+```
+
 # Developer
 Trần Viết Hiếu 
 
