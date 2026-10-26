@@ -73,6 +73,10 @@ public class InvoiceDialog extends JDialog {
         panelBtn = new JPanel(new FlowLayout());
 
         txtmahd = new JTextField();
+        txtmahd.setEditable(false);
+        if (invoiceDTO == null) {
+            txtmahd.setText(invoiceBUS.getNextInvoiceId());
+        }
         AddComponentToForm.addFormRow(panelForm,"Mã hóa đơn", txtmahd );
 
         cbmakht = new JComboBox<>();
@@ -115,6 +119,11 @@ public class InvoiceDialog extends JDialog {
 
         this.setLocationRelativeTo(null);
         pack();
+        if (invoiceDTO == null) {
+            SwingUtilities.invokeLater(() ->
+                    cbmakht.getEditor().getEditorComponent().requestFocusInWindow()
+            );
+        }
     }
 
     public void setupAutoComplete(JComboBox<String> cbx, java.util.List<String> data) {

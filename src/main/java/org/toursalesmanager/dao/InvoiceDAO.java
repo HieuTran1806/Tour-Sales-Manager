@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 import java.time.LocalDate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class InvoiceDAO {
     public ArrayList<InvoiceDTO> getDsHoaDon(){
@@ -41,6 +43,35 @@ public class InvoiceDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public String getNextInvoiceId() {
+        String sql = "SELECT mahd FROM hoadon";
+        Pattern idPattern = Pattern.compile("^HD([0-9]+)$", Pattern.CASE_INSENSITIVE);
+        long maxSequence = 0;
+        int sequenceWidth = 3;
+
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Matcher matcher = idPattern.matcher(rs.getString("mahd"));
+                if (matcher.matches()) {
+                    long sequence = Long.parseLong(matcher.group(1));
+                    maxSequence = Math.max(maxSequence, sequence);
+                    sequenceWidth = Math.max(sequenceWidth, matcher.group(1).length());
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể tạo mã hóa đơn tiếp theo", e);
+        }
+
+        long nextSequence = Math.addExact(maxSequence, 1);
+        return String.format(
+                Locale.ROOT,
+                "HD%0" + sequenceWidth + "d",
+                nextSequence
+        );
     }
 
     public InvoiceDTO maptoHd(ResultSet rs) throws SQLException{

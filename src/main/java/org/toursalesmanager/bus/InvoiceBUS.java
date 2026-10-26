@@ -39,6 +39,11 @@ public class InvoiceBUS {
         return mahd == null ? null : dao.getInvoiceById(mahd);
     }
 
+    public String getNextInvoiceId() {
+        requireManagePermission();
+        return dao.getNextInvoiceId();
+    }
+
     public boolean addInvoice(InvoiceDTO hd){
         requireManagePermission();
 
@@ -65,8 +70,11 @@ public class InvoiceBUS {
         if (invoiceId == null || invoiceId.isBlank()) {
             throw new IllegalArgumentException("Mã hóa đơn không được để trống.");
         }
-        if (!invoiceId.trim().matches("^HD\\d{3}$")) {
+        if (!invoiceId.trim().matches("^HD\\d{3,}$")) {
             throw new IllegalArgumentException("Mã hóa đơn phải có dạng HDxxx (ví dụ: HD001).");
+        }
+        if (invoiceId.trim().length() > 10) {
+            throw new IllegalArgumentException("Mã hóa đơn không được dài quá 10 ký tự.");
         }
 
         validateRequiredId(invoice.getIdTourPlan(), "Mã kế hoạch tour");
