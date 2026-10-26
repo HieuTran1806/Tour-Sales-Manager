@@ -10,6 +10,7 @@ import org.toursalesmanager.dto.StaffDTO;
 import org.toursalesmanager.dto.TourPlanDTO;
 import org.toursalesmanager.dto.TourDTO;
 import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.validate.ValidationException;
 
@@ -17,6 +18,8 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -76,11 +79,10 @@ public class TourPlanDialog extends JDialog {
         setModal(true);
 
         init();
+        requestFocusTourPlanDepartureDate();
+
         if (tourPlanDTO != null) {
             loadData();
-        }else{
-            int soChoMacDinh = tourBUS.getVacantSpot(maTour);
-            txtSoVeConLai.setText(String.valueOf(soChoMacDinh));
         }
     }
 
@@ -99,120 +101,50 @@ public class TourPlanDialog extends JDialog {
         southPanel.add(cancelBtn);
 
         //row maKHTour
-        jlbMaKHTour = new JLabel("Mã kế hoạch tour");
-        jlbMaKHTour.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbMaKHTour);
         txtMaKHTour = new JTextField();
-        formPanel.add(txtMaKHTour);
+        txtMaKHTour.setEditable(false);
+        if (tourPlanDTO == null) {
+            txtMaKHTour.setText(tourPlanBUS.getNextTourPlanId());
+        }
+        AddComponentToForm.addFormRow(formPanel,"Mã kế hoạch tour", txtMaKHTour);
 
         // row ngayKhoiHanh
-        jlbNgayKhoiHanh = new JLabel("Ngày khởi hành");
-        jlbNgayKhoiHanh.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbNgayKhoiHanh);
         jDepartureDate = new JDateChooser();
         jDepartureDate.setDateFormatString(formatter);
         jDepartureDate.setDate(valueOf(LocalDate.now()));
-        formPanel.add(jDepartureDate);
+        AddComponentToForm.addFormRow(formPanel, "Ngày khởi hành", jDepartureDate);
 
         //row ngayKetThuc
-        jlbNgayKetThuc = new JLabel("Ngày kết thúc");
-        jlbNgayKetThuc.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbNgayKetThuc);
         jEndDate = new JDateChooser();
         jEndDate.setDateFormatString(formatter);
         jEndDate.setDate(valueOf(LocalDate.now()));
-        formPanel.add(jEndDate);
+        AddComponentToForm.addFormRow(formPanel, "Ngày kết thúc", jEndDate);
 
-        //row tongSoVe
-        jlbTongSoVe = new JLabel("Tổng số vé");
-        jlbTongSoVe.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbTongSoVe);
-        txtTongSoVe = new JTextField();
-        formPanel.add(txtTongSoVe);
+        initTicketFields();
+        AddComponentToForm.addFormRow(formPanel, "Tổng số vé", txtTongSoVe);
 
         //row tongChi
-        jlbTongChi = new JLabel("Tổng chi dự kiến");
-        jlbTongChi.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbTongChi);
         txtTongChi = new JTextField();
-        formPanel.add(txtTongChi);
+        AddComponentToForm.addFormRow(formPanel, "Tổng chi dự kiến", txtTongChi);
 
         //row soVeConLai
-        jlbSoVeConLai = new JLabel("Số vé còn lại");
-        jlbSoVeConLai.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbSoVeConLai);
-        txtSoVeConLai = new JTextField();
-        txtSoVeConLai.setEditable(false); // can't change by manual
-        txtTongSoVe.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateSoVe();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateSoVe();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateSoVe();
-            }
-
-            private void updateSoVe(){
-                String input = txtTongSoVe.getText().trim();
-                int soChoMacDinh = tourBUS.getVacantSpot(maTour);
-
-                if (input.isEmpty()) {
-                    txtSoVeConLai.setText(String.valueOf(soChoMacDinh));
-                }else{
-                    try {
-                        int tongSo = Integer.parseInt(input);
-                        if (tongSo >= 0) {
-                            txtSoVeConLai.setText(String.valueOf(soChoMacDinh - tongSo));
-                        }
-                    }
-                     catch (NumberFormatException ex) {
-                        txtSoVeConLai.setText("");
-                    }
-                }
-            }
-        });
-        formPanel.add(txtSoVeConLai);
+        AddComponentToForm.addFormRow(formPanel, "Số vé còn lại", txtSoVeConLai);
 
         //row trangThai
-        jlbTrangThai = new JLabel("Trạng thái");
-        jlbTrangThai.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbTrangThai);
         //load status
         loadStatusCombobox();
-        formPanel.add(cbStatus);
+        AddComponentToForm.addFormRow(formPanel, "Trạng thái", cbStatus);
+
 
         //row maTour
-        jlbMaTour = new JLabel("Mã tour");
-        jlbMaTour.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbMaTour);
         // load combo tour ID
-        tourModel = new DefaultComboBoxModel<>();
         tourModel = CBTourPresent();
         cbTour.setModel(tourModel);
-        if (tourModel.getSize() > 0) {
-            cbTour.setSelectedIndex(0);
-        }
-        formPanel.add(cbTour); // center panel add combobox tours
-        cbTour.addActionListener(e -> {
-            String newIdTour = cbTour.getSelectedItem().toString();
-
-            int soChoConLai = tourBUS.getVacantSpot(newIdTour);
-
-            txtSoVeConLai.setText(String.valueOf(soChoConLai));
-        });
+        selectTour(tourPlanDTO == null ? maTour : tourPlanDTO.getIdTour());
+        AddComponentToForm.addFormRow(formPanel, "Mã tour", cbTour);
+        addTourSelectionListener();
 
         //row maNVHD
-        jlbMaNVHD = new JLabel("Mã nhân viên hướng dẫn");
-        jlbMaNVHD.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbMaNVHD);
-
         // Load combo staff
         staffModel = new DefaultComboBoxModel<>();
         staffModel = CBStaffPresent();
@@ -220,7 +152,7 @@ public class TourPlanDialog extends JDialog {
         if (staffModel.getSize() > 0) {
             cbStaff.setSelectedIndex(0);
         }
-        formPanel.add(cbStaff); // center panel add combobox tours
+        AddComponentToForm.addFormRow(formPanel, "Mã nhân viên hướng dẫn", cbStaff);
 
         add(formPanel, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
@@ -246,18 +178,51 @@ public class TourPlanDialog extends JDialog {
         String oldStatus = tourPlanDTO.getStatus();
         cbStatus.setSelectedItem(oldStatus);
 
-        // load idTour
-        for (int i = 0; i < cbTour.getItemCount(); i++) {
-            TourDTO t = cbTour.getItemAt(i);
-            if (t.getIdTour().equals(maTour)) {
-                cbTour.setSelectedIndex(i);
-                break;
-            }
-        }
-
         // load idStaff
         String idStaff = tourPlanDTO.getIdTourGuide();
         cbStaff.setSelectedItem(idStaff);
+    }
+
+    private void addTicketCountListener() {
+        txtTongSoVe.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateSoVe();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateSoVe();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateSoVe();
+            }
+        });
+    }
+
+    private void initTicketFields() {
+        txtTongSoVe = new JTextField();
+        txtSoVeConLai = new JTextField();
+        txtSoVeConLai.setEditable(false);
+        addTicketCountListener();
+    }
+
+    private void addTourSelectionListener() {
+        cbTour.addActionListener(e -> updateSoVe());
+    }
+
+    private void selectTour(String idTour) {
+        for (int i = 0; i < cbTour.getItemCount(); i++) {
+            if (Objects.equals(cbTour.getItemAt(i).getIdTour(), idTour)) {
+                cbTour.setSelectedIndex(i);
+                return;
+            }
+        }
+        if (cbTour.getItemCount() > 0) {
+            cbTour.setSelectedIndex(0);
+        }
     }
 
     private DefaultComboBoxModel<TourDTO> CBTourPresent(){
@@ -300,42 +265,45 @@ public class TourPlanDialog extends JDialog {
         saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(e -> {
             //get all data
-            String idKHT = txtMaKHTour.getText().trim();
             LocalDate departureDate = jDepartureDate.getDate() != null ? jDepartureDate.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : null;
             LocalDate endDate = jEndDate.getDate() != null ? jEndDate.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : null;
             String tongSoVe = txtTongSoVe.getText().trim();
             String tongChi = txtTongChi.getText().trim();
-            String soVeConLai = txtSoVeConLai.getText().trim();
 
             // validate
             try {
                 // validate data form
                 validateDateOfKHT(departureDate, endDate);
-                validateTickets(tongSoVe, soVeConLai);
                 validateEstimateCost(tongChi);
 
                 StaffDTO selectedStaff = getStaffSelected();
                 String status = getStatusSelected();
                 TourDTO selectedTour = getTourSelected();
+                int remainingTickets = validateTickets(tongSoVe, selectedTour);
 
                 // add kehoachtour
                 if (tourPlanDTO == null) {
-                    validateIdKHT(idKHT);
-
                     TourPlanDTO newKHT = new TourPlanDTO(
                             txtMaKHTour.getText(), departureDate,
                             endDate, Integer.parseInt(tongSoVe.trim()),
                             BigDecimal.valueOf(Long.parseLong(tongChi.trim())),
-                            Integer.parseInt(soVeConLai.trim()), status,
+                            remainingTickets, status,
                             selectedTour.getIdTour(), selectedStaff.getIdStaff()
                     );
 
                     boolean validated = validatedForm(newKHT);
                     if (validated) {
-                        tourPlanBUS.addKeHoachTour(newKHT); // edit by keHoachTourBus
-
-                        JOptionPane.showMessageDialog(this, "Thêm thành công!");
-                        dispose();
+                        if (tourPlanBUS.addKeHoachTour(newKHT)) {
+                            JOptionPane.showMessageDialog(this, "Thêm thành công!");
+                            dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Không thể thêm kế hoạch tour.",
+                                    "Lỗi",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                        }
                     }
 
 
@@ -344,7 +312,7 @@ public class TourPlanDialog extends JDialog {
                     tourPlanDTO.setEndDate(endDate);
                     tourPlanDTO.setTickets(Integer.parseInt(tongSoVe.trim()));
                     tourPlanDTO.setEstimatedCost(BigDecimal.valueOf(Long.parseLong(tongChi)));
-                    tourPlanDTO.setRemainingTickets(Integer.parseInt(soVeConLai.trim()));
+                    tourPlanDTO.setRemainingTickets(remainingTickets);
                     tourPlanDTO.setStatus(status);
                     tourPlanDTO.setIdTour(selectedTour.getIdTour());
                     tourPlanDTO.setIdTourGuide(selectedStaff.getIdStaff());
@@ -367,48 +335,44 @@ public class TourPlanDialog extends JDialog {
         });
     }
 
-    private void validateIdKHT(String id) throws ValidationException{
-        if (id.isEmpty()) throw new ValidationException("Mã kế hoạch tour không được để trống!");
-
-        if (!id.matches("^KH\\d{3}$"))  throw new ValidationException("Mã kế hoạch tour phải có dạng KHxxx!");
-
-        if(isIdKHTDuplicated(id)) throw new ValidationException("Mã kế hoạch tour đã tồn tại!");
-    }
-
-    private boolean isIdKHTDuplicated(String id){
-        for (TourPlanDTO ls : tourPlanBUS.getAllKeHoachTours()) {
-            if (ls.getIdTourPlan().equals(id))
-                return true;
+    private int validateTickets(String totalTicketsInput, TourDTO selectedTour) throws ValidationException {
+        if (totalTicketsInput.isEmpty()) {
+            throw new ValidationException("Tổng số vé không được để trống!");
         }
-        return false;
-    }
+        if (selectedTour == null) {
+            throw new ValidationException("Vui lòng chọn tour!");
+        }
 
-    private void validateTickets(String  prices, String tickets) throws ValidationException{
-        if (prices.isEmpty()) throw new ValidationException("Giá vé không được để trống!");
-        if (tickets.isEmpty()) throw new ValidationException("Số vé còn lại không được để trống!");
-
-
-        long price;
+        int totalTickets;
         try{
-            price = Long.parseLong(prices.trim());
+            totalTickets = Integer.parseInt(totalTicketsInput);
         }catch (NumberFormatException e) {
-            throw new ValidationException("Giá vé phải là số!");
+            throw new ValidationException("Tổng số vé phải là số nguyên!");
         }
-        //
-        if (price < 0) {
-            throw new ValidationException("Giá vé không được âm!");
+        if (totalTickets <= 0) {
+            throw new ValidationException("Tổng số vé phải lớn hơn 0!");
+        }
+        if (totalTickets > selectedTour.getSeats()) {
+            throw new ValidationException(
+                    "Tổng số vé không được vượt quá sức chứa của tour (" + selectedTour.getSeats() + ")."
+            );
         }
 
-        long remainingTickets;
-        try{
-            remainingTickets = Long.parseLong(tickets.trim());
-        }catch (NumberFormatException e) {
-            throw new ValidationException("Số vé còn lại phải là số!");
-        }
-        //
+        int bookedTickets = getBookedTickets();
+        int remainingTickets = totalTickets - bookedTickets;
         if (remainingTickets < 0) {
-            throw new ValidationException("Số vé còn lại không được âm!");
+            throw new ValidationException(
+                    "Tổng số vé không thể ít hơn số vé đã đặt (" + bookedTickets + ")."
+            );
         }
+        return remainingTickets;
+    }
+
+    private int getBookedTickets() {
+        if (tourPlanDTO == null) {
+            return 0;
+        }
+        return tourPlanDTO.getTickets() - tourPlanDTO.getRemainingTickets();
     }
 
 
@@ -464,5 +428,37 @@ public class TourPlanDialog extends JDialog {
         }
 
         return true;
+    }
+
+    private void updateSoVe(){
+        String input = txtTongSoVe.getText().trim();
+        TourDTO selectedTour = getTourSelected();
+        if (input.isEmpty() || selectedTour == null) {
+            txtSoVeConLai.setText("");
+            return;
+        }
+
+        try {
+            int totalTickets = Integer.parseInt(input);
+            int remainingTickets = totalTickets - getBookedTickets();
+            if (totalTickets <= 0
+                    || totalTickets > selectedTour.getSeats()
+                    || remainingTickets < 0) {
+                txtSoVeConLai.setText("");
+                return;
+            }
+            txtSoVeConLai.setText(String.valueOf(remainingTickets));
+        } catch (NumberFormatException ex) {
+            txtSoVeConLai.setText("");
+        }
+    }
+
+    private void requestFocusTourPlanDepartureDate(){
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                SwingUtilities.invokeLater(jDepartureDate::requestFocusInWindow);
+            }
+        });
     }
 }

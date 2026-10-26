@@ -76,6 +76,15 @@ public class TourPlanBUS {
         return success;
     }
 
+    public String getNextTourPlanId() {
+        if (!requireManagePermission()) {
+            throw new SecurityException(
+                    "Bạn không có quyền tạo mã kế hoạch tour."
+            );
+        }
+        return tourPlanDAO.getNextTourPlanId();
+    }
+
     public String validateKeHoachTour(TourPlanDTO t){
         if(t == null) return "Dữ liệu không hợp lệ";
 

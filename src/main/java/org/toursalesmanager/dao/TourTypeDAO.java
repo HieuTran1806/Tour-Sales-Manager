@@ -62,7 +62,7 @@ public class TourTypeDAO {
         String sql = "SELECT maloaitour from loaitour";
         Pattern tourTypeIdPattern = Pattern.compile("^LT([0-9]+)$", Pattern.CASE_INSENSITIVE);
         long maxSequence = 0;
-        int sequenceWidth = 2;
+        int sequenceWidth = 3;
 
         try(PreparedStatement ps = c.prepareStatement(sql);
             ResultSet rs = ps.executeQuery()){

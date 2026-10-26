@@ -4,6 +4,9 @@ import org.toursalesmanager.dto.TourPlanDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TourPlanDAO {
     Connection c = MyConnection.getConnection();
@@ -45,7 +48,7 @@ public class TourPlanDAO {
     public boolean addKeHoachTour(TourPlanDTO t){
         try{
             String sql = "Insert into kehoachtour values(";
-            sql += "'" +  t.getIdTour() + "'";
+            sql += "'" +  t.getIdTourPlan() + "'";
             sql += ","  + "'" +  t.getDepartureDate() + "'";
             sql += ","  + "'" +  t.getEndDate() + "'";
             sql += ","  + "'" +  t.getTickets() + "'";
@@ -62,6 +65,34 @@ public class TourPlanDAO {
         } catch (SQLException e) {
             return false;
         }
+    }
+
+    public String getNextTourPlanId() {
+        String sql = "SELECT makhtour FROM kehoachtour";
+        Pattern idPattern = Pattern.compile("^KH([0-9]+)$", Pattern.CASE_INSENSITIVE);
+        long maxSequence = 0;
+        int sequenceWidth = 3;
+
+        try (PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Matcher matcher = idPattern.matcher(rs.getString("makhtour"));
+                if (matcher.matches()) {
+                    long sequence = Long.parseLong(matcher.group(1));
+                    maxSequence = Math.max(maxSequence, sequence);
+                    sequenceWidth = Math.max(sequenceWidth, matcher.group(1).length());
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể tạo mã kế hoạch tour tiếp theo", e);
+        }
+
+        long nextSequence = Math.addExact(maxSequence, 1);
+        return String.format(
+                Locale.ROOT,
+                "KH%0" + sequenceWidth + "d",
+                nextSequence
+        );
     }
 
     public boolean removeKeHoachTour(String maKeHoachTour){
