@@ -21,4 +21,6 @@ public class AccountDTO {
 
     // Tài khoản khách hàng thì có idCustomer
     String idCustomer;
+
+    String email;
 }

@@ -6,8 +6,7 @@ TSM is a Java application that allows customers and staff members to interact di
 # Technologies 
 Programming language: Java 
 User interface: Java Swing
-Database: MySQL 
-
+Database: MySQL
 
 # Project structure
 java/
@@ -31,7 +30,16 @@ PowerShell:
 Copy-Item src\main\resources\config.properties.example src\main\resources\config.properties
 ```
 
+Để thêm email cho cơ sở dữ liệu hiện có, chạy một lần script
+`database/add_account_email.sql`. Khi chạy từ `quanlytour.sql`, cột email đã được
+tạo sẵn. Đặt biến môi trường `MAIL_USERNAME` và `MAIL_APP_PASSWORD` trước khi mở
+ứng dụng để gửi OTP đặt lại mật khẩu; với Gmail, `MAIL_APP_PASSWORD` là App
+Password. OTP có hiệu lực trong 5 phút.
+
 # Luồng đăng nhập, xem tour và đặt tour
+
+# Update 
+
 
 ## Luồng hiện có trong ứng dụng
 

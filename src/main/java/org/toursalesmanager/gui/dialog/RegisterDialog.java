@@ -24,7 +24,7 @@ public class RegisterDialog extends JDialog {
     JPasswordField txtPassword;
     JPasswordField txtConfirmPassword;
 
-    JTextField txtUsername, txtFirstName, txtLastName, txtAddress, txtPhoneNumber;
+    JTextField txtUsername, txtFirstName, txtLastName, txtAddress, txtPhoneNumber, txtEmail;
     JDateChooser dob;
 
     String formatter = ("dd/MM/yyyy");
@@ -71,6 +71,7 @@ public class RegisterDialog extends JDialog {
         AddComponentToForm.addFormRow(panelForm, "Tên:", txtLastName = new JTextField());
         AddComponentToForm.addFormRow(panelForm, "Địa chỉ:", txtAddress = new JTextField());
         AddComponentToForm.addFormRow(panelForm, "Số điện thoại:", txtPhoneNumber = new JTextField());
+        AddComponentToForm.addFormRow(panelForm, "Email:", txtEmail = new JTextField());
 
         dob = new JDateChooser();
         dob.setDateFormatString(formatter);
@@ -104,6 +105,7 @@ public class RegisterDialog extends JDialog {
         String lastName = txtLastName.getText().trim();
         String address = txtAddress.getText().trim();
         String phone = txtPhoneNumber.getText().trim();
+        String email = txtEmail.getText().trim();
         Date selectedDob = dob.getDate();
         LocalDate dateOfBirth = DateHelper.toLocalDateFromUtil(selectedDob);
 
@@ -116,7 +118,8 @@ public class RegisterDialog extends JDialog {
                     address,
                     phone,
                     dateOfBirth,
-                    confirmPassword
+                    confirmPassword,
+                    email
             );
 
             if (success) {

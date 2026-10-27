@@ -32,7 +32,8 @@ public class AccountDAO {
                             ),
                             rs.getString("status"),
                             rs.getString("idstaff"),
-                            rs.getString("idcustomer")
+                            rs.getString("idcustomer"),
+                            rs.getString("email")
                     );
                 }
             }
@@ -52,6 +53,56 @@ public class AccountDAO {
             return pstmt.executeUpdate() == 1;
         } catch (SQLException e) {
             throw new RuntimeException("Không thể cập nhật mật khẩu tài khoản.", e);
+        }
+
+    }
+
+    public boolean customerEmailExists(String email) {
+        String sql = """
+                SELECT 1
+                FROM taikhoan
+                WHERE email = ? AND role = ?
+                LIMIT 1
+                """;
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+            pstmt.setString(2, Role.CUSTOMER.name());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể kiểm tra email tài khoản.", e);
+        }
+    }
+
+    public boolean updateCustomerPasswordByEmail(String email, String hashedPassword) {
+        String sql = """
+                UPDATE taikhoan
+                SET password = ?
+                WHERE email = ? AND role = ?
+                """;
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, hashedPassword);
+            pstmt.setString(2, email);
+            pstmt.setString(3, Role.CUSTOMER.name());
+            return pstmt.executeUpdate() == 1;
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể cập nhật mật khẩu tài khoản.", e);
+        }
+    }
+
+    public boolean emailExists(String email) {
+        String sql = "SELECT 1 FROM taikhoan WHERE email = ? LIMIT 1";
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể kiểm tra email đã đăng ký.", e);
         }
     }
 
@@ -147,14 +198,15 @@ public class AccountDAO {
         }
     }
 
-    public boolean registerCustomer(String username, String password, String firstName, String lastName, String address, String phoneNumber, LocalDate dob, Role role) {
+    public boolean registerCustomer(String username, String password, String firstName, String lastName,
+                                    String address, String phoneNumber, LocalDate dob, Role role, String email) {
         String customerSql = """
                 INSERT INTO KhachHang (MaKH, Ho, Ten, DiaChi, SDT, NgaySinh)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """;
         String accountSql = """
-                INSERT INTO taikhoan (username, password, role, status, idcustomer)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO taikhoan (username, password, role, status, idcustomer, email)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
         try (Connection conn = MyConnection.getConnection()) {
@@ -181,6 +233,7 @@ public class AccountDAO {
                     pstmt.setString(3, role.name());
                     pstmt.setString(4, "ACTIVE");
                     pstmt.setString(5, customerId);
+                    pstmt.setString(6, email);
                     if (pstmt.executeUpdate() != 1) {
                         conn.rollback();
                         return false;

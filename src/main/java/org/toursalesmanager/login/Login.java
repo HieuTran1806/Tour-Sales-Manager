@@ -18,6 +18,7 @@ import javax.swing.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Login extends JFrame {
     JButton loginBtn, logoutBtn, registerBtn;
+    JButton forgotPasswordBtn;
     JLabel jlbAccount, jlbPassword;
     JTextField txtUsername;
     JPasswordField txtPassword;
@@ -136,6 +137,7 @@ public class Login extends JFrame {
         JPanel registerPanel = new JPanel(
                 new FlowLayout(FlowLayout.CENTER, 8, 5)
         );
+        JPanel forgotPasswordPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
 
         JLabel lblRegisterQuestion =
                 new JLabel("Bạn chưa có tài khoản?");
@@ -143,10 +145,14 @@ public class Login extends JFrame {
 
         registerPanel.add(lblRegisterQuestion);
         registerPanel.add(registerBtn);
+        forgotPasswordBtn = ButtonFactory.create("Quên mật khẩu?", UIColors.VIEW);
+        forgotPasswordBtn.addActionListener(e -> forgotPassword());
+        forgotPasswordPanel.add(forgotPasswordBtn);
 
         southPanel.add(actionPanel);
         southPanel.add(Box.createVerticalStrut(8));
         southPanel.add(registerPanel);
+        southPanel.add(forgotPasswordPanel);
 
         mainPanel.add(headerPanel, BorderLayout.NORTH);
         mainPanel.add(formPanel, BorderLayout.CENTER);
@@ -158,6 +164,56 @@ public class Login extends JFrame {
 
         pack();
         setLocationRelativeTo(null);
+    }
+
+    private void forgotPassword() {
+        String email = JOptionPane.showInputDialog(this, "Nhập email đã đăng ký:", "Quên mật khẩu",
+                JOptionPane.QUESTION_MESSAGE);
+        if (email == null || email.isBlank()) {
+            return;
+        }
+
+        try {
+            boolean codeSent = accountBUS.sendPasswordResetCode(email);
+            JOptionPane.showMessageDialog(this,
+                    "Nếu email đã đăng ký, mã xác nhận sẽ được gửi đến hộp thư đó.");
+            if (!codeSent) {
+                return;
+            }
+
+            JTextField codeField = new JTextField(8);
+            if (JOptionPane.showConfirmDialog(this, codeField, "Nhập mã OTP", JOptionPane.OK_CANCEL_OPTION)
+                    != JOptionPane.OK_OPTION) {
+                return;
+            }
+
+            JPasswordField passwordField = new JPasswordField(16);
+            JPasswordField confirmField = new JPasswordField(16);
+            JPanel passwordPanel = new JPanel(new GridLayout(0, 1, 4, 4));
+            passwordPanel.add(new JLabel("Mật khẩu mới:"));
+            passwordPanel.add(passwordField);
+            passwordPanel.add(new JLabel("Xác nhận mật khẩu:"));
+            passwordPanel.add(confirmField);
+            if (JOptionPane.showConfirmDialog(this, passwordPanel, "Đặt lại mật khẩu",
+                    JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
+                return;
+            }
+
+            boolean updated = accountBUS.resetCustomerPassword(email, codeField.getText(),
+                    new String(passwordField.getPassword()), new String(confirmField.getPassword()));
+            if (updated) {
+                JOptionPane.showMessageDialog(this, "Đặt lại mật khẩu thành công.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Không thể cập nhật mật khẩu. Vui lòng thử lại.",
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Dữ liệu không hợp lệ",
+                    JOptionPane.WARNING_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Không thể gửi mã hoặc đặt lại mật khẩu: " + ex.getMessage(),
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void loginAccount(){

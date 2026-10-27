@@ -4,13 +4,24 @@ import org.toursalesmanager.dao.AccountDAO;
 import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.enums.Role;
 import org.toursalesmanager.gui.helper.PasswordUtil;
+import org.toursalesmanager.service.MailService;
 
-import java.nio.charset.StandardCharsets;
+import jakarta.mail.MessagingException;
 import java.time.LocalDate;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AccountBUS {
 
     private final AccountDAO accountDAO;
+    private final Map<String, PasswordResetCode> passwordResetCodes = new ConcurrentHashMap<>();
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final long RESET_CODE_LIFETIME_SECONDS = 5 * 60;
+    private static final int MAX_RESET_CODE_ATTEMPTS = 5;
 
     public AccountBUS() {
         this.accountDAO = new AccountDAO();
@@ -140,16 +151,17 @@ public class AccountBUS {
 
     public boolean registerCustomer(String username, String password, String firstName,
             String lastName, String address, String phoneNumber,
-            LocalDate dob, String confirmPassword) {
+            LocalDate dob, String confirmPassword, String email) {
 
         String normalizedUsername = username == null ? null : username.trim();
         String normalizedFirstName = firstName == null ? null : firstName.trim();
         String normalizedLastName = lastName == null ? null : lastName.trim();
         String normalizedAddress = address == null ? null : address.trim();
         String normalizedPhone = phoneNumber == null ? null : phoneNumber.trim();
+        String normalizedEmail = normalizeEmail(email);
 
         validateCustomerInfo(normalizedUsername, password, normalizedFirstName, normalizedLastName,
-                normalizedAddress, normalizedPhone, dob, confirmPassword);
+                normalizedAddress, normalizedPhone, dob, confirmPassword, normalizedEmail);
 
         Role role = Role.CUSTOMER;
 
@@ -161,11 +173,64 @@ public class AccountBUS {
                 normalizedAddress,
                 normalizedPhone,
                 dob,
-                role
+                role,
+                normalizedEmail
         );
     }
 
-    private void validateCustomerInfo(String username, String password, String firstName, String lastName, String address, String phoneNumber, LocalDate dob, String confirmPassword) {
+    public boolean sendPasswordResetCode(String email) throws MessagingException {
+        String normalizedEmail = normalizeEmail(email);
+        validateEmail(normalizedEmail);
+        if (!accountDAO.customerEmailExists(normalizedEmail)) {
+            return false;
+        }
+
+        String code = String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
+        MailService.sendOtp(normalizedEmail, code);
+        passwordResetCodes.put(normalizedEmail, new PasswordResetCode(
+                code,
+                Instant.now().plusSeconds(RESET_CODE_LIFETIME_SECONDS),
+                0
+        ));
+        return true;
+    }
+
+    public boolean resetCustomerPassword(String email, String code, String newPassword, String confirmPassword) {
+        String normalizedEmail = normalizeEmail(email);
+        validateEmail(normalizedEmail);
+        validateNewPassword(newPassword, confirmPassword);
+
+        PasswordResetCode resetCode = passwordResetCodes.get(normalizedEmail);
+        if (resetCode == null) {
+            throw new IllegalArgumentException("Mã xác nhận không hợp lệ hoặc đã hết hạn");
+        }
+        if (Instant.now().isAfter(resetCode.expiresAt())) {
+            passwordResetCodes.remove(normalizedEmail, resetCode);
+            throw new IllegalArgumentException("Mã xác nhận đã hết hạn. Vui lòng yêu cầu mã mới");
+        }
+        if (code == null || !resetCode.code().equals(code.trim())) {
+            if (resetCode.failedAttempts() + 1 >= MAX_RESET_CODE_ATTEMPTS) {
+                passwordResetCodes.remove(normalizedEmail, resetCode);
+                throw new IllegalArgumentException("Bạn đã nhập sai mã quá nhiều lần. Vui lòng yêu cầu mã mới");
+            }
+            passwordResetCodes.replace(normalizedEmail, resetCode,
+                    new PasswordResetCode(resetCode.code(), resetCode.expiresAt(), resetCode.failedAttempts() + 1));
+            throw new IllegalArgumentException("Mã xác nhận không chính xác");
+        }
+
+        boolean updated = accountDAO.updateCustomerPasswordByEmail(
+                normalizedEmail,
+                PasswordUtil.hash(newPassword)
+        );
+        if (updated) {
+            passwordResetCodes.remove(normalizedEmail, resetCode);
+        }
+        return updated;
+    }
+
+    private void validateCustomerInfo(String username, String password, String firstName, String lastName,
+                                      String address, String phoneNumber, LocalDate dob, String confirmPassword,
+                                      String email) {
         if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("Tên tài khoản không được để trống");
         }
@@ -178,10 +243,15 @@ public class AccountBUS {
                     "Tên tài khoản đã tồn tại"
             );
         }
+        validateEmail(email);
+        if (accountDAO.emailExists(email)) {
+            throw new IllegalArgumentException("Email này đã được sử dụng");
+        }
 
         if (password == null || password.isBlank()) {
             throw new IllegalArgumentException("Mật khẩu không được để trống");
         }
+
         if (confirmPassword == null || !password.equals(confirmPassword)) {
             throw new IllegalArgumentException(
                     "Mật khẩu xác nhận không khớp"
@@ -230,7 +300,34 @@ public class AccountBUS {
         if (dob.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Ngày sinh không được sau ngày hiện tại");
         }
+    }
 
+    private void validateNewPassword(String password, String confirmPassword) {
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Mật khẩu không được để trống");
+        }
+        if (confirmPassword == null || !password.equals(confirmPassword)) {
+            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
+        }
+        if (password.length() < 6) {
+            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự");
+        }
+        if (password.getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new IllegalArgumentException("Mật khẩu không được vượt quá 72 byte UTF-8");
+        }
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private void validateEmail(String email) {
+        if (email == null || email.length() > 254 || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalArgumentException("Email không hợp lệ");
+        }
+    }
+
+    private record PasswordResetCode(String code, Instant expiresAt, int failedAttempts) {
     }
 
     private boolean isPhoneExisted(String phoneNumber) {

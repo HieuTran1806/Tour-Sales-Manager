@@ -372,7 +372,9 @@ CREATE TABLE `taikhoan` (
   `userName` varchar(30) NOT NULL,
   `password` varchar(30) NOT NULL,
   `position` varchar(10) NOT NULL,
-  PRIMARY KEY (`userName`)
+  `email` varchar(254) DEFAULT NULL,
+  PRIMARY KEY (`userName`),
+  UNIQUE KEY `uq_taikhoan_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -382,7 +384,7 @@ CREATE TABLE `taikhoan` (
 
 LOCK TABLES `taikhoan` WRITE;
 /*!40000 ALTER TABLE `taikhoan` DISABLE KEYS */;
-INSERT INTO `taikhoan` VALUES ('admin','admin123','quản lí'),('NV003','123','Nhân viên'),('NV004','123','Saler'),('NV01','123','Nhân viên'),('NV02','123','Nhân viên');
+INSERT INTO `taikhoan` (`userName`, `password`, `position`) VALUES ('admin','admin123','quản lí'),('NV003','123','Nhân viên'),('NV004','123','Saler'),('NV01','123','Nhân viên'),('NV02','123','Nhân viên');
 /*!40000 ALTER TABLE `taikhoan` ENABLE KEYS */;
 UNLOCK TABLES;
 
