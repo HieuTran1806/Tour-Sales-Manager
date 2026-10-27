@@ -66,12 +66,16 @@ public class TourBookingDAO {
         String sql = "SELECT * FROM tourbooking WHERE idCustomer = ?";
 
         ArrayList<TourBookingDTO> ls = new ArrayList<>();
+        if (idCustomer == null || idCustomer.isBlank()) {
+            return ls;
+        }
 
         try (Connection conn = MyConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, idCustomer);
 
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
+                while (rs.next()) {
                     ls.add(mapResultSetToDTO(rs));
                 }
             }

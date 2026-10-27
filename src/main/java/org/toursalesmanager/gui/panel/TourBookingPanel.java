@@ -3,6 +3,7 @@ package org.toursalesmanager.gui.panel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
@@ -13,6 +14,9 @@ import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourBookingBUS;
 import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourBookingDTO;
+import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.gui.dialog.CustomerTourBookingDialog;
 import org.toursalesmanager.gui.dialog.TourBookingDialog;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
@@ -35,22 +39,23 @@ public class TourBookingPanel extends JPanel {
     JTable table;
 
     TourBookingBUS tourBookingBus;
-    TourBookingDTO tourBookingDTO;
     TourPlanBUS tourPlanBUS;
     TourBookingDialog tourBookingDialog;
+    CustomerTourBookingDialog customerTourBookingDialog;
 
     public TourBookingPanel()  {
         tourBookingBus = new TourBookingBUS();
-        tourBookingDTO = new TourBookingDTO();
         tourPlanBUS = new TourPlanBUS();
 
         scrollPane = new JScrollPane();
 
         initComponents();
-        if (!SessionManager.isAdmin()) {
-            deleteBtn.setEnabled(false);
-        }
-        loadTourBookingData(tourBookingBus.getAllTourBooking());
+        boolean customer = SessionManager.hasRole(Role.CUSTOMER);
+        addBtn.setVisible(SessionManager.hasPermission(Permission.CREATE_BOOKING));
+        addBtn.setText(customer ? "Đặt tour" : "Thêm");
+        editBtn.setVisible(!customer && SessionManager.hasPermission(Permission.UPDATE_BOOKING));
+        deleteBtn.setVisible(!customer && SessionManager.isAdmin());
+        loadTourBookingData(tourBookingBus.getVisibleBookings());
         hasSelectedRow();
     }
 
@@ -59,7 +64,10 @@ public class TourBookingPanel extends JPanel {
 
         // northPanel
         northPanel = new JPanel(new BorderLayout());
-        JLabel jlbTitle = new JLabel("QUẢN LÝ PHIẾU ĐẶT TOUR", JLabel.CENTER);
+        JLabel jlbTitle = new JLabel(
+                SessionManager.hasRole(Role.CUSTOMER) ? "ĐẶT TOUR CỦA TÔI" : "QUẢN LÝ PHIẾU ĐẶT TOUR",
+                JLabel.CENTER
+        );
         jlbTitle.setFont(new Font("Arial", Font.BOLD, 18));
         northPanel.add(jlbTitle, BorderLayout.NORTH); // northPanel add components
 
@@ -164,10 +172,16 @@ public class TourBookingPanel extends JPanel {
     private void setAddBtn(){
         addBtn = createBtn("Thêm", UIColors.ADD);
         addBtn.addActionListener(v -> {
-            tourBookingDialog = new TourBookingDialog(null, true, TourBookingDialog.Mode.ADD, tourBookingDTO, tourPlanBUS);
-            tourBookingDialog.setVisible(true);
-
-            loadTourBookingData(tourBookingBus.getAllTourBooking());
+            if (SessionManager.hasRole(Role.CUSTOMER)) {
+                customerTourBookingDialog = new CustomerTourBookingDialog(
+                        null, true, tourPlanBUS, null, null);
+                customerTourBookingDialog.setVisible(true);
+            } else {
+                tourBookingDialog = new TourBookingDialog(
+                        null, true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
+                tourBookingDialog.setVisible(true);
+            }
+            loadTourBookingData(tourBookingBus.getVisibleBookings());
         });
     }
 
@@ -182,12 +196,12 @@ public class TourBookingPanel extends JPanel {
             int i = table.getSelectedRow();
             int result = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa?", "Xác nhận", JOptionPane.YES_NO_OPTION);
             if (result == JOptionPane.YES_OPTION && i >= 0) {
-                String maKHang = (String) table.getValueAt(i, 0);
-                String maKHTour = (String) table.getValueAt(i, 3);
+                int modelRow = table.convertRowIndexToModel(i);
+                String maKHang = (String) tableModel.getValueAt(modelRow, 1);
+                String maKHTour = (String) tableModel.getValueAt(modelRow, 2);
                 TourBookingBUS tourBookingBus = new TourBookingBUS();
                 tourBookingBus.deleteTourBooking(maKHTour, maKHang);
-                DefaultTableModel model = (DefaultTableModel) table.getModel();
-                model.removeRow(i);
+                loadTourBookingData(tourBookingBus.getVisibleBookings());
             }
         });
     }
@@ -203,14 +217,16 @@ public class TourBookingPanel extends JPanel {
             }
 
             if (row >= 0) {
-                String maKHang = (String) table.getValueAt(row, 0);
-                String maKHTour = (String) table.getValueAt(row, 3);
+                int modelRow = table.convertRowIndexToModel(row);
+                String maKHang = (String) tableModel.getValueAt(modelRow, 1);
+                String maKHTour = (String) tableModel.getValueAt(modelRow, 2);
                 TourBookingDTO khangkht = tourBookingBus.findTourBookingByIdTourPlan(maKHTour);
                 if (khangkht != null && khangkht.getIdCustomer().equals(maKHang)) {
-                    tourBookingDialog = new TourBookingDialog(null, true, TourBookingDialog.Mode.EDIT, tourBookingDTO, tourPlanBUS);
+                    tourBookingDialog = new TourBookingDialog(
+                            null, true, TourBookingDialog.Mode.EDIT, khangkht, tourPlanBUS);
                     tourBookingDialog.setVisible(true);
 
-                    loadTourBookingData(tourBookingBus.getAllTourBooking());
+                    loadTourBookingData(tourBookingBus.getVisibleBookings());
                 }
             }
         });
@@ -219,7 +235,7 @@ public class TourBookingPanel extends JPanel {
     private void setRefreshBtn(){
         refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(v -> {
-            loadTourBookingData(tourBookingBus.getAllTourBooking());
+            loadTourBookingData(tourBookingBus.getVisibleBookings());
         });
     }
 
@@ -240,12 +256,12 @@ public class TourBookingPanel extends JPanel {
         }
     }
 
-    private void loadTourBookingData(ArrayList<TourBookingDTO> ls) {
+    private void loadTourBookingData(List<TourBookingDTO> ls) {
         tableModel.setRowCount(0);
 
         for (TourBookingDTO dto : ls) {
             tableModel.addRow(new Object[]{
-                    dto.getIdTourPlan(),
+                    dto.getIdTourBooking(),
                     dto.getIdCustomer(),
                     dto.getIdTourPlan(),
                     dto.getBookingDate(),
@@ -263,7 +279,7 @@ public class TourBookingPanel extends JPanel {
             boolean hasSelected = table.getSelectedRow() != -1;
             refreshBtn.setEnabled(hasSelected);
             editBtn.setEnabled(hasSelected);
-            addBtn.setEnabled(hasSelected);
+            addBtn.setEnabled(SessionManager.hasPermission(Permission.CREATE_BOOKING));
             deleteBtn.setEnabled(hasSelected);
         });
     }

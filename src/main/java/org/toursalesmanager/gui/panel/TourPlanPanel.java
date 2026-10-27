@@ -4,14 +4,15 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.bus.TourBUS;
-import org.toursalesmanager.dto.TourBookingDTO;
 import org.toursalesmanager.dto.TourPlanDTO;
 import org.toursalesmanager.dto.TourDTO;
 import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.enums.Role;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.TourPlanDetailDialog;
 import org.toursalesmanager.gui.dialog.TourPlanDialog;
 import org.toursalesmanager.gui.dialog.TourBookingDialog;
+import org.toursalesmanager.gui.dialog.CustomerTourBookingDialog;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
 
@@ -45,7 +46,7 @@ public class TourPlanPanel extends JPanel {
     ArrayList<TourPlanDTO> lsKeHoachTours;
 
     TourBookingDialog tourBookingDialog;
-    TourBookingDTO tourBookingDTO;
+    CustomerTourBookingDialog customerTourBookingDialog;
 
     // formatter
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -118,6 +119,7 @@ public class TourPlanPanel extends JPanel {
         southPanel.add(detailsBtn);
 
         booking();
+        bookingBtn.setVisible(SessionManager.hasPermission(Permission.CREATE_BOOKING));
         southPanel.add(bookingBtn);
 
         refresh();
@@ -194,11 +196,33 @@ public class TourPlanPanel extends JPanel {
     }
 
     private void booking(){
-        bookingBtn = ButtonFactory.create("Booking", UIColors.BOOKING);
+        bookingBtn = ButtonFactory.create(
+                SessionManager.hasRole(Role.CUSTOMER) ? "Đặt tour" : "Tạo phiếu đặt",
+                UIColors.BOOKING
+        );
         bookingBtn.addActionListener(e -> {
-
-            tourBookingDialog = new TourBookingDialog(null, true, TourBookingDialog.Mode.ADD, tourBookingDTO, tourPlanBUS);
-            tourBookingDialog.setVisible(true);
+            int row = table.getSelectedRow();
+            if (SessionManager.hasRole(Role.CUSTOMER) && row < 0) {
+                customerTourBookingDialog = new CustomerTourBookingDialog(
+                        null, true, tourPlanBUS, null, null);
+                customerTourBookingDialog.setVisible(true);
+                return;
+            }
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn kế hoạch tour cần đặt.");
+                return;
+            }
+            int modelRow = table.convertRowIndexToModel(row);
+            String planId = tableModel.getValueAt(modelRow, 0).toString();
+            if (SessionManager.hasRole(Role.CUSTOMER)) {
+                customerTourBookingDialog = new CustomerTourBookingDialog(
+                        null, true, tourPlanBUS, planId, null);
+                customerTourBookingDialog.setVisible(true);
+            } else {
+                tourBookingDialog = new TourBookingDialog(
+                        null, true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
+                tourBookingDialog.setVisible(true);
+            }
         });
     }
 
@@ -289,7 +313,8 @@ public class TourPlanPanel extends JPanel {
             deleteBtn.setEnabled(hadSelection);
             editBtn.setEnabled(hadSelection);
             detailsBtn.setEnabled(hadSelection);
-            bookingBtn.setEnabled(hadSelection);
+            bookingBtn.setEnabled(SessionManager.hasPermission(Permission.CREATE_BOOKING)
+                    && (SessionManager.hasRole(Role.CUSTOMER) || hadSelection));
         });
     }
 

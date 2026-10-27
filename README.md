@@ -38,17 +38,18 @@ Copy-Item src\main\resources\config.properties.example src\main\resources\config
 1. **Khách hàng** đăng ký tài khoản khách hàng trên màn hình đăng nhập, sau đó đăng nhập bằng tên đăng nhập và mật khẩu. Tài khoản đăng ký mới được gán vai trò khách hàng.
 2. **Nhân viên** đăng nhập bằng tài khoản đã được cấp. Nhân viên không tự đăng ký qua màn hình đăng ký khách hàng; các màn hình và thao tác được hiển thị theo quyền của tài khoản.
 3. Người dùng có quyền xem tour có thể mở danh sách tour, tìm kiếm và xem thông tin chi tiết. Các thao tác thêm, sửa hoặc xóa tour chỉ dành cho người có quyền quản lý tour.
-4. Hiện tại, luồng tạo đặt tour nằm trong màn hình quản lý đặt tour dành cho nhân viên có quyền phù hợp. Nhân viên chọn khách hàng và kế hoạch tour, nhập ngày đặt, số vé, giá, trạng thái và ghi chú để lập hoặc cập nhật phiếu đặt. Hóa đơn được quản lý ở màn hình riêng.
+4. Ngay tại màn hình **Tour**, khách hàng chọn một tour (không bắt buộc) rồi bấm **Chọn lịch & đặt tour**; cũng có thể mở **Kế hoạch tour** và bấm **Đặt tour**. Khách chọn kế hoạch khởi hành, nhập số vé và ghi chú rồi gửi yêu cầu. Hệ thống tự gắn phiếu với khách hàng đang đăng nhập, lấy giá từ kế hoạch tour và đặt trạng thái ban đầu là **Chờ xác nhận**. Danh sách của khách hàng chỉ hiển thị các phiếu của chính họ.
+5. Nhân viên có quyền xem/tạo phiếu đặt có thể xem danh sách phục vụ công việc và lập phiếu cho khách hàng. Hóa đơn được quản lý ở màn hình riêng.
 
-**Lưu ý:** Ứng dụng hiện chưa có luồng đặt tour trực tuyến hoàn chỉnh cho khách hàng. Khách có thể đăng ký, đăng nhập và xem tour, nhưng chưa tự gửi yêu cầu đặt tour từ màn hình khách hàng. Chức năng xác nhận chỗ, thu tiền/đặt cọc và tự động gửi xác nhận cũng chưa được thể hiện như một quy trình tự động trong ứng dụng. Vì vậy, không nên coi phiếu đặt mới tạo là đã thanh toán hoặc đã xác nhận chỗ nếu nhân viên chưa kiểm tra và xử lý.
+**Lưu ý:** Yêu cầu khách gửi được ghi nhận ở trạng thái **Chờ xác nhận**; việc kiểm tra chỗ, xác nhận đặt tour, thu/đối soát tiền và gửi thông báo vẫn cần nhân viên xử lý. Tạo phiếu không đồng nghĩa với đã giữ chỗ hoặc đã thanh toán. Khách chỉ xem được phiếu của mình, không được tự đổi khách hàng, giá hoặc trạng thái.
 
-## Nghiệp vụ đặt tour nên áp dụng
+## Nghiệp vụ đặt tour
 
 ### Khách hàng
 
-1. Đăng ký hoặc đăng nhập; tìm tour theo nhu cầu và xem lịch khởi hành, giá, dịch vụ bao gồm, điều kiện và số chỗ còn nhận.
-2. Chọn lịch khởi hành, số người và cung cấp thông tin liên hệ của người đại diện cùng thông tin cần thiết của khách đi tour. Kiểm tra lại giá và chính sách trước khi gửi yêu cầu.
-3. Hệ thống ghi nhận yêu cầu ở trạng thái **chờ xác nhận**, chưa trừ chỗ chính thức và chưa coi là đã thanh toán. Khách nhận mã đặt tour để tra cứu.
+1. Đăng ký hoặc đăng nhập; tìm tour, xem chi tiết và chọn kế hoạch khởi hành phù hợp.
+2. Nhập số vé và ghi chú cần thiết, kiểm tra giá/tổng tiền dự kiến rồi gửi yêu cầu. Hệ thống gắn yêu cầu với hồ sơ của tài khoản, tự tính giá và ghi nhận trạng thái **chờ xác nhận**.
+3. Theo dõi phiếu đặt trong màn hình **Phiếu đặt tour**. Phiếu chỉ được xem là xác nhận sau khi nhân viên kiểm tra và cập nhật theo quy trình của đơn vị.
 4. Chỉ thanh toán/đặt cọc theo hướng dẫn và thời hạn do nhân viên thông báo. Sau khi nhân viên xác nhận còn chỗ và ghi nhận khoản thanh toán theo quy định, khách nhận xác nhận đặt tour, thông tin thanh toán và hướng dẫn tiếp theo.
 5. Nếu hết chỗ hoặc thông tin chưa đầy đủ, nhân viên liên hệ khách để đề xuất lịch khác hoặc bổ sung thông tin; không tự xác nhận một yêu cầu không đáp ứng điều kiện.
 

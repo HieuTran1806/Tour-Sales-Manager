@@ -2,11 +2,13 @@ package org.toursalesmanager.gui.panel;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourBUS;
+import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourDTO;
 import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.TourDetailDialog;
 import org.toursalesmanager.gui.dialog.TourDiaLog;
+import org.toursalesmanager.gui.dialog.CustomerTourBookingDialog;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
 
@@ -26,7 +28,7 @@ public class TourPanel extends JPanel {
 
     // define button
 
-    JButton addBtn, deleteBtn, editBtn, refreshBtn, detailBtn;
+    JButton addBtn, deleteBtn, editBtn, refreshBtn, detailBtn, bookingBtn;
 
     // relate to table
     JTable table;
@@ -127,6 +129,10 @@ public class TourPanel extends JPanel {
 
         viewDetail();
         southPanel.add(detailBtn);
+
+        booking();
+        bookingBtn.setVisible(SessionManager.hasPermission(Permission.CREATE_BOOKING));
+        southPanel.add(bookingBtn);
 
         refresh();
         southPanel.add(refreshBtn);
@@ -261,9 +267,23 @@ public class TourPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn kế tour để xem");
                 return;
             }
-
             TourDTO t = tourBUS.getByID(maTour);
             TourDetailDialog dialog = new TourDetailDialog(t);
+            dialog.setVisible(true);
+        });
+    }
+
+    private void booking() {
+        bookingBtn = ButtonFactory.create("Chọn lịch & đặt tour", UIColors.BOOKING);
+        bookingBtn.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            String selectedTourId = null;
+            if (row >= 0) {
+                int modelRow = table.convertRowIndexToModel(row);
+                selectedTourId = tableModel.getValueAt(modelRow, 0).toString();
+            }
+            CustomerTourBookingDialog dialog = new CustomerTourBookingDialog(
+                    null, true, new TourPlanBUS(), null, selectedTourId);
             dialog.setVisible(true);
         });
     }
