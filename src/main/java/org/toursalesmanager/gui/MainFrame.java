@@ -9,6 +9,7 @@ import org.toursalesmanager.dto.CustomerDTO;
 import org.toursalesmanager.dto.StaffDTO;
 import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.gui.panel.*;
 import org.toursalesmanager.login.SessionManager;
 
@@ -65,7 +66,7 @@ public class MainFrame extends JFrame {
     private JPanel buildSideBar(){
         JPanel sidebar = new JPanel();
 
-        sidebar.setBackground(new Color(30, 90, 160));
+        sidebar.setBackground(UIColors.SIDEBAR_BACKGROUND);
         sidebar.setPreferredSize(new Dimension(240, 0));
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
 
@@ -102,7 +103,7 @@ public class MainFrame extends JFrame {
 
         sidebar.add(Box.createVerticalGlue());
 
-        JButton logoutBtn = createMenuButton("Đăng xuất", null, Color.RED);
+        JButton logoutBtn = createMenuButton("Đăng xuất", null, UIColors.LOGOUT_BACKGROUND);
         logoutBtn.addActionListener(e -> handleLogout());
 
         sidebar.add(logoutBtn);
@@ -113,7 +114,7 @@ public class MainFrame extends JFrame {
     private JPanel buildContentArea(){
         cardLayout = new CardLayout();
         contentArea = new JPanel(cardLayout);
-        contentArea.setBackground(Color.cyan);
+        contentArea.setBackground(UIColors.MAIN_CONTENT_BACKGROUND);
 
         if(SessionManager.hasPermission(Permission.VIEW_TOUR))
             contentArea.add(new TourPanel(), "Tour");
@@ -180,14 +181,14 @@ public class MainFrame extends JFrame {
         JButton btn = new JButton(text) {
             @Override protected void paintComponent(Graphics g) {
                 if(color != null){
-                    g.setColor(color);
-                    g.fillRect(0, 0, getWidth(), getHeight());
+                    g.setColor(getModel().isRollover() ? UIColors.LOGOUT_HOVER : color);
+                    g.fillRoundRect(8, 4, getWidth() - 16, getHeight() - 8, 12, 12);
                 }else if (this == activeButton) {
-                    g.setColor(new Color(255, 255, 255, 30));
-                    g.fillRoundRect(8, 4, getWidth() - 16, getHeight() - 8, 10, 10);
+                    g.setColor(UIColors.SIDEBAR_ACTIVE);
+                    g.fillRoundRect(8, 4, getWidth() - 16, getHeight() - 8, 12, 12);
                 } else if (getModel().isRollover()) {
-                    g.setColor(Color.blue);
-                    g.fillRect(0, 0, getWidth(), getHeight());
+                    g.setColor(UIColors.SIDEBAR_HOVER);
+                    g.fillRoundRect(8, 4, getWidth() - 16, getHeight() - 8, 12, 12);
                 }
                 super.paintComponent(g);
             }
@@ -199,7 +200,7 @@ public class MainFrame extends JFrame {
         btn.setFocusPainted(false);
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        btn.setForeground(Color.WHITE);
+        btn.setForeground(UIColors.SIDEBAR_TEXT);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setMaximumSize(new Dimension(240, 48));
         btn.setPreferredSize(new Dimension(240, 48));
@@ -211,9 +212,7 @@ public class MainFrame extends JFrame {
 
             activeButton = btn;
             btn.repaint();
-            cardLayout.show(contentArea, card);
-
-            if(card != null) { // nếu card null (nút đăng xuất) sẽ là nút bình thường không show ra như những nút khác
+            if(card != null) {
                 cardLayout.show(contentArea, card);
             }
         });
