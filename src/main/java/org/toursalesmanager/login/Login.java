@@ -1,5 +1,6 @@
 package org.toursalesmanager.login;
 
+import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.AccountBUS;
@@ -181,9 +182,8 @@ public class Login extends JFrame {
                 return;
             }
 
-            JTextField codeField = new JTextField(8);
-            if (JOptionPane.showConfirmDialog(this, codeField, "Nhập mã OTP", JOptionPane.OK_CANCEL_OPTION)
-                    != JOptionPane.OK_OPTION) {
+            String code = showOtpVerificationDialog(email);
+            if (code == null) {
                 return;
             }
 
@@ -199,7 +199,7 @@ public class Login extends JFrame {
                 return;
             }
 
-            boolean updated = accountBUS.resetCustomerPassword(email, codeField.getText(),
+            boolean updated = accountBUS.resetCustomerPassword(email, code,
                     new String(passwordField.getPassword()), new String(confirmField.getPassword()));
             if (updated) {
                 JOptionPane.showMessageDialog(this, "Đặt lại mật khẩu thành công.");
@@ -214,6 +214,106 @@ public class Login extends JFrame {
             JOptionPane.showMessageDialog(this, "Không thể gửi mã hoặc đặt lại mật khẩu: " + ex.getMessage(),
                     "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private String showOtpVerificationDialog(String email) {
+        JDialog dialog = new JDialog(this, "Nhập mã OTP", true);
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+        JTextField codeField = new JTextField(10);
+        JLabel messageLabel = new JLabel("Mã xác nhận đã được gửi đến email của bạn.");
+        messageLabel.setForeground(Color.GRAY);
+        JButton resendButton = new JButton("Gửi lại OTP");
+        resendButton.setFont(resendButton.getFont().deriveFont(Font.PLAIN, 11f));
+        resendButton.setBorderPainted(false);
+        resendButton.setContentAreaFilled(false);
+        resendButton.setForeground(new Color(0, 102, 204));
+        resendButton.setEnabled(false);
+
+        JPanel content = new JPanel(new GridBagLayout());
+        content.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(4, 4, 8, 4);
+        content.add(messageLabel, gbc);
+
+        gbc.gridy++;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        content.add(codeField, gbc);
+
+        JLabel resendHint = new JLabel("Bạn chưa nhận được mã?");
+        resendHint.setFont(resendHint.getFont().deriveFont(Font.PLAIN, 11f));
+        gbc.gridy++;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        content.add(resendHint, gbc);
+        gbc.gridx = 1;
+        gbc.insets = new Insets(4, 0, 8, 4);
+        content.add(resendButton, gbc);
+
+        JButton verifyButton = new JButton("Xác nhận");
+        JButton cancelButton = new JButton("Hủy");
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(cancelButton);
+        buttons.add(verifyButton);
+        dialog.add(content, BorderLayout.CENTER);
+        dialog.add(buttons, BorderLayout.SOUTH);
+
+        int[] secondsRemaining = {60};
+        Timer resendTimer = new Timer(1000, event -> {
+            secondsRemaining[0]--;
+            if (secondsRemaining[0] <= 0) {
+                resendButton.setEnabled(true);
+                resendButton.setText("Gửi lại OTP");
+                ((Timer) event.getSource()).stop();
+            } else {
+                resendButton.setText("Gửi lại OTP (" + secondsRemaining[0] + "s)");
+            }
+        });
+        resendButton.setText("Gửi lại OTP (60s)");
+        resendTimer.start();
+
+        String[] verifiedCode = {null};
+        verifyButton.addActionListener(event -> {
+            try {
+                String code = codeField.getText().trim();
+                accountBUS.verifyPasswordResetCode(email, code);
+                verifiedCode[0] = code;
+                dialog.dispose();
+            } catch (IllegalArgumentException ex) {
+                messageLabel.setText(ex.getMessage());
+                messageLabel.setForeground(Color.RED);
+            }
+        });
+        resendButton.addActionListener(event -> {
+            try {
+                if (!accountBUS.sendPasswordResetCode(email)) {
+                    messageLabel.setText("Không thể gửi mã. Vui lòng kiểm tra email.");
+                    messageLabel.setForeground(Color.RED);
+                    return;
+                }
+                messageLabel.setText("Đã gửi mã OTP mới đến email của bạn.");
+                messageLabel.setForeground(Color.GRAY);
+                codeField.setText("");
+                secondsRemaining[0] = 60;
+                resendButton.setEnabled(false);
+                resendButton.setText("Gửi lại OTP (60s)");
+                resendTimer.restart();
+            } catch (MessagingException | IllegalArgumentException | IllegalStateException ex) {
+                messageLabel.setText(ex.getMessage());
+                messageLabel.setForeground(Color.RED);
+            }
+        });
+        cancelButton.addActionListener(event -> dialog.dispose());
+        dialog.getRootPane().setDefaultButton(verifyButton);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+        resendTimer.stop();
+        return verifiedCode[0];
     }
 
     private void loginAccount(){

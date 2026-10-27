@@ -21,7 +21,9 @@ public class AccountBUS {
     private final Map<String, PasswordResetCode> passwordResetCodes = new ConcurrentHashMap<>();
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final long RESET_CODE_LIFETIME_SECONDS = 5 * 60;
+    private static final long RESET_CODE_RESEND_DELAY_SECONDS = 60;
     private static final int MAX_RESET_CODE_ATTEMPTS = 5;
+    private final Map<String, Instant> passwordResetLastSentAt = new ConcurrentHashMap<>();
 
     public AccountBUS() {
         this.accountDAO = new AccountDAO();
@@ -178,11 +180,19 @@ public class AccountBUS {
         );
     }
 
-    public boolean sendPasswordResetCode(String email) throws MessagingException {
+    public synchronized boolean sendPasswordResetCode(String email) throws MessagingException {
         String normalizedEmail = normalizeEmail(email);
         validateEmail(normalizedEmail);
         if (!accountDAO.customerEmailExists(normalizedEmail)) {
             return false;
+        }
+
+        Instant lastSentAt = passwordResetLastSentAt.get(normalizedEmail);
+        if (lastSentAt != null
+                && Instant.now().isBefore(lastSentAt.plusSeconds(RESET_CODE_RESEND_DELAY_SECONDS))) {
+            long secondsRemaining = RESET_CODE_RESEND_DELAY_SECONDS
+                    - java.time.Duration.between(lastSentAt, Instant.now()).getSeconds();
+            throw new IllegalArgumentException("Vui lòng đợi " + secondsRemaining + " giây trước khi gửi lại OTP");
         }
 
         String code = String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
@@ -192,7 +202,14 @@ public class AccountBUS {
                 Instant.now().plusSeconds(RESET_CODE_LIFETIME_SECONDS),
                 0
         ));
+        passwordResetLastSentAt.put(normalizedEmail, Instant.now());
         return true;
+    }
+
+    public void verifyPasswordResetCode(String email, String code) {
+        String normalizedEmail = normalizeEmail(email);
+        validateEmail(normalizedEmail);
+        getValidPasswordResetCode(normalizedEmail, code);
     }
 
     public boolean resetCustomerPassword(String email, String code, String newPassword, String confirmPassword) {
@@ -200,6 +217,19 @@ public class AccountBUS {
         validateEmail(normalizedEmail);
         validateNewPassword(newPassword, confirmPassword);
 
+        PasswordResetCode resetCode = getValidPasswordResetCode(normalizedEmail, code);
+        boolean updated = accountDAO.updateCustomerPasswordByEmail(
+                normalizedEmail,
+                PasswordUtil.hash(newPassword)
+        );
+        if (updated) {
+            passwordResetCodes.remove(normalizedEmail, resetCode);
+            passwordResetLastSentAt.remove(normalizedEmail);
+        }
+        return updated;
+    }
+
+    private PasswordResetCode getValidPasswordResetCode(String normalizedEmail, String code) {
         PasswordResetCode resetCode = passwordResetCodes.get(normalizedEmail);
         if (resetCode == null) {
             throw new IllegalArgumentException("Mã xác nhận không hợp lệ hoặc đã hết hạn");
@@ -217,15 +247,7 @@ public class AccountBUS {
                     new PasswordResetCode(resetCode.code(), resetCode.expiresAt(), resetCode.failedAttempts() + 1));
             throw new IllegalArgumentException("Mã xác nhận không chính xác");
         }
-
-        boolean updated = accountDAO.updateCustomerPasswordByEmail(
-                normalizedEmail,
-                PasswordUtil.hash(newPassword)
-        );
-        if (updated) {
-            passwordResetCodes.remove(normalizedEmail, resetCode);
-        }
-        return updated;
+        return resetCode;
     }
 
     private void validateCustomerInfo(String username, String password, String firstName, String lastName,

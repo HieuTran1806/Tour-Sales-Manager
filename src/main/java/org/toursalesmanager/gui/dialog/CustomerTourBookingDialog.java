@@ -4,6 +4,7 @@ import org.toursalesmanager.bus.TourBookingBUS;
 import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourPlanDTO;
 import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
 
@@ -41,10 +42,29 @@ public class CustomerTourBookingDialog extends JDialog {
     private void initialize(String preselectedTourPlanId, String tourId) {
         setTitle("Đặt tour");
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(0, 12));
+        setResizable(false);
 
-        JPanel form = new JPanel(new GridLayout(0, 2, 10, 12));
-        form.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+        JPanel content = new JPanel(new BorderLayout(0, 16));
+        content.setBorder(BorderFactory.createEmptyBorder(20, 24, 8, 24));
+        content.setBackground(UIColors.BACKGROUND);
+
+        JPanel heading = new JPanel();
+        heading.setLayout(new BoxLayout(heading, BoxLayout.Y_AXIS));
+        heading.setOpaque(false);
+        JLabel titleLabel = new JLabel("Thông tin đặt tour");
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 20f));
+        titleLabel.setForeground(UIColors.SIDEBAR_BACKGROUND);
+        JLabel subtitleLabel = new JLabel("Chọn kế hoạch và số vé bạn muốn đăng ký.");
+        subtitleLabel.setForeground(new Color(95, 112, 120));
+        heading.add(titleLabel);
+        heading.add(Box.createVerticalStrut(4));
+        heading.add(subtitleLabel);
+        content.add(heading, BorderLayout.NORTH);
+
+        GridBagLayout formLayout = new GridBagLayout();
+        JPanel form = new JPanel(formLayout);
+        form.setOpaque(false);
 
         tourPlanCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -63,30 +83,44 @@ public class CustomerTourBookingDialog extends JDialog {
                 return this;
             }
         });
+        tourPlanCombo.setPreferredSize(new Dimension(360, 34));
 
-        form.add(new JLabel("Kế hoạch tour:"));
-        form.add(tourPlanCombo);
-        form.add(new JLabel("Số vé:"));
-        form.add(ticketsField);
-        form.add(new JLabel("Đơn giá:"));
-        form.add(priceLabel);
-        form.add(new JLabel("Tổng tiền dự kiến:"));
-        form.add(totalLabel);
-        form.add(new JLabel("Ghi chú:"));
-        form.add(new JScrollPane(noteArea));
+        ticketsField.setPreferredSize(new Dimension(120, 34));
+        noteArea.setLineWrap(true);
+        noteArea.setWrapStyleWord(true);
+        JScrollPane noteScrollPane = new JScrollPane(noteArea);
+        noteScrollPane.setPreferredSize(new Dimension(360, 58));
+
+        priceLabel.setFont(priceLabel.getFont().deriveFont(14f));
+        priceLabel.setForeground(new Color(75, 91, 99));
+        totalLabel.setFont(totalLabel.getFont().deriveFont(Font.BOLD, 16f));
+        totalLabel.setForeground(UIColors.SIDEBAR_ACTIVE);
+
+        addFormRow(form, formLayout, 0, "Kế hoạch tour:", tourPlanCombo);
+        addFormRow(form, formLayout, 1, "Số vé:", ticketsField);
+        addFormRow(form, formLayout, 2, "Đơn giá:", priceLabel);
+        addFormRow(form, formLayout, 3, "Tổng tiền dự kiến:", totalLabel);
+        addFormRow(form, formLayout, 4, "Ghi chú:", noteScrollPane);
+        content.add(form, BorderLayout.CENTER);
 
         JButton submitButton = new JButton("Gửi yêu cầu đặt tour");
         submitButton.setBackground(UIColors.SAVE);
         submitButton.setForeground(Color.WHITE);
+        submitButton.setFocusPainted(false);
         JButton closeButton = new JButton("Đóng");
+        closeButton.setBackground(UIColors.CANCEL);
+        closeButton.setForeground(Color.WHITE);
+        closeButton.setFocusPainted(false);
         closeButton.addActionListener(event -> dispose());
         submitButton.addActionListener(event -> submitBooking());
 
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 8));
+        actions.setOpaque(false);
+        actions.setBorder(BorderFactory.createEmptyBorder(0, 16, 8, 16));
         actions.add(submitButton);
         actions.add(closeButton);
 
-        add(form, BorderLayout.CENTER);
+        add(content, BorderLayout.CENTER);
         add(actions, BorderLayout.SOUTH);
 
         for (TourPlanDTO plan : tourPlanBUS.getAllKeHoachTours()) {
@@ -121,6 +155,27 @@ public class CustomerTourBookingDialog extends JDialog {
         updatePriceAndTotal();
         pack();
         setLocationRelativeTo(getParent());
+    }
+
+    private void addFormRow(JPanel form, GridBagLayout layout, int row,
+                            String label, JComponent component) {
+        int firstComponent = form.getComponentCount();
+        AddComponentToForm.addFormRow(form, label, component);
+
+        GridBagConstraints labelConstraints = new GridBagConstraints();
+        labelConstraints.gridx = 0;
+        labelConstraints.gridy = row;
+        labelConstraints.anchor = GridBagConstraints.WEST;
+        labelConstraints.insets = new Insets(3, 0, 3, 12);
+        layout.setConstraints(form.getComponent(firstComponent), labelConstraints);
+
+        GridBagConstraints fieldConstraints = new GridBagConstraints();
+        fieldConstraints.gridx = 1;
+        fieldConstraints.gridy = row;
+        fieldConstraints.weightx = 1;
+        fieldConstraints.fill = GridBagConstraints.HORIZONTAL;
+        fieldConstraints.insets = new Insets(3, 0, 3, 0);
+        layout.setConstraints(form.getComponent(firstComponent + 1), fieldConstraints);
     }
 
     private void updatePriceAndTotal() {
