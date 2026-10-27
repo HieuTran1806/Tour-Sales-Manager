@@ -33,8 +33,8 @@ public class MailService {
         Message msg = new MimeMessage(session);
         msg.setFrom(new InternetAddress(from));
         msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-        msg.setSubject("Mã xác nhận đặt lại mật khẩu");
-        msg.setText("Mã OTP của bạn là: " + otp + "\nMã có hiệu lực trong 5 phút.");
+        msg.setSubject("TOUR SALE APPLICATION SEND OTP");
+        msg.setText("Mã OTP đặt lại mật khẩu của bạn là: " + otp + "\nMã có hiệu lực trong 5 phút.");
         Transport.send(msg);
     }
 
