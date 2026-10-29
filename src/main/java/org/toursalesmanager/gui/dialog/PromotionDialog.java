@@ -9,6 +9,7 @@ import org.toursalesmanager.dto.PromotionDTO;
 import org.toursalesmanager.dto.PromotionalInvoiceDTO;
 import org.toursalesmanager.dto.KMTourDTO;
 import org.toursalesmanager.dto.TourDTO;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.DateHelper;
 import org.toursalesmanager.gui.helper.UIFontHelper;
 import org.toursalesmanager.gui.helper.UIColors;
@@ -228,13 +229,7 @@ public class PromotionDialog extends JDialog {
     }
 
     private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-
-        return btn;
+        return ButtonFactory.create(text, color);
     }
 
     private void handleSave(){

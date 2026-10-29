@@ -128,7 +128,7 @@ public class TourBookingDialog extends JDialog {
 
         txtCustomerSearch = new JTextField();
 
-        searchCustomerBtn = new JButton("Tìm");
+        searchCustomerBtn = ButtonFactory.create("Tìm", UIColors.BUTTON);
 
         JPanel customerSearchPanel = new JPanel(new BorderLayout(5, 0));
 

@@ -14,6 +14,7 @@ import org.toursalesmanager.bus.InvoiceBUS;
 import org.toursalesmanager.bus.CustomerBUS;
 import org.toursalesmanager.dto.*;
 import org.toursalesmanager.dto.InvoiceDetailDTO;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
@@ -154,12 +155,7 @@ public class NhapCTHD extends JDialog {
     }
 
     private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-        return btn;
+        return ButtonFactory.create(text, color);
     }
 
     private void luu(){

@@ -7,6 +7,7 @@ import org.toursalesmanager.bus.*;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.ExcelHelper;
+import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
@@ -91,7 +92,7 @@ public class StatisticsPanel extends JPanel {
         cbYear.addActionListener(e -> updateChart()); // Khi đổi năm -> tự động update biểu đồ
 
         // Trong hàm init() của StatisticsPanel:
-        JButton btnExportExcel = ButtonFactory.create("Xuất Excel", new Color(76, 175, 80)); // Màu xanh lá đặc trưng của Excel
+        JButton btnExportExcel = ButtonFactory.create("Xuất Excel", UIColors.BUTTON);
         filterPanel.add(btnExportExcel);
 
         btnExportExcel.addActionListener(e->xuatThongke());

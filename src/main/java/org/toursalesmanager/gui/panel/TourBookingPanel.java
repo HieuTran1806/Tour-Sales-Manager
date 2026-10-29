@@ -18,6 +18,7 @@ import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.enums.Role;
 import org.toursalesmanager.gui.dialog.CustomerTourBookingDialog;
 import org.toursalesmanager.gui.dialog.TourBookingDialog;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
 
@@ -140,18 +141,7 @@ public class TourBookingPanel extends JPanel {
     }//GEN-LAST:event_jComboBox2ActionPerformed
 
     private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // in south panel
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
+        return ButtonFactory.create(text, color);
     }
 
     public void initTable(){

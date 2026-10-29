@@ -1,6 +1,8 @@
 package org.toursalesmanager.gui.component;
 
 import javax.swing.JButton;
+import org.toursalesmanager.gui.helper.UIColors;
+
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
@@ -18,7 +20,7 @@ public final class ButtonFactory {
     ) {
         JButton button = new JButton(text);
 
-        button.setBackground(backgroundColor);
+        button.setBackground(UIColors.BUTTON);
         button.setForeground(Color.WHITE);
 
         button.setFocusPainted(false);
@@ -38,6 +40,16 @@ public final class ButtonFactory {
         button.setContentAreaFilled(true);
         button.setOpaque(true);
         button.setBorderPainted(false);
+        button.setRolloverEnabled(true);
+        button.getModel().addChangeListener(event -> {
+            if (!button.isEnabled()) {
+                button.setBackground(UIColors.BUTTON_DISABLED);
+            } else if (button.getModel().isRollover() || button.getModel().isPressed()) {
+                button.setBackground(UIColors.BUTTON_HOVER);
+            } else {
+                button.setBackground(UIColors.BUTTON);
+            }
+        });
 
         return button;
     }

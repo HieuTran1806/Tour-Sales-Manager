@@ -4,6 +4,7 @@ import org.toursalesmanager.bus.TourBookingBUS;
 import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourPlanDTO;
 import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
@@ -103,14 +104,8 @@ public class CustomerTourBookingDialog extends JDialog {
         addFormRow(form, formLayout, 4, "Ghi chú:", noteScrollPane);
         content.add(form, BorderLayout.CENTER);
 
-        JButton submitButton = new JButton("Gửi yêu cầu đặt tour");
-        submitButton.setBackground(UIColors.SAVE);
-        submitButton.setForeground(Color.WHITE);
-        submitButton.setFocusPainted(false);
-        JButton closeButton = new JButton("Đóng");
-        closeButton.setBackground(UIColors.CANCEL);
-        closeButton.setForeground(Color.WHITE);
-        closeButton.setFocusPainted(false);
+        JButton submitButton = ButtonFactory.create("Gửi yêu cầu đặt tour", UIColors.BUTTON);
+        JButton closeButton = ButtonFactory.create("Đóng", UIColors.BUTTON);
         closeButton.addActionListener(event -> dispose());
         submitButton.addActionListener(event -> submitBooking());
 

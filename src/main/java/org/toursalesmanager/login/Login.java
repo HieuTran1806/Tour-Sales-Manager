@@ -146,7 +146,15 @@ public class Login extends JFrame {
 
         registerPanel.add(lblRegisterQuestion);
         registerPanel.add(registerBtn);
-        forgotPasswordBtn = ButtonFactory.create("Quên mật khẩu?", UIColors.VIEW);
+        forgotPasswordBtn = new JButton("<html><u>Quên mật khẩu?</u></html>");
+        forgotPasswordBtn.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        forgotPasswordBtn.setForeground(UIColors.BUTTON);
+        forgotPasswordBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        forgotPasswordBtn.setFocusPainted(false);
+        forgotPasswordBtn.setContentAreaFilled(false);
+        forgotPasswordBtn.setBorderPainted(false);
+        forgotPasswordBtn.setOpaque(false);
+        forgotPasswordBtn.setMargin(new Insets(0, 0, 0, 0));
         forgotPasswordBtn.addActionListener(e -> forgotPassword());
         forgotPasswordPanel.add(forgotPasswordBtn);
 
@@ -227,7 +235,7 @@ public class Login extends JFrame {
         resendButton.setFont(resendButton.getFont().deriveFont(Font.PLAIN, 11f));
         resendButton.setBorderPainted(false);
         resendButton.setContentAreaFilled(false);
-        resendButton.setForeground(new Color(0, 102, 204));
+        resendButton.setForeground(UIColors.BUTTON);
         resendButton.setEnabled(false);
 
         JPanel content = new JPanel(new GridBagLayout());
@@ -254,8 +262,8 @@ public class Login extends JFrame {
         gbc.insets = new Insets(4, 0, 8, 4);
         content.add(resendButton, gbc);
 
-        JButton verifyButton = new JButton("Xác nhận");
-        JButton cancelButton = new JButton("Hủy");
+        JButton verifyButton = ButtonFactory.create("Xác nhận", UIColors.BUTTON);
+        JButton cancelButton = ButtonFactory.create("Hủy", UIColors.BUTTON);
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttons.add(cancelButton);
         buttons.add(verifyButton);

@@ -9,6 +9,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import org.toursalesmanager.dto.*;
 import org.toursalesmanager.bus.*;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.ExcelHelper;
 import org.toursalesmanager.gui.helper.UIColors;
 
@@ -233,18 +234,7 @@ public class InvoiceDetailPanel extends JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
+        return ButtonFactory.create(text, color);
     }
 
     private void add(){

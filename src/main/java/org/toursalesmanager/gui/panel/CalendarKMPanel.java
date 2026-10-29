@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.PromotionBUS;
 import org.toursalesmanager.dto.PromotionDTO;
+import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -38,17 +40,17 @@ public class CalendarKMPanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
 
         JPanel top = new JPanel(new BorderLayout());
-        JButton btnPrev = new JButton("<");
-        JButton btnNext = new JButton(">");
+        JButton btnPrev = ButtonFactory.create("<", UIColors.BUTTON);
+        JButton btnNext = ButtonFactory.create(">", UIColors.BUTTON);
 
         lblMonth = new JLabel("", JLabel.CENTER);
         lblMonth.setFont(new Font("Arial", Font.BOLD, 18));
         //control
         JPanel controlPanel = new JPanel();
 
-        JButton btnToday = new JButton("Today");
-        JButton btnPrevKM = new JButton("Prev KM");
-        JButton btnNextKM = new JButton("Next KM");
+        JButton btnToday = ButtonFactory.create("Today", UIColors.BUTTON);
+        JButton btnPrevKM = ButtonFactory.create("Prev KM", UIColors.BUTTON);
+        JButton btnNextKM = ButtonFactory.create("Next KM", UIColors.BUTTON);
 
         controlPanel.add(btnToday);
         controlPanel.add(btnPrevKM);

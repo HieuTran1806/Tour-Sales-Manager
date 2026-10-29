@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourPlanDetailBUS;
 import org.toursalesmanager.dto.TourPlanDetailDTO;
+import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.helper.AddComponentToForm;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
@@ -20,7 +22,6 @@ import static java.sql.Date.valueOf;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TourPlanDetailDialog extends JDialog {
-    JLabel jlbMaCTietKHTour, jlbTongChi, jlbTienO, jlbTienAn, jlbTienDiLai, jlbDiemDi, jlbDiemDen, jlbMaKHtour;
 
     JTextField txtMaCTietKHTour, txtNgayThucHien, txtTongChi, txtTienO, txtTienAn, txtTienDiLai, txtDiemDi, txtDiemDen, txtMaKHtour;
 
@@ -53,7 +54,7 @@ public class TourPlanDetailDialog extends JDialog {
     private void init(){
         setLayout(new BorderLayout());
 
-        JPanel formPanel = new JPanel(new GridLayout(9, 2)); // at center
+        JPanel formPanel = new JPanel(new GridLayout(0, 2)); // at center
 
         JPanel southPanel = new JPanel(new FlowLayout());
 
@@ -66,67 +67,44 @@ public class TourPlanDetailDialog extends JDialog {
         southPanel.add(cancelBtn);
 
         //row MaCTietKHTour
-        jlbMaCTietKHTour = new JLabel("Mã kế chi tiết hoạch tour");
-        jlbMaCTietKHTour.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbMaCTietKHTour);
         txtMaCTietKHTour = new JTextField();
-        formPanel.add(txtMaCTietKHTour);
+        AddComponentToForm.addFormRow(formPanel, "Mã kế chi tiết hoạch tour", txtMaCTietKHTour);
 
         // row booking date
         date = new JDateChooser();
         date.setDateFormatString(String.valueOf(formatter));
         date.setDate(valueOf(LocalDate.now()));
-        addFormRow(formPanel, "Ngày đặt: ",date);
+        AddComponentToForm.addFormRow(formPanel, "Ngày đặt: ",date);
 
         //row TongChi
-        jlbTongChi = new JLabel("Tổng chi");
-        jlbTongChi.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbTongChi);
         txtTongChi = new JTextField();
-        formPanel.add(txtTongChi);
+        AddComponentToForm.addFormRow(formPanel, "Tổng chi", txtTongChi);
 
         //row TienO
-        jlbTienO = new JLabel("Tiền ở");
-        jlbTienO.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbTienO);
         txtTienO = new JTextField();
-        formPanel.add(txtTienO);
+        AddComponentToForm.addFormRow(formPanel, "Tiền ở",txtTienO);
 
         //row TienAn
-        jlbTienAn = new JLabel("Tiền ăn");
-        jlbTienAn.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbTienAn);
         txtTienAn = new JTextField();
-        formPanel.add(txtTienAn);
+        AddComponentToForm.addFormRow(formPanel, "Tiền ăn",txtTienAn);
 
         //row TienDiLai
-        jlbTienDiLai = new JLabel("Tiền đi lại");
-        jlbTienDiLai.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbTienDiLai);
         txtTienDiLai = new JTextField();
-        formPanel.add(txtTienDiLai);
+        AddComponentToForm.addFormRow(formPanel, "Tiền đi lại",txtTienDiLai);
 
         //row DiemDi
-        jlbDiemDi = new JLabel("Điểm đi");
-        jlbDiemDi.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbDiemDi);
         txtDiemDi = new JTextField();
-        formPanel.add(txtDiemDi);
+        AddComponentToForm.addFormRow(formPanel, "Điểm đi",txtDiemDi);
+
 
         //row DiemDen
-        jlbDiemDen = new JLabel("Điểm đến");
-        jlbDiemDen.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbDiemDen);
         txtDiemDen = new JTextField();
-        formPanel.add(txtDiemDen);
+        AddComponentToForm.addFormRow(formPanel, "Điểm đến",txtDiemDen);
 
         //row MaKHtour
-        jlbMaKHtour = new JLabel("Mã kế hoạch tour");
-        jlbMaKHtour.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
-        formPanel.add(jlbMaKHtour);
         txtMaKHtour = new JTextField();
         txtMaKHtour.setEnabled(false);
-        formPanel.add(txtMaKHtour);
+        AddComponentToForm.addFormRow(formPanel, "Mã kế hoạch tour",txtMaKHtour);
 
         add(formPanel, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
@@ -144,30 +122,8 @@ public class TourPlanDetailDialog extends JDialog {
         txtMaKHtour.setText(tourPlanDetailDTO.getIdTourPlan());
     }
 
-    private void addFormRow(JPanel formPanel, String labelText, JComponent component) {
-        JLabel label = new JLabel(labelText);
-
-        label.setBorder(
-                BorderFactory.createEmptyBorder(
-                        5, 5, 5, 0
-                )
-        );
-
-        formPanel.add(label);
-        formPanel.add(component);
-    }
-
-    private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));// Trong jpBtn panel
-        return btn;
-    }
-
     private void save(){
-        saveBtn = createBtn("Lưu", UIColors.SAVE);
+        saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(e -> {
             if(isEmpty(txtMaCTietKHTour, txtNgayThucHien, txtTongChi, txtTienO, txtTienAn, txtTongChi, txtTienDiLai, txtDiemDi, txtDiemDen)){
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin");
@@ -239,7 +195,7 @@ public class TourPlanDetailDialog extends JDialog {
     }
 
     private void cancel(){
-        cancelBtn = createBtn("Hủy", UIColors.CANCEL);
+        cancelBtn = ButtonFactory.create("Hủy", UIColors.CANCEL);
         cancelBtn.addActionListener(e -> {
             dispose();
         });

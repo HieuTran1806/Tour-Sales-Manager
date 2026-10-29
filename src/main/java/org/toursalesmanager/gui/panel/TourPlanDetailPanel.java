@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.*;
 import org.toursalesmanager.dto.*;
 import org.toursalesmanager.gui.dialog.TourPlanDetailDialog;
+import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.UIColors;
 
 import javax.swing.*;
@@ -96,22 +97,11 @@ public class TourPlanDetailPanel extends JDialog {
     }
 
     private JButton createBtn(String text, Color color){
-        JButton btn = new JButton(text);
-        btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); // in south panel
-
-        btn.setContentAreaFilled(true);
-        btn.setOpaque(true);
-        btn.setBorderPainted(false);
-
-        return btn;
+        return ButtonFactory.create(text, color);
     }
 
     private void add(){
-        addBtn = createBtn("Thêm chi tiết kế hoạch Tour", Color.GREEN);
+        addBtn = createBtn("Thêm chi tiết kế hoạch Tour", UIColors.ADD);
         addBtn.addActionListener(e -> openDiaLog(null)); // null là ở chế độ thêm, có đối tượng DTO là ở dạng sửa
     }
 
@@ -124,7 +114,7 @@ public class TourPlanDetailPanel extends JDialog {
 
     // delete button
     private void delete(){
-        deleteBtn = createBtn("Xóa chi tiết kế hoạch tour", Color.RED);
+        deleteBtn = createBtn("Xóa chi tiết kế hoạch tour", UIColors.DELETE);
         deleteBtn.setEnabled(false);
         deleteBtn.addActionListener(e ->{
             int row = table.getSelectedRow();
