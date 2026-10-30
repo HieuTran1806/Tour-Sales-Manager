@@ -3,6 +3,8 @@ package org.toursalesmanager.security;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.toursalesmanager.dao.AccountPermissionDAO;
+import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.enums.Role;
 
@@ -118,6 +120,33 @@ public class AuthorizationService {
         Set<Permission> permissions = ROLE_PERMISSION.get(role);
 
         return permissions != null && permissions.contains(permission);
+    }
+
+    /**
+     * Quyền thực tế của một tài khoản:
+     * ADMIN luôn có toàn quyền; tài khoản đã được phân quyền riêng dùng danh sách riêng;
+     * còn lại dùng quyền mặc định theo vai trò.
+     */
+    public static Set<Permission> resolvePermissions(AccountDTO account){
+        if (account == null || account.getRole() == null) {
+            return EnumSet.noneOf(Permission.class);
+        }
+
+        if (account.getRole() == Role.ADMIN) {
+            return getPermissions(Role.ADMIN);
+        }
+
+        try {
+            Set<Permission> customPermissions =
+                    new AccountPermissionDAO().getPermissions(account.getIdAccount());
+            if (customPermissions != null) {
+                return customPermissions;
+            }
+        } catch (RuntimeException e) {
+            System.err.println("Không tải được quyền riêng của tài khoản: " + e.getMessage());
+        }
+
+        return getPermissions(account.getRole());
     }
 
     public static Set<Permission> getPermissions(Role role){

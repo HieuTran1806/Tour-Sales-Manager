@@ -8,10 +8,14 @@ import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.enums.Role;
 import org.toursalesmanager.security.AuthorizationService;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 public class SessionManager {
     static AccountDTO currentAccount;
+    static Set<Permission> currentPermissions = EnumSet.noneOf(Permission.class);
 
     public static void loginAccount(AccountDTO account) {
         if (account == null) {
@@ -21,10 +25,12 @@ public class SessionManager {
         }
 
         currentAccount = account;
+        currentPermissions = AuthorizationService.resolvePermissions(account);
     }
     
     public static void logoutAccount() {
         currentAccount = null;
+        currentPermissions = EnumSet.noneOf(Permission.class);
     }
 
     public static boolean isLoggedIn() {
@@ -72,9 +78,6 @@ public class SessionManager {
                     || permission == Permission.VIEW_PROMOTION;
         }
 
-        return AuthorizationService.hasPermission(
-                currentAccount.getRole(),
-                permission
-        );
+        return currentPermissions.contains(permission);
     }
 }
