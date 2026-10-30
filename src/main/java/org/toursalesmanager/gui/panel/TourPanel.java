@@ -147,7 +147,7 @@ public class TourPanel extends JPanel {
 
     private void initTable(){
         // columns of table
-        String[] columns = {"Mã tour", "Tên", "Số ngày", "Đơn giá", "Số chỗ", "Địa điểm khởi hành", "Mã loại tour", "Mã địa điểm"};
+        String[] columns = {"Mã tour", "Tên", "Số ngày", "Đơn giá", "Số chỗ", "Địa điểm khởi hành"};
 
         tableModel = new DefaultTableModel(columns, 0);
         table = new JTable(tableModel);
@@ -333,9 +333,7 @@ public class TourPanel extends JPanel {
                     t.getNumberOfDate(),
                     t.getPrice(),
                     t.getSeats(),
-                    t.getDepartureLocation(),
-                    t.getIdTourType(),
-                    t.getIdLocation()
+                    t.getDepartureLocation()
             });
         }
     }

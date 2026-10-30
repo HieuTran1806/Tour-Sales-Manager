@@ -133,7 +133,7 @@ public class TourPlanPanel extends JPanel {
 
     private void initTable(){
         // columns of table
-        String[] columns = {"Mã kế hoạch Tour", "Ngày khởi hành", "Ngày kết thúc", "Tổng số vé", "Tổng chi dự kiến", "Số vé còn lại", "Trạng thái", "Mã Tour", "Mã nhân viên hướng dẫn"};
+        String[] columns = {"Mã kế hoạch Tour", "Ngày khởi hành", "Ngày kết thúc", "Tổng số vé", "Tổng chi dự kiến", "Số vé còn lại", "Trạng thái", "Mã nhân viên hướng dẫn"};
 
         tableModel = new DefaultTableModel(columns, 0);
         table = new JTable(tableModel);
@@ -156,7 +156,6 @@ public class TourPlanPanel extends JPanel {
                     kt.getEstimatedCost(),
                     kt.getRemainingTickets(),
                     kt.getStatus(),
-                    kt.getIdTour(),
                     kt.getIdTourGuide()
             });
         }
