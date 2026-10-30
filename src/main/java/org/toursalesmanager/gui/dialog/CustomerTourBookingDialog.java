@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import org.toursalesmanager.bus.TourBookingBUS;
 import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourPlanDTO;
@@ -149,7 +151,7 @@ public class CustomerTourBookingDialog extends JDialog {
         });
         updatePriceAndTotal();
         pack();
-        setLocationRelativeTo(getParent());
+        WindowHelper.centerOnParent(this);
     }
 
     private void addFormRow(JPanel form, GridBagLayout layout, int row,

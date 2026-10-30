@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.*;
@@ -29,7 +31,6 @@ public class LocationDialog extends JDialog {
         this.bus=new LocationBUS();
         initComponents();
         this.setTitle("Địa điểm");
-        this.setLocationRelativeTo(null);
     }
 
     public LocationDialog(LocationDTO dd) {
@@ -39,7 +40,6 @@ public class LocationDialog extends JDialog {
         initComponents();
 
         this.setTitle("Sửa địa điểm");
-        this.setLocationRelativeTo(null);
 
         this.sua= true;
         this.maDiaDiemCu=dd.getIdLocation();
@@ -92,7 +92,7 @@ public class LocationDialog extends JDialog {
 
         setPreferredSize(new Dimension(350, 260));
         pack();
-        setLocationRelativeTo(null);
+        WindowHelper.centerOnParent(this);
     }
 
     private void luu(){

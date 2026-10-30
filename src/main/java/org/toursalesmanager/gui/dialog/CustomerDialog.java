@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -102,7 +104,7 @@ public class CustomerDialog extends JDialog {
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         pack();
-        setLocationRelativeTo(getParent()); // hiển thị giữa màn hình cha
+        WindowHelper.centerOnParent(this); // hiển thị giữa màn hình cha
     }
 
     private void save(){

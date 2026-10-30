@@ -23,6 +23,7 @@ public class AccountBUS {
     private static final long RESET_CODE_LIFETIME_SECONDS = 5 * 60;
     private static final long RESET_CODE_RESEND_DELAY_SECONDS = 60;
     private static final int MAX_RESET_CODE_ATTEMPTS = 5;
+    private static final String ACTIVE_STATUS = "ACTIVE";
     private final Map<String, Instant> passwordResetLastSentAt = new ConcurrentHashMap<>();
 
     public AccountBUS() {
@@ -56,10 +57,12 @@ public class AccountBUS {
 
         String storedPassword = account.getPassword();
         if (PasswordUtil.matches(password, storedPassword)) {
+            requireActive(account);
             return account;
         }
 
         if (!PasswordUtil.isBCryptHash(storedPassword) && password.equals(storedPassword)) {
+            requireActive(account);
             String hashedPassword = PasswordUtil.hash(password);
             if (accountDAO.updatePassword(account.getUsername(), hashedPassword)) {
                 account.setPassword(hashedPassword);
@@ -67,6 +70,17 @@ public class AccountBUS {
             return account;
         }
         return null;
+    }
+
+    // Chỉ kiểm tra sau khi mật khẩu đúng, để không lộ trạng thái tài khoản cho người đoán mật khẩu.
+    // status NULL (tài khoản cũ) vẫn được xem là đang hoạt động.
+    private void requireActive(AccountDTO account) {
+        String status = account.getStatus();
+        if (status != null && !status.trim().equalsIgnoreCase(ACTIVE_STATUS)) {
+            throw new IllegalStateException(
+                    "Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên."
+            );
+        }
     }
 
     public boolean createStaffAccount(

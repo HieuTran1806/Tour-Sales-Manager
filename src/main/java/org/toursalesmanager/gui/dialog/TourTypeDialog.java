@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourTypeBUS;
@@ -34,7 +36,7 @@ public class TourTypeDialog extends JDialog{
 
         setTitle(tourTypeDTO == null ? "Thêm loại Tour" : "Sửa loại Tour");
         setSize(300, 240);
-        setLocationRelativeTo(null);
+        WindowHelper.centerOnParent(this);
         setModal(true);
 
         init();

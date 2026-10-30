@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -55,7 +57,6 @@ public class PromotionDialog extends JDialog {
         card = (CardLayout) pnlSwitch.getLayout();
         this.bus = new PromotionBUS();
         this.setTitle("Chương trình khuyến mãi");
-        this.setLocationRelativeTo(null);
         txtMaCTKM.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
@@ -109,7 +110,6 @@ public class PromotionDialog extends JDialog {
         initComponents();
         card = (CardLayout) pnlSwitch.getLayout();
         this.setTitle("Chương trình khuyến mãi");
-        this.setLocationRelativeTo(null);
         txtMaCTKM.setInputVerifier(new InputVerifier() {
             @Override
             public boolean verify(JComponent input) {
@@ -160,7 +160,6 @@ public class PromotionDialog extends JDialog {
         initComponents();
         card = (CardLayout) pnlSwitch.getLayout();
         this.setTitle("Chương trình khuyến mãi");
-        this.setLocationRelativeTo(null);
         this.bus = bus;
         isEdit = true;
         txtMaCTKM.setText(ct.getIdPromotion());
@@ -567,6 +566,7 @@ public class PromotionDialog extends JDialog {
 
         configureResponsiveLayout();
         pack();
+        WindowHelper.centerOnParent(this);
     }// </editor-fold>//GEN-END:initComponents
 
     private void configureResponsiveLayout() {

@@ -1,6 +1,8 @@
 
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -46,7 +48,6 @@ public class NhapCTHD extends JDialog {
 
 
         this.setTitle("Nhập chi tiết hóa đơn");
-        this.setLocationRelativeTo(null);
         initComponents();
         loaddata();
         setupComboBoxKhachHang();
@@ -57,7 +58,6 @@ public class NhapCTHD extends JDialog {
         this.mahd=mahd;
         bus=new InvoiceDetailBUS();
         this.setTitle("Chi tiết hóa đơn của hóa đơn: "+ma);
-        this.setLocationRelativeTo(null);
         initComponents();
         btnluu.setVisible(false);
         tblnhapct.setDefaultEditor(Object.class, null);
@@ -152,6 +152,7 @@ public class NhapCTHD extends JDialog {
         );
 
         pack();
+        WindowHelper.centerOnParent(this);
     }
 
     private JButton createBtn(String text, Color color){

@@ -1,16 +1,21 @@
 package org.toursalesmanager.gui.panel;
 
+import org.toursalesmanager.gui.helper.TableSelectionHelper;
+
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.toursalesmanager.bus.*;
-import org.toursalesmanager.dto.*;
-import org.toursalesmanager.gui.dialog.TourPlanDetailDialog;
+import org.toursalesmanager.bus.TourPlanDetailBUS;
+import org.toursalesmanager.dto.TourPlanDetailDTO;
+import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.gui.component.ButtonFactory;
+import org.toursalesmanager.gui.dialog.TourPlanDetailDialog;
 import org.toursalesmanager.gui.helper.UIColors;
+import org.toursalesmanager.login.SessionManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -23,26 +28,24 @@ public class TourPlanDetailPanel extends JDialog {
     // define btn
     JButton addBtn, deleteBtn, editBtn, refreshBtn;
 
-    CustomerBUS customerBUS;
-
     TourPlanDetailBUS tourPlanDetailBUS;
-    TourPlanDetailDTO tourPlanDetailDTO;
+    final String idTourPlan;
+    final boolean canManageTourPlan;
 
-    public TourPlanDetailPanel(TourPlanDetailBUS bus, TourPlanDetailDTO dto){
-        this.tourPlanDetailBUS = bus;
-        this.tourPlanDetailDTO = dto;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+    public TourPlanDetailPanel(Window owner, String idTourPlan){
+        super(owner, "Chi tiết kế hoạch: " + idTourPlan, ModalityType.APPLICATION_MODAL);
+        this.idTourPlan = idTourPlan;
         this.tourPlanDetailBUS = new TourPlanDetailBUS();
-        this.customerBUS = new CustomerBUS();
+        this.canManageTourPlan = SessionManager.hasPermission(Permission.MANAGE_TOUR_PLAN);
 
-        String idTourPlan = dto.getIdTourPlan();
-        setTitle("Chi tiết kế hoạch: " + idTourPlan);
         setSize(1000, 500);
-        setLocationRelativeTo(null);
-        setModal(true);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         init();
-        loadTableWithIdTourPlan(idTourPlan);
+        loadTableWithIdTourPlan();
+        setLocationRelativeTo(owner); // hiển thị giữa màn hình cha
     }
 
     private void init(){
@@ -52,10 +55,13 @@ public class TourPlanDetailPanel extends JDialog {
         //South Panel
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         add(); // add button
+        addBtn.setVisible(canManageTourPlan);
         southPanel.add(addBtn);
         delete(); // delete button
+        deleteBtn.setVisible(canManageTourPlan);
         southPanel.add(deleteBtn);
         edit(); // edit button
+        editBtn.setVisible(canManageTourPlan);
         southPanel.add(editBtn);
         refresh();
         southPanel.add(refreshBtn);
@@ -74,99 +80,112 @@ public class TourPlanDetailPanel extends JDialog {
         tableModel = new DefaultTableModel(columns, 0);
         table = new JTable(tableModel);
         table.setDefaultEditor(Object.class, null);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
     }
 
-    private void loadTableWithIdTourPlan(String maKHTour){
+    private void loadTableWithIdTourPlan(){
         tableModel.setRowCount(0);
-        ArrayList<TourPlanDetailDTO> lsCTKeHoachTours = tourPlanDetailBUS.getLsCTietKHToursById(maKHTour);
+        ArrayList<TourPlanDetailDTO> lsCTKeHoachTours;
+        try {
+            lsCTKeHoachTours = tourPlanDetailBUS.getLsCTietKHToursById(idTourPlan);
+        } catch (RuntimeException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         for (TourPlanDetailDTO ct : lsCTKeHoachTours){
             tableModel.addRow(new Object[]{
                     ct.getIdTourPlanDetail(),
-                    ct.getDate(),
+                    ct.getDate() == null ? "" : ct.getDate().format(formatter),
                     ct.getTotalExpenditure(),
                     ct.getHousingCost(),
                     ct.getEatingCost(),
                     ct.getTravelingCost(),
                     ct.getDepartureLocation(),
-                    ct.getDepartureLocation(),
+                    ct.getEndLocation(),
                     ct.getIdTourPlan()
             });
         }
     }
 
-    private JButton createBtn(String text, Color color){
-        return ButtonFactory.create(text, color);
-    }
-
     private void add(){
-        addBtn = createBtn("Thêm chi tiết kế hoạch Tour", UIColors.ADD);
+        addBtn = ButtonFactory.create("Thêm chi tiết kế hoạch Tour", UIColors.ADD);
         addBtn.addActionListener(e -> openDiaLog(null)); // null là ở chế độ thêm, có đối tượng DTO là ở dạng sửa
     }
 
     private void openDiaLog(TourPlanDetailDTO dto){
-        TourPlanDetailDialog dialog = new TourPlanDetailDialog(tourPlanDetailDTO.getIdTourPlan());
+        try {
+            TourPlanDetailDialog dialog = new TourPlanDetailDialog(this, idTourPlan, dto);
+            dialog.setVisible(true);
+        } catch (SecurityException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Không đủ quyền", JOptionPane.WARNING_MESSAGE);
+        }
+        loadTableWithIdTourPlan();
+    }
 
-        dialog.setVisible(true);
-        loadTableWithIdTourPlan(dto.getIdTourPlan());
+    private String getSelectedDetailId(){
+        int row = table.getSelectedRow();
+        if (row == -1) return null;
+        return tableModel.getValueAt(table.convertRowIndexToModel(row), 0).toString();
     }
 
     // delete button
     private void delete(){
-        deleteBtn = createBtn("Xóa chi tiết kế hoạch tour", UIColors.DELETE);
+        deleteBtn = ButtonFactory.create("Xóa chi tiết kế hoạch tour", UIColors.DELETE);
         deleteBtn.setEnabled(false);
         deleteBtn.addActionListener(e ->{
-            int row = table.getSelectedRow();
-            if (row == -1){
+            String maCTKHTour = getSelectedDetailId();
+            if (maCTKHTour == null){
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn chi tiết kế hoạch tour muốn xóa");
                 return;
             }
 
-            String maCTKHTour = tableModel.getValueAt(row, 0).toString();
             int confirm = JOptionPane.showConfirmDialog(this, "Xác nhận xóa?");
             if(confirm == JOptionPane.YES_OPTION){
-                boolean result = tourPlanDetailBUS.removeCTietKHTour(maCTKHTour);
-
-                if(result)
-                    JOptionPane.showMessageDialog(this, "Đã xóa chi tiết kế hoạch tour có mã: " + maCTKHTour);
-                else
-                    JOptionPane.showMessageDialog(this, "Mã chi tiết kế hoạch tour không tồn tại: " + maCTKHTour);
-                loadTableWithIdTourPlan(tourPlanDetailDTO.getIdTourPlan());
+                try {
+                    boolean result = tourPlanDetailBUS.removeCTietKHTour(maCTKHTour);
+                    if(result)
+                        JOptionPane.showMessageDialog(this, "Đã xóa chi tiết kế hoạch tour có mã: " + maCTKHTour);
+                    else
+                        JOptionPane.showMessageDialog(this, "Mã chi tiết kế hoạch tour không tồn tại: " + maCTKHTour);
+                } catch (RuntimeException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+                loadTableWithIdTourPlan();
             }
         });
     }
 
     // edit button
     private void edit(){
-        editBtn = createBtn("Chỉnh sửa", UIColors.EDIT);
+        editBtn = ButtonFactory.create("Chỉnh sửa", UIColors.EDIT);
         editBtn.setEnabled(false);
         editBtn.addActionListener(e -> {
-            int row = table.getSelectedRow();
-            if (row == -1) {
+            String maCTKHTour = getSelectedDetailId();
+            if (maCTKHTour == null) {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn chi tiết kế hoạch tour cần sửa");
                 return;
             }
-            String maCTKHTour = tableModel.getValueAt(row, 0).toString();
             TourPlanDetailDTO ct = tourPlanDetailBUS.getCTietKHTourById(maCTKHTour);
+            if (ct == null) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy chi tiết kế hoạch tour: " + maCTKHTour);
+                loadTableWithIdTourPlan();
+                return;
+            }
             openDiaLog(ct);
         });
     }
 
     // refresh button
     private void refresh(){
-        refreshBtn = createBtn("Làm mới", UIColors.SAVE);
-        refreshBtn.addActionListener(e -> {
-            loadTableWithIdTourPlan(tourPlanDetailDTO.getIdTourPlan());
-        });
+        refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
+        refreshBtn.addActionListener(e -> loadTableWithIdTourPlan());
     }
 
     private void hasSelectedRow(){
-        table.getSelectionModel().addListSelectionListener(e ->{
-            boolean hadSelection = table.getSelectedRow() != -1;
-            deleteBtn.setEnabled(hadSelection);
-            editBtn.setEnabled(hadSelection);
-        });
+        TableSelectionHelper.bindButtons(table, () -> canManageTourPlan, deleteBtn, editBtn);
     }
 
 }

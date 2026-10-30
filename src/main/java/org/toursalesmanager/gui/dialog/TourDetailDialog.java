@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourTypeBUS;
@@ -38,7 +40,7 @@ public class TourDetailDialog extends JDialog {
         setTitle("TOUR " + tourDTO.getIdTour());
         setPreferredSize(new Dimension(360,520));
         pack();
-        setLocationRelativeTo(null);
+        WindowHelper.centerOnParent(this);
         setModal(true);
         setLayout(new BorderLayout());
 

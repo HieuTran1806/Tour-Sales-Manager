@@ -1,5 +1,9 @@
 package org.toursalesmanager.gui.panel;
 
+import org.toursalesmanager.gui.helper.TableSelectionHelper;
+
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.StaffBUS;
@@ -12,8 +16,6 @@ import org.toursalesmanager.login.SessionManager;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -49,6 +51,7 @@ public class StaffPanel extends JPanel {
 
         initComponents();
         reloadStaffTable();
+        TableSelectionHelper.bindButtons(jTable1, this::requirePermission, deleteBtn, editBtn);
     }
 
     @SuppressWarnings("unchecked")
@@ -116,11 +119,6 @@ public class StaffPanel extends JPanel {
                 return types [columnIndex];
             }
         });
-        jTable1.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent evt) {
-                jTable1MouseClicked(evt);
-            }
-        });
         jScrollPane1.setViewportView(jTable1);
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
@@ -131,13 +129,9 @@ public class StaffPanel extends JPanel {
         jPanel3.add(addBtn);
 
         deleteStaff();
-        deleteBtn.setEnabled(false);
-        deleteBtn.setEnabled(canManageStaff);
         jPanel3.add(deleteBtn);
 
         updateStaff();
-        editBtn.setEnabled(false);
-        editBtn.setEnabled(canManageStaff);
         jPanel3.add(editBtn);
 
         refresh();
@@ -156,7 +150,7 @@ public class StaffPanel extends JPanel {
             }
 
             StaffDialog dialog = new StaffDialog(
-                    null,
+                    WindowHelper.getParentFrame(this),
                     true,
                     StaffDialog.Mode.ADD,
                     null
@@ -182,7 +176,7 @@ public class StaffPanel extends JPanel {
                 StaffDTO nv = staffBus.findStaffById(maNV);
                 System.err.println(nv.getIdStaff());
                 StaffDialog dialog = new StaffDialog(
-                        null, true,
+                        WindowHelper.getParentFrame(this), true,
                         StaffDialog.Mode.EDIT,
                         nv);
 
@@ -227,13 +221,6 @@ public class StaffPanel extends JPanel {
     private void txtSearchActionPerformed(ActionEvent evt) {//GEN-FIRST:event_txtSearchActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSearchActionPerformed
-
-    private void jTable1MouseClicked(MouseEvent evt){
-        if (SessionManager.isAdmin()) {
-            deleteBtn.setEnabled(true);
-            editBtn.setEnabled(true);
-        }
-    }
 
     private String getColumnName(String selected) {
         switch (selected) {

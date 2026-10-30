@@ -1,5 +1,9 @@
 package org.toursalesmanager.gui.panel;
 
+import org.toursalesmanager.gui.helper.TableSelectionHelper;
+
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourPlanBUS;
@@ -10,7 +14,6 @@ import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.enums.Role;
 import org.toursalesmanager.gui.MainFrame;
 import org.toursalesmanager.gui.component.ButtonFactory;
-import org.toursalesmanager.gui.dialog.TourPlanDetailDialog;
 import org.toursalesmanager.gui.dialog.TourPlanDialog;
 import org.toursalesmanager.gui.dialog.TourBookingDialog;
 import org.toursalesmanager.gui.dialog.CustomerTourBookingDialog;
@@ -223,7 +226,7 @@ public class TourPlanPanel extends JPanel {
         }
         if (SessionManager.hasRole(Role.CUSTOMER)) {
             customerTourBookingDialog = new CustomerTourBookingDialog(
-                    null, true, tourPlanBUS, planId, null);
+                    WindowHelper.getParentFrame(this), true, tourPlanBUS, planId, null);
             customerTourBookingDialog.setVisible(true);
             return;
         }
@@ -232,7 +235,7 @@ public class TourPlanPanel extends JPanel {
             return;
         }
         tourBookingDialog = new TourBookingDialog(
-                null, true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
+                WindowHelper.getParentFrame(this), true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
         tourBookingDialog.setVisible(true);
     }
 
@@ -293,11 +296,10 @@ public class TourPlanPanel extends JPanel {
                 return;
             }
 
+            // Lấy mã kế hoạch tour của dòng đang chọn (không phải mã tour)
+            String maKHTour = tableModel.getValueAt(table.convertRowIndexToModel(row), 0).toString();
 
-            TourDTO selectedTour = (TourDTO) cbTour.getSelectedItem();
-            assert selectedTour != null;
-
-            TourPlanDetailDialog dialog = new TourPlanDetailDialog(selectedTour.getIdTour());
+            TourPlanDetailPanel dialog = new TourPlanDetailPanel(SwingUtilities.getWindowAncestor(this), maKHTour);
             dialog.setVisible(true);
         });
     }
@@ -318,14 +320,11 @@ public class TourPlanPanel extends JPanel {
     }
 
     private void hasSelectedRow(){
-        table.getSelectionModel().addListSelectionListener(e ->{
-            boolean hadSelection = table.getSelectedRow() != -1;
-            deleteBtn.setEnabled(hadSelection);
-            editBtn.setEnabled(hadSelection);
-            detailsBtn.setEnabled(hadSelection);
-            bookingBtn.setEnabled(SessionManager.canRequestBooking()
-                    && (!SessionManager.isLoggedIn() || SessionManager.hasRole(Role.CUSTOMER) || hadSelection));
-        });
+        TableSelectionHelper.bindButtons(table, deleteBtn, editBtn, detailsBtn);
+        // Khách (hoặc chưa đăng nhập) được đặt tour không cần chọn dòng; nhân viên phải chọn kế hoạch trước
+        TableSelectionHelper.onSelectionChanged(table, selected ->
+                bookingBtn.setEnabled(SessionManager.canRequestBooking()
+                        && (!SessionManager.isLoggedIn() || SessionManager.hasRole(Role.CUSTOMER) || selected)));
     }
 
     private boolean requireManagePermission() {

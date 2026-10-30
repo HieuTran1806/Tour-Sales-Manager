@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
@@ -117,8 +119,8 @@ public class InvoiceDialog extends JDialog {
         this.add(panelForm, BorderLayout.CENTER);
         this.add(panelBtn, BorderLayout.SOUTH);
 
-        this.setLocationRelativeTo(null);
         pack();
+        WindowHelper.centerOnParent(this);
         if (invoiceDTO == null) {
             SwingUtilities.invokeLater(() ->
                     cbmakht.getEditor().getEditorComponent().requestFocusInWindow()
@@ -257,7 +259,7 @@ public class InvoiceDialog extends JDialog {
 
                 if(invoiceBUS.addInvoice(updatedInvoice)){
                     JOptionPane.showMessageDialog(this, "Thêm hóa đơn thành công.");
-                    new NhapCTHD(null, true, ma, tickets).setVisible(true);
+                    new NhapCTHD(WindowHelper.getParentFrame(this), true, ma, tickets).setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(this, "Thêm hóa đơn thất bại.");
                 }

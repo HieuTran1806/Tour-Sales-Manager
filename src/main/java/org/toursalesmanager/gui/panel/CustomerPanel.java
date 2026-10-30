@@ -1,9 +1,9 @@
 package org.toursalesmanager.gui.panel;
 
+import org.toursalesmanager.gui.helper.TableSelectionHelper;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -155,12 +155,6 @@ public class CustomerPanel extends JPanel {
         lamMoi();
         jPanel3.add(refreshBtn);
 
-        jTable1.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                jTable1MouseClicked(e);
-            }
-        });
         jPanel3.add(editBtn);
 
         jPanel3.add(refreshBtn);
@@ -237,13 +231,6 @@ public class CustomerPanel extends JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
-    private void jTable1MouseClicked(MouseEvent evt) {
-        if (SessionManager.isAdmin()) {
-            deleteBtn.setEnabled(true);
-        }
-        editBtn.setEnabled(true);
-    }
-
     private String getColumnName(String selected) {
         switch (selected) {
             case "Mã khách hàng":
@@ -286,11 +273,9 @@ public class CustomerPanel extends JPanel {
     }
 
     private void hasSelectedRow(){
-        jTable1.getSelectionModel().addListSelectionListener(e ->{
-            boolean hadSelection = jTable1.getSelectedRow() != -1;
-            deleteBtn.setEnabled(hadSelection);
-            editBtn.setEnabled(hadSelection);
-        });
+        TableSelectionHelper.bindButtons(jTable1,
+                () -> SessionManager.hasPermission(Permission.MANAGE_CUSTOMER),
+                deleteBtn, editBtn);
     }
 
     private boolean requireManagePermission() {

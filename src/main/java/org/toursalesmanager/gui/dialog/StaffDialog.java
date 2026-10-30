@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -51,7 +53,6 @@ public class StaffDialog extends JDialog {
         cbRoles = new JComboBox<>();
 
         initComponents();
-        this.setLocationRelativeTo(null); // set location after init
 
         if (mode == Mode.EDIT && nv != null) {
             setStaffData(nv);
@@ -114,8 +115,8 @@ public class StaffDialog extends JDialog {
         add(jpBtn, BorderLayout.SOUTH);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         pack();
+        WindowHelper.centerOnParent(this);
     }// </editor-fold>//GEN-END:initComponents
 
     private void loadRolesCombobox() {

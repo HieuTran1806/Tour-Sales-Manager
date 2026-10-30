@@ -1,4 +1,6 @@
 package org.toursalesmanager.gui.panel;
+
+import org.toursalesmanager.gui.helper.TableSelectionHelper;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourBUS;
@@ -339,15 +341,10 @@ public class TourPanel extends JPanel {
     }
 
     private void hasSelectedRow(){
-        table.getSelectionModel().addListSelectionListener(e ->{
-            boolean hadSelection = table.getSelectedRow() != -1;
-
-            boolean canManageTours =
-                    SessionManager.hasPermission(Permission.MANAGE_TOUR);
-            deleteBtn.setEnabled(hadSelection && canManageTours);
-            editBtn.setEnabled(hadSelection && canManageTours);
-            detailBtn.setEnabled(hadSelection);
-        });
+        TableSelectionHelper.bindButtons(table,
+                () -> SessionManager.hasPermission(Permission.MANAGE_TOUR),
+                deleteBtn, editBtn);
+        TableSelectionHelper.bindButtons(table, detailBtn);
     }
 
     private String getSelectedTourId() {

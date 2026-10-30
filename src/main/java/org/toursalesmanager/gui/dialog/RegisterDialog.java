@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -44,8 +46,8 @@ public class RegisterDialog extends JDialog {
         initComponents();
         initEvents();
 
-        setLocationRelativeTo(owner);
         pack();
+        WindowHelper.centerOnParent(this);
     }
 
     private void initComponents() {

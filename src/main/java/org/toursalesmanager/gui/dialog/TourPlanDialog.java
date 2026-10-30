@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -75,7 +77,7 @@ public class TourPlanDialog extends JDialog {
 
         setTitle(tourPlanDTO == null ? "Thêm kế hoạch tour" : "Sửa kế hoạch Tour");
         setSize(300, 440);
-        setLocationRelativeTo(null);
+        WindowHelper.centerOnParent(this);
         setModal(true);
 
         init();

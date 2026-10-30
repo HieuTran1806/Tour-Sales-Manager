@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -213,7 +215,7 @@ public class TourBookingDialog extends JDialog {
         // Combo tự chọn sẵn kế hoạch đầu tiên nhưng không bắn sự kiện, nên điền giá vé ngay từ đầu
         handleTourPlanChanged();
         pack();
-        setLocationRelativeTo(null);
+        WindowHelper.centerOnParent(this);
     }
 
     private void loadTourPlans() {

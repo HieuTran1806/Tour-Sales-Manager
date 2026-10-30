@@ -159,8 +159,8 @@ public class AccountDAO {
     public boolean existsByStaffId(String idStaff) {
         String sql = """
             SELECT 1
-            FROM account
-            WHERE idStaff = ?
+            FROM taikhoan
+            WHERE idstaff = ?
             LIMIT 1
             """;
 
@@ -175,8 +175,8 @@ public class AccountDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            // Không nuốt lỗi: trả về false sẽ khiến việc kiểm tra trùng tài khoản bị bỏ qua
+            throw new RuntimeException("Không thể kiểm tra tài khoản của nhân viên.", e);
         }
     }
 

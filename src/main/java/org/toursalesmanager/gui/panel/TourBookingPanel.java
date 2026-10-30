@@ -1,5 +1,9 @@
 package org.toursalesmanager.gui.panel;
 
+import org.toursalesmanager.gui.helper.TableSelectionHelper;
+
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -164,11 +168,11 @@ public class TourBookingPanel extends JPanel {
         addBtn.addActionListener(v -> {
             if (SessionManager.hasRole(Role.CUSTOMER)) {
                 customerTourBookingDialog = new CustomerTourBookingDialog(
-                        null, true, tourPlanBUS, null, null);
+                        WindowHelper.getParentFrame(this), true, tourPlanBUS, null, null);
                 customerTourBookingDialog.setVisible(true);
             } else {
                 tourBookingDialog = new TourBookingDialog(
-                        null, true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
+                        WindowHelper.getParentFrame(this), true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
                 tourBookingDialog.setVisible(true);
             }
             loadTourBookingData(tourBookingBus.getVisibleBookings());
@@ -177,7 +181,7 @@ public class TourBookingPanel extends JPanel {
 
     private void setDeleteBtn(){
         deleteBtn = createBtn("Xóa", UIColors.DELETE);
-        editBtn.setEnabled(false);
+        deleteBtn.setEnabled(false);
         deleteBtn.addActionListener(v -> {
             if (!SessionManager.isAdmin()) {
                 JOptionPane.showMessageDialog(this, "Bạn không có quyền xóa dữ liệu.");
@@ -213,7 +217,7 @@ public class TourBookingPanel extends JPanel {
                 TourBookingDTO khangkht = tourBookingBus.findTourBookingByIdTourPlan(maKHTour);
                 if (khangkht != null && khangkht.getIdCustomer().equals(maKHang)) {
                     tourBookingDialog = new TourBookingDialog(
-                            null, true, TourBookingDialog.Mode.EDIT, khangkht, tourPlanBUS);
+                            WindowHelper.getParentFrame(this), true, TourBookingDialog.Mode.EDIT, khangkht, tourPlanBUS);
                     tourBookingDialog.setVisible(true);
 
                     loadTourBookingData(tourBookingBus.getVisibleBookings());
@@ -265,13 +269,7 @@ public class TourBookingPanel extends JPanel {
     }
 
     private void hasSelectedRow(){
-        table.getSelectionModel().addListSelectionListener(e ->{
-            boolean hasSelected = table.getSelectedRow() != -1;
-            refreshBtn.setEnabled(hasSelected);
-            editBtn.setEnabled(hasSelected);
-            addBtn.setEnabled(SessionManager.hasPermission(Permission.CREATE_BOOKING));
-            deleteBtn.setEnabled(hasSelected);
-        });
+        TableSelectionHelper.bindButtons(table, editBtn, deleteBtn);
     }
 
     private void searchByType(){

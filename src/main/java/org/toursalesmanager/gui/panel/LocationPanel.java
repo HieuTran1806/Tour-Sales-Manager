@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.panel;
 
+import org.toursalesmanager.gui.helper.TableSelectionHelper;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -48,6 +50,7 @@ public class LocationPanel extends JPanel {
         txtdate.setVisible(false);
         model = (DefaultTableModel) tbldd.getModel();
         loadData();
+        TableSelectionHelper.bindButtons(tbldd, this::requireManagePermission, deleteBtn, editBtn);
     }
 
     private void loadData(java.util.Date ngay){
@@ -172,15 +175,6 @@ public class LocationPanel extends JPanel {
                 }
         ));
         tbldd.setPreferredSize(null);
-        tbldd.addMouseListener(new MouseAdapter() { // when click row of table
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (tbldd.getSelectedRow() != -1) {
-                    deleteBtn.setEnabled(true);
-                    editBtn.setEnabled(true);
-                }
-            }
-        });
         jScrollPane2.setViewportView(tbldd);
 
         pnltable.add(jScrollPane2, BorderLayout.CENTER);

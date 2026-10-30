@@ -12,49 +12,51 @@ import org.toursalesmanager.gui.helper.UIColors;
 import javax.swing.*;
 import java.awt.*;
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
-import static java.sql.Date.valueOf;
+import java.util.Date;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TourPlanDetailDialog extends JDialog {
 
-    JTextField txtMaCTietKHTour, txtNgayThucHien, txtTongChi, txtTienO, txtTienAn, txtTienDiLai, txtDiemDi, txtDiemDen, txtMaKHtour;
+    JTextField txtMaCTietKHTour, txtTongChi, txtTienO, txtTienAn, txtTienDiLai, txtDiemDi, txtDiemDen, txtMaKHtour;
 
     JDateChooser date;
 
     JButton saveBtn, cancelBtn;
 
-    TourPlanDetailDTO tourPlanDetailDTO;
+    final String idTourPlan;
+    final TourPlanDetailDTO tourPlanDetailDTO; // null: thêm mới, khác null: sửa
 
-    LocalDate today;
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    final TourPlanDetailBUS bus;
 
-    TourPlanDetailBUS bus;
-
-    public TourPlanDetailDialog(String idTourPlan){
-        bus = new TourPlanDetailBUS();
-        today = LocalDate.now();
+    public TourPlanDetailDialog(Window owner, String idTourPlan, TourPlanDetailDTO tourPlanDetailDTO){
+        super(owner, ModalityType.APPLICATION_MODAL);
+        this.bus = new TourPlanDetailBUS();
+        this.idTourPlan = idTourPlan;
+        this.tourPlanDetailDTO = tourPlanDetailDTO;
 
         setTitle(tourPlanDetailDTO == null ? "Thêm chi tiết kế hoạch tour" : "Sửa chi tiết kế hoạch Tour");
-        setSize(300, 440);
-        setLocationRelativeTo(null);
-        setModal(true);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         init();
         if (tourPlanDetailDTO != null) {
             loadData();
+        } else {
+            txtMaCTietKHTour.setText(bus.getNextTourPlanDetailId());
+            txtMaKHtour.setText(idTourPlan);
         }
+
+        setSize(420, 440);
+        setLocationRelativeTo(owner); // hiển thị giữa màn hình cha
     }
 
     private void init(){
         setLayout(new BorderLayout());
 
-        JPanel formPanel = new JPanel(new GridLayout(0, 2)); // at center
+        JPanel formPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // at center
+        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel southPanel = new JPanel(new FlowLayout());
 
@@ -68,13 +70,14 @@ public class TourPlanDetailDialog extends JDialog {
 
         //row MaCTietKHTour
         txtMaCTietKHTour = new JTextField();
-        AddComponentToForm.addFormRow(formPanel, "Mã kế chi tiết hoạch tour", txtMaCTietKHTour);
+        txtMaCTietKHTour.setEditable(false);
+        AddComponentToForm.addFormRow(formPanel, "Mã chi tiết kế hoạch tour", txtMaCTietKHTour);
 
-        // row booking date
+        // row ngay thuc hien
         date = new JDateChooser();
-        date.setDateFormatString(String.valueOf(formatter));
-        date.setDate(valueOf(LocalDate.now()));
-        AddComponentToForm.addFormRow(formPanel, "Ngày đặt: ",date);
+        date.setDateFormatString("dd/MM/yyyy");
+        date.setDate(toDate(LocalDate.now()));
+        AddComponentToForm.addFormRow(formPanel, "Ngày thực hiện", date);
 
         //row TongChi
         txtTongChi = new JTextField();
@@ -82,29 +85,28 @@ public class TourPlanDetailDialog extends JDialog {
 
         //row TienO
         txtTienO = new JTextField();
-        AddComponentToForm.addFormRow(formPanel, "Tiền ở",txtTienO);
+        AddComponentToForm.addFormRow(formPanel, "Tiền ở", txtTienO);
 
         //row TienAn
         txtTienAn = new JTextField();
-        AddComponentToForm.addFormRow(formPanel, "Tiền ăn",txtTienAn);
+        AddComponentToForm.addFormRow(formPanel, "Tiền ăn", txtTienAn);
 
         //row TienDiLai
         txtTienDiLai = new JTextField();
-        AddComponentToForm.addFormRow(formPanel, "Tiền đi lại",txtTienDiLai);
+        AddComponentToForm.addFormRow(formPanel, "Tiền đi lại", txtTienDiLai);
 
         //row DiemDi
         txtDiemDi = new JTextField();
-        AddComponentToForm.addFormRow(formPanel, "Điểm đi",txtDiemDi);
-
+        AddComponentToForm.addFormRow(formPanel, "Điểm đi", txtDiemDi);
 
         //row DiemDen
         txtDiemDen = new JTextField();
-        AddComponentToForm.addFormRow(formPanel, "Điểm đến",txtDiemDen);
+        AddComponentToForm.addFormRow(formPanel, "Điểm đến", txtDiemDen);
 
         //row MaKHtour
         txtMaKHtour = new JTextField();
-        txtMaKHtour.setEnabled(false);
-        AddComponentToForm.addFormRow(formPanel, "Mã kế hoạch tour",txtMaKHtour);
+        txtMaKHtour.setEditable(false);
+        AddComponentToForm.addFormRow(formPanel, "Mã kế hoạch tour", txtMaKHtour);
 
         add(formPanel, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
@@ -112,11 +114,13 @@ public class TourPlanDetailDialog extends JDialog {
 
     private void loadData(){
         txtMaCTietKHTour.setText(tourPlanDetailDTO.getIdTourPlanDetail());
-        txtNgayThucHien.setText(String.valueOf(tourPlanDetailDTO.getDate()));
-        txtTongChi.setText(tourPlanDetailDTO.getTotalExpenditure() + "");
-        txtTienO.setText(tourPlanDetailDTO.getHousingCost() + "");
-        txtTienAn.setText(tourPlanDetailDTO.getEatingCost() + "");
-        txtTienDiLai.setText(tourPlanDetailDTO.getTravelingCost() + "");
+        date.setDate(tourPlanDetailDTO.getDate() == null
+                ? null
+                : toDate(tourPlanDetailDTO.getDate().toLocalDate()));
+        txtTongChi.setText(toText(tourPlanDetailDTO.getTotalExpenditure()));
+        txtTienO.setText(toText(tourPlanDetailDTO.getHousingCost()));
+        txtTienAn.setText(toText(tourPlanDetailDTO.getEatingCost()));
+        txtTienDiLai.setText(toText(tourPlanDetailDTO.getTravelingCost()));
         txtDiemDi.setText(tourPlanDetailDTO.getDepartureLocation());
         txtDiemDen.setText(tourPlanDetailDTO.getEndLocation());
         txtMaKHtour.setText(tourPlanDetailDTO.getIdTourPlan());
@@ -125,7 +129,7 @@ public class TourPlanDetailDialog extends JDialog {
     private void save(){
         saveBtn = ButtonFactory.create("Lưu", UIColors.SAVE);
         saveBtn.addActionListener(e -> {
-            if(isEmpty(txtMaCTietKHTour, txtNgayThucHien, txtTongChi, txtTienO, txtTienAn, txtTongChi, txtTienDiLai, txtDiemDi, txtDiemDen)){
+            if(isEmpty(txtMaCTietKHTour, txtTongChi, txtTienO, txtTienAn, txtTienDiLai, txtDiemDi, txtDiemDen)){
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin");
                 return;
             }
@@ -133,72 +137,87 @@ public class TourPlanDetailDialog extends JDialog {
             //validate numbers
             BigDecimal tongChi, tienO, tienAn, tienDiLai;
             try {
-                tongChi = BigDecimal.valueOf(Long.parseLong(txtTongChi.getText().trim()));
-                tienO = BigDecimal.valueOf(Long.parseLong(txtTongChi.getText().trim()));
-                tienAn = BigDecimal.valueOf(Long.parseLong(txtTongChi.getText().trim()));
-                tienDiLai = BigDecimal.valueOf(Long.parseLong(txtTongChi.getText().trim()));
+                tongChi = parseMoney(txtTongChi);
+                tienO = parseMoney(txtTienO);
+                tienAn = parseMoney(txtTienAn);
+                tienDiLai = parseMoney(txtTienDiLai);
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập đúng định dạng số");
+                JOptionPane.showMessageDialog(this, "Các khoản tiền phải là số nguyên không âm");
                 return;
             }
-            Date selectedDate =
-                    (Date) date.getDate();
+
+            Date selectedDate = date.getDate();
             if (selectedDate == null) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Vui lòng chọn ngày đặt"
-                );
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày thực hiện");
                 return;
             }
+            LocalDateTime dateTime = selectedDate.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .atStartOfDay();
 
-            LocalDateTime dateTime =
-                    selectedDate.toInstant()
-                            .atZone(
-                                    ZoneId.systemDefault()
-                            )
-                            .toLocalDateTime();
+            try {
+                if(tourPlanDetailDTO == null){
+                    String id = txtMaCTietKHTour.getText().trim();
+                    if(bus.existedCTietKHTourWithID(id)) {
+                        JOptionPane.showMessageDialog(this, "Mã chi tiết kế hoạch tour đã tồn tại, vui lòng thử lại!");
+                        txtMaCTietKHTour.setText(bus.getNextTourPlanDetailId());
+                        return;
+                    }
 
-            if(tourPlanDetailDTO == null){
-                if(bus.existedCTietKHTourWithID(txtMaCTietKHTour.getText()))
-                    JOptionPane.showMessageDialog(null, "Mã chi tiết kế hoạch tour đã tồn tại, vui lòng nhập mã khác!");
-
-                else{
-                    TourPlanDetailDTO newTourPlan = new TourPlanDetailDTO(
-                            txtMaCTietKHTour.getText(), dateTime,
-                            tongChi, tienO, tienAn,
-                            tienDiLai, txtDiemDi.getText(), txtDiemDen.getText(), txtMaKHtour.getText()
+                    TourPlanDetailDTO newDetail = new TourPlanDetailDTO(
+                            id, dateTime,
+                            tongChi, tienO, tienAn, tienDiLai,
+                            txtDiemDi.getText().trim(), txtDiemDen.getText().trim(), idTourPlan
                     );
 
-                    boolean result = bus.addCTietKHTour(newTourPlan);
-                    if(result) {
-                        JOptionPane.showMessageDialog(this, "Đã thêm");
+                    if(bus.addCTietKHTour(newDetail)) {
+                        JOptionPane.showMessageDialog(this, "Đã thêm chi tiết kế hoạch tour");
                         dispose();
                     }else{
                         JOptionPane.showMessageDialog(this, "Thêm thất bại");
                     }
+                }else{
+                    tourPlanDetailDTO.setDate(dateTime);
+                    tourPlanDetailDTO.setTotalExpenditure(tongChi);
+                    tourPlanDetailDTO.setHousingCost(tienO);
+                    tourPlanDetailDTO.setEatingCost(tienAn);
+                    tourPlanDetailDTO.setTravelingCost(tienDiLai);
+                    tourPlanDetailDTO.setDepartureLocation(txtDiemDi.getText().trim());
+                    tourPlanDetailDTO.setEndLocation(txtDiemDen.getText().trim());
+
+                    if(bus.editCTietKHTour(tourPlanDetailDTO)) {
+                        JOptionPane.showMessageDialog(this, "Đã cập nhật chi tiết kế hoạch tour");
+                        dispose();
+                    }else{
+                        JOptionPane.showMessageDialog(this, "Cập nhật thất bại");
+                    }
                 }
-            }else{
-                tourPlanDetailDTO.setIdTourPlanDetail(txtMaCTietKHTour.getText());
-                tourPlanDetailDTO.setDate(LocalDateTime.parse(txtNgayThucHien.getText()));
-                tourPlanDetailDTO.setTotalExpenditure(tongChi);
-                tourPlanDetailDTO.setHousingCost(tienO);
-                tourPlanDetailDTO.setEatingCost(tienAn);
-                tourPlanDetailDTO.setTravelingCost(tienDiLai);
-                tourPlanDetailDTO.setDepartureLocation(txtDiemDi.getText());
-                tourPlanDetailDTO.setEndLocation(txtDiemDen.getText());
-
-                tourPlanDetailDTO.setIdTourPlan(txtMaKHtour.getText());
-
-                bus.editCTietKHTour(tourPlanDetailDTO); // edit by cTietKeHoachTourBus
+            } catch (RuntimeException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
     }
 
     private void cancel(){
         cancelBtn = ButtonFactory.create("Hủy", UIColors.CANCEL);
-        cancelBtn.addActionListener(e -> {
-            dispose();
-        });
+        cancelBtn.addActionListener(e -> dispose());
+    }
+
+    private BigDecimal parseMoney(JTextField field){
+        BigDecimal value = new BigDecimal(field.getText().trim());
+        if (value.signum() < 0 || value.stripTrailingZeros().scale() > 0) {
+            throw new NumberFormatException();
+        }
+        return value;
+    }
+
+    private String toText(BigDecimal value){
+        return value == null ? "" : value.toPlainString();
+    }
+
+    private Date toDate(LocalDate localDate){
+        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     private boolean isEmpty(JTextField... fields){

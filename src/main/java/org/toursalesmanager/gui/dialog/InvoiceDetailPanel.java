@@ -1,6 +1,8 @@
 
 package org.toursalesmanager.gui.dialog;
 
+import org.toursalesmanager.gui.helper.WindowHelper;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.math.BigDecimal;
@@ -41,7 +43,7 @@ public class InvoiceDetailPanel extends JDialog {
         loadData();
         this.setTitle("Chi tiết hóa đơn");
         this.bus=new InvoiceDetailBUS();
-        this.setLocationRelativeTo(null);
+        WindowHelper.centerOnParent(this);
     }
 
     @SuppressWarnings("unchecked")

@@ -344,7 +344,13 @@ public class Login extends JDialog {
                 return;
             }
 
-            AccountDTO account = accountBUS.login(username, password);
+            AccountDTO account;
+            try {
+                account = accountBUS.login(username, password);
+            } catch (IllegalStateException | IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Không thể đăng nhập", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             if (account == null) {
                 JOptionPane.showMessageDialog(this, "Sai tài khoản hoặc mật khẩu.");
                 return;

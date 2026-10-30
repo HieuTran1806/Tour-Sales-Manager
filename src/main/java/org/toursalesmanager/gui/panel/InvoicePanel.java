@@ -1,6 +1,8 @@
 
 package org.toursalesmanager.gui.panel;
 
+import org.toursalesmanager.gui.helper.TableSelectionHelper;
+
 import com.toedter.calendar.JDateChooser;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -55,6 +57,7 @@ public class InvoicePanel extends JPanel {
         model=(DefaultTableModel) tblhoadon.getModel();
         txtday.setVisible(false);
         loadData();
+        TableSelectionHelper.bindButtons(tblhoadon, editBtn, deleteBtn, viewDetailBtn);
     }
 
     private void loadData(){
@@ -244,7 +247,6 @@ public class InvoicePanel extends JPanel {
         InvoiceDialog invoiceDialog = new InvoiceDialog(bus, tourPlanBUS, customerBUS,
                 promotionBUS, staffBUS, invoiceDTO);
         invoiceDialog.setModal(true);
-        invoiceDialog.setLocationRelativeTo(this);
         invoiceDialog.setVisible(true);
         loadData();
     }
@@ -380,9 +382,6 @@ public class InvoicePanel extends JPanel {
             return;
         }
         String ma =tblhoadon.getValueAt(row, 0).toString().trim();
-        editBtn.setEnabled(true);
-        deleteBtn.setEnabled(true);
-        viewDetailBtn.setEnabled(true);
         if(evt.getClickCount()==2){
             int cf=JOptionPane.showConfirmDialog(this, "Bạn có muốn xuất excel dòng này không?");
             if(cf==JOptionPane.YES_OPTION){
