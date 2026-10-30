@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.dto.CustomerDTO;
 import org.toursalesmanager.dto.StaffDTO;
 import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.gui.helper.DateHelper;
 import org.toursalesmanager.gui.helper.UIFontHelper;
 import org.toursalesmanager.login.SessionManager;
 
@@ -13,6 +14,8 @@ import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProfilePanel extends JPanel {
@@ -200,27 +203,45 @@ public class ProfilePanel extends JPanel {
             }
             lbLinkStatus.setText(" ");
             lbMaNV.setText(staffDTO.getIdStaff());
-            lbHoTen.setText(STR."\{staffDTO.getFirstName()} \{staffDTO.getLastName()}");
-            lbNgaySinh.setText(String.valueOf(staffDTO.getDob()));
-            lbGioiTinh.setText("null");
-            lbSDT.setText(staffDTO.getPhoneNumber());
-            lbEmail.setText("-");
-            lbDiaChi.setText(staffDTO.getAddress());
+            lbHoTen.setText(fullName(staffDTO.getFirstName(), staffDTO.getLastName()));
+            lbNgaySinh.setText(orDash(DateHelper.toString(staffDTO.getDob())));
+            lbGioiTinh.setText("-");
+            lbSDT.setText(orDash(staffDTO.getPhoneNumber()));
+            lbEmail.setText(orDash(getAccountEmail()));
+            lbDiaChi.setText(orDash(staffDTO.getAddress()));
             lbChucVu.setText(staffDTO.getRole() == null ? "-" : staffDTO.getRole().name());
         } else if (customerDTO != null) {
             lbLinkStatus.setText(" ");
             lbMaKH.setText(customerDTO.getIdCustomer());
-            lbHoTen.setText(STR."\{customerDTO.getFirstName()} \{customerDTO.getLastName()}");
-            lbNgaySinh.setText(String.valueOf(customerDTO.getDob()));
+            lbHoTen.setText(fullName(customerDTO.getFirstName(), customerDTO.getLastName()));
+            lbNgaySinh.setText(orDash(DateHelper.toString(customerDTO.getDob())));
             lbGioiTinh.setText("-");
-            lbSDT.setText(customerDTO.getPhoneNumber());
-            lbEmail.setText("-");
-            lbDiaChi.setText(customerDTO.getAddress());
+            lbSDT.setText(orDash(customerDTO.getPhoneNumber()));
+            lbEmail.setText(orDash(getAccountEmail()));
+            lbDiaChi.setText(orDash(customerDTO.getAddress()));
         } else {
             lbLinkStatus.setText(
                     "Chưa tìm thấy hồ sơ khách hàng. Tài khoản cần được liên kết với mã khách hàng."
             );
         }
+    }
+
+    // Ghép "Họ Tên", bỏ qua phần bị trống để không hiện chữ "null"
+    private String fullName(String firstName, String lastName) {
+        String name = Stream.of(firstName, lastName)
+                .filter(part -> part != null && !part.isBlank())
+                .map(String::trim)
+                .collect(Collectors.joining(" "));
+        return orDash(name);
+    }
+
+    private String orDash(String value) {
+        return value == null || value.isBlank() ? "-" : value;
+    }
+
+    // Email lưu ở bảng taikhoan, không nằm trong hồ sơ nhân viên/khách hàng
+    private String getAccountEmail() {
+        return SessionManager.isLoggedIn() ? SessionManager.getCurrentAccount().getEmail() : null;
     }
 
     private boolean isStaff(){
