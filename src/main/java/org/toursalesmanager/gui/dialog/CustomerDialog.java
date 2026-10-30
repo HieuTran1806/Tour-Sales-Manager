@@ -45,7 +45,6 @@ public class CustomerDialog extends JDialog {
 
         if (mode == Mode.EDIT && kh != null) {
             loadData(kh);
-            txtIDCustomer.setEditable(false);
             txtFirstName.requestFocus();
             setTitle("Sửa thông tin khách hàng");
         } else {
@@ -62,6 +61,10 @@ public class CustomerDialog extends JDialog {
 
         //row idCustomer
         txtIDCustomer = new JTextField();
+        txtIDCustomer.setEditable(false);
+        if (mode == Mode.ADD) {
+            txtIDCustomer.setText(customerBUS.getNextCustomerId());
+        }
         AddComponentToForm.addFormRow(panelForm, "Mã khách hàng:", txtIDCustomer);
 
         //row FirstName
@@ -98,8 +101,8 @@ public class CustomerDialog extends JDialog {
         add(jpBtn, BorderLayout.SOUTH);
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
         pack();
+        setLocationRelativeTo(getParent()); // hiển thị giữa màn hình cha
     }
 
     private void save(){
@@ -115,7 +118,7 @@ public class CustomerDialog extends JDialog {
 
             try {
                 validateFirstName(firstName);
-                validateLastName(firstName);
+                validateLastName(lastName);
                 validateDob(dob);
                 validateAddress(address);
                 validatePhoneNumber(phoneNumber);
@@ -151,8 +154,6 @@ public class CustomerDialog extends JDialog {
 
     private void validateIdCustomer(String id) throws ValidationException{
         if (id.isEmpty()) throw new ValidationException("Mã KH không được để trống!");
-
-        if (!id.matches("^KH\\d{3}$"))  throw new ValidationException("Mã khách hàng phải có dạng KHxxx!");
 
         if(isIdDuplicated(id)) throw new ValidationException("Mã khách hàng đã tồn tại!");
     }

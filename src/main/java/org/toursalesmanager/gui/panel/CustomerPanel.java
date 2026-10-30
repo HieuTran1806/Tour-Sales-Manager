@@ -168,6 +168,11 @@ public class CustomerPanel extends JPanel {
         add(jPanel3, BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
 
+    private Frame getParentFrame() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        return window instanceof Frame frame ? frame : null;
+    }
+
     private void addCustomer(){
         addBtn = ButtonFactory.create("Thêm khách hàng", UIColors.ADD);
         addBtn.addActionListener(v -> {
@@ -175,7 +180,7 @@ public class CustomerPanel extends JPanel {
                 return;
             }
 
-            CustomerDialog dialog = new CustomerDialog(null, true, customerBUS, CustomerDialog.Mode.ADD, null);
+            CustomerDialog dialog = new CustomerDialog(getParentFrame(), true, customerBUS, CustomerDialog.Mode.ADD, null);
             dialog.setVisible(true);
 
             loadKhachHangToTable(customerBUS.getAllCustomers());
@@ -194,7 +199,7 @@ public class CustomerPanel extends JPanel {
             if (i>=0){
                 String idStaff = jTable1.getValueAt(i, 0).toString();
                 CustomerDTO kh = customerBUS.findCustomerById(idStaff);
-                CustomerDialog dialog = new CustomerDialog(null, true, customerBUS, CustomerDialog.Mode.EDIT, kh);
+                CustomerDialog dialog = new CustomerDialog(getParentFrame(), true, customerBUS, CustomerDialog.Mode.EDIT, kh);
                 dialog.setVisible(true);
 
                 loadKhachHangToTable(customerBUS.getAllCustomers());

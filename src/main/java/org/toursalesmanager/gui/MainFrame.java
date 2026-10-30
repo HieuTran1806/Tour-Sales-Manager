@@ -132,6 +132,12 @@ public class MainFrame extends JFrame {
             sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
         }
 
+        // Trang phân quyền chỉ dành cho quản trị viên
+        if (SessionManager.isAdmin()) {
+            sidebar.add(createMenuButton("Phân quyền", "PhanQuyen", null));
+            sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
+        }
+
         if (SessionManager.isLoggedIn()) {
             sidebar.add(createMenuButton("Thông tin cá nhân", "ThongTinCaNhan", null));
             sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
@@ -191,6 +197,9 @@ public class MainFrame extends JFrame {
         if(SessionManager.hasPermission(Permission.VIEW_STATISTICS)){
             contentArea.add(new StatisticsPanel(), "ThongKe");
         }
+
+        if (SessionManager.isAdmin())
+            contentArea.add(new PermissionPanel(), "PhanQuyen");
 
 
         // Khách chưa đăng nhập không có trang thông tin cá nhân

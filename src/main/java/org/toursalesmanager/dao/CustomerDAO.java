@@ -9,6 +9,9 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CustomerDAO {
     public ArrayList<CustomerDTO> getAllCustomers() {
@@ -25,6 +28,35 @@ public class CustomerDAO {
             e.printStackTrace();
         }
         return dsKH;
+    }
+
+    public String getNextCustomerId() {
+        String sql = "SELECT MaKH FROM KhachHang";
+        Pattern customerIdPattern = Pattern.compile("^KH([0-9]+)$", Pattern.CASE_INSENSITIVE);
+        long maxSequence = 0;
+        int sequenceWidth = 3;
+
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                Matcher matcher = customerIdPattern.matcher(rs.getString("MaKH"));
+                if (matcher.matches()) {
+                    long sequence = Long.parseLong(matcher.group(1));
+                    maxSequence = Math.max(maxSequence, sequence);
+                    sequenceWidth = Math.max(sequenceWidth, matcher.group(1).length());
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể tạo mã khách hàng tiếp theo", e);
+        }
+
+        long nextSequence = Math.addExact(maxSequence, 1);
+        return String.format(
+                Locale.ROOT,
+                "KH%0" + sequenceWidth + "d",
+                nextSequence
+        );
     }
 
     public boolean addCustomer(CustomerDTO dto) {

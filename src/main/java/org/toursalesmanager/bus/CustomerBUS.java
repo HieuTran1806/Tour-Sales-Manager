@@ -18,6 +18,11 @@ public class CustomerBUS {
     public ArrayList<CustomerDTO> getAllCustomers() {
         return dao.getAllCustomers();
     }
+    public String getNextCustomerId() {
+        requireManagePermission();
+        return dao.getNextCustomerId();
+    }
+
     public void addCustomer(CustomerDTO khang) {
         requireManagePermission();
 

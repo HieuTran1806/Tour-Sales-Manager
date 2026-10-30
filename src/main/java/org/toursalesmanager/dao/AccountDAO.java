@@ -10,6 +10,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AccountDAO {
 
@@ -271,6 +276,33 @@ public class AccountDAO {
             }
             return String.format("KH%03d", nextId);
         }
+    }
+
+    public List<AccountDTO> getAllAccounts() {
+        String sql = "SELECT * FROM taikhoan ORDER BY idaccount";
+        List<AccountDTO> accounts = new ArrayList<>();
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                accounts.add(new AccountDTO(
+                        rs.getInt("idaccount"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        Role.valueOf(
+                                rs.getString("role").toUpperCase().trim()
+                        ),
+                        rs.getString("status"),
+                        rs.getString("idstaff"),
+                        rs.getString("idcustomer"),
+                        rs.getString("email")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Không thể tải danh sách tài khoản.", e);
+        }
+        return accounts;
     }
 
     public boolean existsByUsername(String username) {
