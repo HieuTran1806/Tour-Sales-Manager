@@ -1,13 +1,13 @@
--- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 9.3.0, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: tour
+-- Host: localhost    Database: tour
 -- ------------------------------------------------------
 -- Server version	9.3.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -127,7 +127,7 @@ CREATE TABLE `diadiem` (
 
 LOCK TABLES `diadiem` WRITE;
 /*!40000 ALTER TABLE `diadiem` DISABLE KEYS */;
-INSERT INTO `diadiem` VALUES ('DD01','Lanmark 81','abcd','Việt Nam'),('DD02','TPHCM','abc 123','Việt Nam'),('DD04','Thành phố Đà Lạt 2','abcd','Việt Nam');
+INSERT INTO `diadiem` VALUES ('DD01','Lanmark 81','abcd','Việt Nam'),('DD02','TPHCM','abc','Việt Nam'),('DD03','avadv','aesf','VietNam'),('DD04','Thành phố Đà Lạt 2','abcd','Việt Nam');
 /*!40000 ALTER TABLE `diadiem` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -179,8 +179,9 @@ CREATE TABLE `kehoachtour` (
   `ngaykhoihanh` date DEFAULT NULL,
   `ngayketthuc` date DEFAULT NULL,
   `tongsove` int DEFAULT NULL,
-  `tongchi` decimal(10,0) DEFAULT NULL,
-  `tongthu` decimal(10,0) DEFAULT NULL,
+  `tongchidukien` decimal(10,0) DEFAULT NULL,
+  `soveconlai` int DEFAULT NULL,
+  `trangthai` varchar(45) DEFAULT NULL,
   `matour` varchar(10) DEFAULT NULL,
   `manvhd` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`makhtour`),
@@ -194,7 +195,7 @@ CREATE TABLE `kehoachtour` (
 
 LOCK TABLES `kehoachtour` WRITE;
 /*!40000 ALTER TABLE `kehoachtour` DISABLE KEYS */;
-INSERT INTO `kehoachtour` VALUES ('KH008','2026-03-29','2026-03-30',-15,8000000,9000000,'T02','NV01'),('KH01','2026-01-01','2026-02-01',4,10000000,8000000,'T01','NV01'),('KH02','2026-03-09','2026-03-10',5,1000000,2000000,'T01','NV02'),('KH03','2026-03-09','2026-03-10',0,1000000,1000000,'T01','NV03'),('KH04','2026-03-25','2026-03-26',25,8000000,9000000,'T01','NV01'),('KH05','2026-03-27','2026-03-28',27,8000000,7000000,'T01','NV01'),('KH06','2026-03-27','2026-03-28',46,800000,700000,'T01','NV02'),('KH07','2026-03-29','2026-03-30',9,8000000,9000000,'T01','NV01'),('KH08','2026-03-29','2026-03-30',5,900000,800000,'T01','NV01'),('KH09','2026-03-30','2026-03-31',9,8000000,10000000,'T01','NV003'),('KH10','2026-03-30','2026-03-31',9,8000000,10000000,'T01','NV003');
+INSERT INTO `kehoachtour` VALUES ('KH008','2026-03-29','2026-03-30',1,8000000,NULL,NULL,'T02','NV01'),('KH01','2026-01-01','2026-02-01',5,10000000,NULL,NULL,'T01','NV003'),('KH01 ','2026-09-13','2026-09-14',4,4,0,'','T01','NV003'),('KH010','2026-09-21','2026-09-21',10,22222,17,'Sắp khởi hành','T01','NV003'),('KH02','2026-01-01','2026-01-09',5,10000000,50,'Sắp khởi hành','T06','NV003'),('KH03','2026-03-09','2026-03-10',0,1000000,NULL,NULL,'T01','NV03'),('KH04','2026-03-25','2026-03-26',25,8000000,NULL,NULL,'T01','NV01'),('KH05','2026-03-27','2026-03-27',27,6000000,10,'Sắp khởi hành','T01','NV003'),('KH06','2026-03-27','2026-03-27',2,800000,25,'Sắp khởi hành','T01','NV003'),('KH07','2026-03-29','2026-03-29',11,8000000,27,'Đã hủy','T02','NV003'),('KH08','2026-09-17','2026-09-17',20,22000,50,'Đã hủy','T03','NV003'),('KH09','2026-09-17','2026-09-18',200,100000000,9,'Sắp khởi hành','T04','NV003'),('KH10','2026-09-17','2026-09-18',11,111111,50,'Sắp khởi hành','T03','NV003');
 /*!40000 ALTER TABLE `kehoachtour` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -222,36 +223,8 @@ CREATE TABLE `khachhang` (
 
 LOCK TABLES `khachhang` WRITE;
 /*!40000 ALTER TABLE `khachhang` DISABLE KEYS */;
-INSERT INTO `khachhang` VALUES ('KH002','Trần','Hiếu','abcxyz 123','0123456789','2006-06-18'),('KH003','Trần','Hiếu','abc','0123456789','2026-03-29'),('KH01','Nguyễn Huỳnh','Phúc','abcxyz','0123456789','2026-03-24');
+INSERT INTO `khachhang` VALUES ('KH002','Trần','Hiếu','abcxyz 123','0123456789','2006-06-18'),('KH003','Trần','Hiếu','abc','0123456789','2026-03-29'),('KH004','t','t','abc','0815943949','2026-09-20'),('KH005','Tt','t','afd','0123456789','2026-09-20'),('KH006','Tran','Hieu','abc','0815943948','2026-10-15'),('KH007','tran','hieu','abc','0815943941','2026-10-14'),('KH008','Tran','Hieu','abc','0123456788','2026-10-26'),('KH009','Phan','Nguyen','89 Chu Van An','0999999999','2006-12-12'),('KH01','Nguyễn Huỳnh','Phúc','abcxyz','0123456789','2026-03-24');
 /*!40000 ALTER TABLE `khachhang` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `khang_khtour`
---
-
-DROP TABLE IF EXISTS `khang_khtour`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `khang_khtour` (
-  `maKHTour` varchar(10) DEFAULT NULL,
-  `maKHang` varchar(10) DEFAULT NULL,
-  `giaVe` decimal(10,0) DEFAULT NULL,
-  KEY `fk_khangkhtour_kehoachtour_idx` (`maKHTour`),
-  KEY `fk_khangkhtour_khachhang_idx` (`maKHang`),
-  CONSTRAINT `fk_khangkhtour_kehoachtour` FOREIGN KEY (`maKHTour`) REFERENCES `kehoachtour` (`makhtour`),
-  CONSTRAINT `fk_khangkhtour_khachhang` FOREIGN KEY (`maKHang`) REFERENCES `khachhang` (`maKH`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `khang_khtour`
---
-
-LOCK TABLES `khang_khtour` WRITE;
-/*!40000 ALTER TABLE `khang_khtour` DISABLE KEYS */;
-INSERT INTO `khang_khtour` VALUES ('KH01','KH01',5000000);
-/*!40000 ALTER TABLE `khang_khtour` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -328,7 +301,7 @@ CREATE TABLE `loaitour` (
 
 LOCK TABLES `loaitour` WRITE;
 /*!40000 ALTER TABLE `loaitour` DISABLE KEYS */;
-INSERT INTO `loaitour` VALUES ('LT01','Tour trong nước','','1'),('LT02','Tour nước ngoài','123','1'),('LT03','Tour khám phá','','1'),('LT04','Tour du lịch ','1234','1');
+INSERT INTO `loaitour` VALUES ('LT01','Tour trong nước','','Đang hoạt động'),('LT02','Tour nước ngoài','','Đang hoạt động'),('LT03','Tour khám phá','123','Đang hoạt động'),('LT04','abc','ac','Đang hoạt động');
 /*!40000 ALTER TABLE `loaitour` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -341,7 +314,6 @@ DROP TABLE IF EXISTS `nhanvien`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `nhanvien` (
   `maNV` varchar(10) NOT NULL,
-  `chucVu` varchar(255) DEFAULT NULL,
   `ho` varchar(45) DEFAULT NULL,
   `ten` varchar(45) DEFAULT NULL,
   `diaChi` varchar(255) DEFAULT NULL,
@@ -357,7 +329,7 @@ CREATE TABLE `nhanvien` (
 
 LOCK TABLES `nhanvien` WRITE;
 /*!40000 ALTER TABLE `nhanvien` DISABLE KEYS */;
-INSERT INTO `nhanvien` VALUES ('NV003','Nhân viên','Tiêu Viết','Vương','abc','0123456789','2026-03-29'),('NV004','Saler','Trần','Hiếu','abc','0123456789','2026-03-29'),('NV01','Nhân viên','Trần Viết','Hiếu','abc','0123456789','2006-01-01'),('NV02','Nhân viên','Nguyễn','Phúc','abc','0123456789','2026-03-24');
+INSERT INTO `nhanvien` VALUES ('NV003','Tiêu Viết','Vương','abc','0123456789','2026-03-29'),('NV004','Trần','Hiếu','abc','0123456789','2026-03-29'),('NV005','Tran','Hieu','abc','0815943949','2026-10-11'),('NV006','Tiêu','Vương','123 Điện Biên Phủ','0123456781','2004-07-01'),('NV01','Trần Viết','Hiếu','abc','0123456789','2006-01-01'),('NV02','Nguyễn','Phúc','abc','0123456789','2026-03-24'),('Trần','Trần','Viết','abc','0815943949','2026-09-19');
 /*!40000 ALTER TABLE `nhanvien` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -369,13 +341,22 @@ DROP TABLE IF EXISTS `taikhoan`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `taikhoan` (
+  `idAccount` int NOT NULL AUTO_INCREMENT,
   `userName` varchar(30) NOT NULL,
-  `password` varchar(30) NOT NULL,
-  `position` varchar(10) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `role` varchar(45) NOT NULL,
+  `status` varchar(45) DEFAULT 'ACTIVE',
+  `idstaff` varchar(10) DEFAULT NULL,
+  `idCustomer` varchar(10) DEFAULT NULL,
   `email` varchar(254) DEFAULT NULL,
-  PRIMARY KEY (`userName`),
-  UNIQUE KEY `uq_taikhoan_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`idAccount`),
+  UNIQUE KEY `uq_taikhoan_username` (`userName`),
+  UNIQUE KEY `uq_taikhoan_email` (`email`),
+  KEY `idStaff_idx` (`idstaff`),
+  KEY `idCustomer_idx` (`idCustomer`),
+  CONSTRAINT `idCustomer` FOREIGN KEY (`idCustomer`) REFERENCES `khachhang` (`maKH`),
+  CONSTRAINT `idStaff` FOREIGN KEY (`idstaff`) REFERENCES `nhanvien` (`maNV`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -384,8 +365,32 @@ CREATE TABLE `taikhoan` (
 
 LOCK TABLES `taikhoan` WRITE;
 /*!40000 ALTER TABLE `taikhoan` DISABLE KEYS */;
-INSERT INTO `taikhoan` (`userName`, `password`, `position`) VALUES ('admin','admin123','quản lí'),('NV003','123','Nhân viên'),('NV004','123','Saler'),('NV01','123','Nhân viên'),('NV02','123','Nhân viên');
+INSERT INTO `taikhoan` VALUES (1,'admin','$2a$10$D6thL4xbsM/k959v3cWgoutLbgcBuiBdbZ06czcuqi3jidPUm.qiC','ADMIN','ACTIVE',NULL,NULL,NULL),(2,'NV003','$2a$10$BYkHcf0MEw0PyNEKGLlgKeUluRJ/yJhSlrnr.VGBrKKrIUtXBipMC','TOUR_OPERATE','ACTIVE','NV003',NULL,NULL),(3,'NV004','$2a$10$U8mNaWDVULgBCor90K6zdOsogDB.h6vpJs7ayzPo3fDyPh23YZtgK','ACCOUNTANT','ACTIVE','NV004',NULL,NULL),(7,'hieutran','$2a$10$Bt1eVkFiVmoC6LdWtQ0mBONWYijzEqqxuXgJv3YGaMH0oWLVIoz1m','CUSTOMER','ACTIVE',NULL,NULL,NULL),(9,'hieutran1','$2a$10$tgOC0IB1IPRw3QsSqedA0uRkgoKeK1WHMYweA3OHUyEy45tBENBYW','CUSTOMER','ACTIVE',NULL,NULL,NULL),(11,'NV005','$2a$10$zfDQgPT1kDDKs7GUhSxswO2NgDakJcGPnohURcI32q2G.GnsoL64i','TOUR_OPERATE','ACTIVE','NV005',NULL,NULL),(12,'hieutran123','$2a$10$Z7EvOoqtVc8x5c.YkhDwkOuei03UFTmmffoJRqE4aEJcmBxh9Vhhe','CUSTOMER','ACTIVE',NULL,'KH006',NULL),(13,'hieutran3','$2a$10$vfPkKYXNoXhbqhshx24aEuBXn.cxucqSpSc5MOXDaCJ612z26KFuG','CUSTOMER','ACTIVE',NULL,'KH007',NULL),(14,'Hieutran666','$2a$10$BLf25f66P4H/s4hh85GdG.dbKU4y7E1e68f6j1gPgK63wDvS2.xta','CUSTOMER','ACTIVE',NULL,'KH008','kh008@example.com'),(15,'tn','$2a$10$mw9kWd2egRhSKO4zMLgHu.9IKY2kdzmJ9L223LwTfDibeXBkSxmNm','CUSTOMER','ACTIVE',NULL,'KH009','kh009@example.com'),(16,'NV006','$2a$10$Zrq8Qw8lkyo8JkMEp8JUSu7n5gTMj9LnNAcHIZGFkrtZ2Daida.5q','ACCOUNTANT','ACTIVE','NV006',NULL,NULL);
 /*!40000 ALTER TABLE `taikhoan` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `taikhoan_quyen`
+--
+
+DROP TABLE IF EXISTS `taikhoan_quyen`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `taikhoan_quyen` (
+  `idaccount` int NOT NULL,
+  `permission` varchar(50) NOT NULL,
+  PRIMARY KEY (`idaccount`,`permission`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `taikhoan_quyen`
+--
+
+LOCK TABLES `taikhoan_quyen` WRITE;
+/*!40000 ALTER TABLE `taikhoan_quyen` DISABLE KEYS */;
+INSERT INTO `taikhoan_quyen` VALUES (16,'MANAGE_CUSTOMER'),(16,'MANAGE_INVOICE'),(16,'MANAGE_PAYMENT'),(16,'MANAGE_TOUR'),(16,'VIEW_BOOKING'),(16,'VIEW_CUSTOMER'),(16,'VIEW_INVOICE'),(16,'VIEW_LOCATION'),(16,'VIEW_PAYMENT'),(16,'VIEW_PROMOTION'),(16,'VIEW_REVENUE_REPORT'),(16,'VIEW_STATISTICS'),(16,'VIEW_TOUR'),(16,'VIEW_TOUR_PLAN');
+/*!40000 ALTER TABLE `taikhoan_quyen` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -419,9 +424,45 @@ CREATE TABLE `tour` (
 
 LOCK TABLES `tour` WRITE;
 /*!40000 ALTER TABLE `tour` DISABLE KEYS */;
-INSERT INTO `tour` VALUES ('T01','Du lịch Phú Quốc',7,5000000,27,'Hồ Chí Minh',NULL,'LT01',NULL),('T02','Du lịch Miền Tây',14,10000000,27,'Hồ Chí Minh',NULL,'LT01',NULL),('T03','Du lịch Miền Trung',5,10000000,50,'Cần Thơ',NULL,'LT01',NULL),('T04','Du lịch Thượng Hải',5,10000000,9,'Hồ Chí Minh',NULL,'LT01',NULL),('T05','Du lịch sapa ',3,8000000,50,'Hồ Chí Minh','C:\\Users\\pc\\Pictures\\Camera Roll\\TuTien.jpg','LT01',NULL),('T06','Du lịch sapa ',6,9000000,50,'abc da lat','C:\\Users\\pc\\Pictures\\sapa.jpg','LT01','DD04'),('T07','Du lịch HCM',50,9000000,8000000,'abc 123','C:\\Users\\pc\\Pictures\\sapa.jpg','LT01','DD02');
+INSERT INTO `tour` VALUES ('T01','Du lịch Phú Quốc',7,5000000,27,'Hồ Chí Minh',NULL,'LT01',NULL),('T02','Du lịch Miền Tây',14,10000000,27,'Hồ Chí Minh',NULL,'LT01',NULL),('T04','Du lịch Thượng Hải',5,10000000,9,'Hồ Chí Minh',NULL,'LT01',NULL),('T06','Du lịch sapa ',6,9000000,50,'abc da lat','C:\\Users\\pc\\Pictures\\sapa.jpg','LT01','DD04'),('T07','Du lịch HCM',50,9000000,8000000,'abc','C:\\Users\\pc\\Pictures\\sapa.jpg','LT01','DD02'),('T08','Du lịch ',5,10000000,50,'Hồ Chí Minh ','abc ','LT01','DD01');
 /*!40000 ALTER TABLE `tour` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `tourbooking`
+--
+
+DROP TABLE IF EXISTS `tourbooking`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tourbooking` (
+  `idTourBooking` int NOT NULL AUTO_INCREMENT,
+  `idCustomer` varchar(10) DEFAULT NULL,
+  `idTourPlan` varchar(10) DEFAULT NULL,
+  `bookingdate` date DEFAULT NULL,
+  `tickets` int DEFAULT NULL,
+  `price` decimal(10,0) DEFAULT NULL,
+  `costTotal` decimal(10,0) DEFAULT NULL,
+  `bookingStatus` varchar(45) DEFAULT NULL,
+  `note` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`idTourBooking`),
+  KEY `fk_khangkhtour_kehoachtour_idx` (`idTourBooking`),
+  KEY `fk_khangkhtour_khachhang_idx` (`idCustomer`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tourbooking`
+--
+
+LOCK TABLES `tourbooking` WRITE;
+/*!40000 ALTER TABLE `tourbooking` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tourbooking` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Dumping routines for database 'tour'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -432,4 +473,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-03 15:41:51
+-- Dump completed

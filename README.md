@@ -4,11 +4,11 @@
 TSM is a Java application that allows customers and staff members to interact directly to book tours and manage tour transactions. Tours can be edited flexibly by staff members with the appropriate permissions. 
 
 # Technologies 
-- Programming language: Java 21 (bật `--enable-preview` vì có dùng String Template `STR`)
+- Programming language: Java 21 (không dùng tính năng preview)
 - User interface: Java Swing (JCalendar cho chọn ngày)
 - Database: MySQL 8+ (MySQL Connector/J 8.3)
 - Thư viện khác: Lombok, jBCrypt (băm mật khẩu), Apache POI (xuất Excel), Angus Mail (gửi OTP qua email)
-- Build: Maven
+- Build: Maven, đóng gói thành một file jar chạy được (`target/TourSalesManager.jar`)
 
 # Project structure
 ```
@@ -29,8 +29,10 @@ src/main/java/org/toursalesmanager/
     ├── component/      # ButtonFactory
     └── helper/         # Màu, font, mật khẩu, Excel, PermissionUI, ...
 
-database/                 # Script cập nhật CSDL (migration), chạy theo thứ tự bên dưới
-quanlytour.sql            # Bản dump CSDL ban đầu
+database/
+├── quanlytour.sql                 # Toàn bộ CSDL (cấu trúc + dữ liệu mẫu), dùng khi cài mới
+├── add_account_email.sql          # Migration cho CSDL cũ
+└── add_account_permission.sql     # Migration cho CSDL cũ
 src/main/resources/       # config.properties(.example), hình ảnh
 ```
 
@@ -54,15 +56,57 @@ PowerShell:
 Copy-Item src\main\resources\config.properties.example src\main\resources\config.properties
 ```
 
-Để thêm email cho cơ sở dữ liệu hiện có, chạy một lần script
-`database/add_account_email.sql`. Khi chạy từ `quanlytour.sql`, cột email đã được
-tạo sẵn. Đặt biến môi trường `MAIL_USERNAME` và `MAIL_APP_PASSWORD` trước khi mở
+## Tạo cơ sở dữ liệu (cài mới)
+
+File `database/quanlytour.sql` chứa toàn bộ 15 bảng (kể cả `taikhoan_quyen`, `tourbooking`) và dữ liệu mẫu. File được dump lại từ CSDL đang dùng, khớp với code hiện tại. Khi cài mới **chỉ cần chạy file này**, không cần chạy các migration bên dưới.
+
+```sql
+CREATE DATABASE tour CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+```
+Sau đó mở `database/quanlytour.sql` trong MySQL Workbench, chọn database `tour` và bấm ⚡. Hoặc chạy bằng dòng lệnh:
+```powershell
+cmd /c "\"C:\Program Files\MySQL\MySQL Server 9.3\bin\mysql.exe\" -u root -p --default-character-set=utf8mb4 tour < database\quanlytour.sql"
+```
+
+**Lưu ý:** file dump có lệnh `DROP TABLE IF EXISTS`, nên chạy vào database đang có dữ liệu sẽ **xoá dữ liệu cũ** của các bảng trùng tên.
+
+Tài khoản mẫu: `admin` (ADMIN), `NV003`, `NV005` (TOUR_OPERATE), `NV004`, `NV006` (ACCOUNTANT). Mật khẩu đã được băm BCrypt, hãy dùng mật khẩu bạn đã đặt hoặc đặt lại.
+
+Để cập nhật dump sau khi đổi cấu trúc CSDL:
+```powershell
+cmd /c "\"C:\Program Files\MySQL\MySQL Server 9.3\bin\mysqldump.exe\" -u root -p --single-transaction --routines --triggers --skip-dump-date --set-gtid-purged=OFF --default-character-set=utf8mb4 --result-file=database\quanlytour.sql tour"
+```
+**Trước khi commit file dump mới:** CSDL local chứa email thật (dùng để nhận OTP), nên mở `database/quanlytour.sql` và thay các email thật trong phần `INSERT INTO taikhoan` bằng email mẫu (ví dụ `kh008@example.com`), để không lộ email lên repo.
+
+## Gửi OTP qua email
+
+Đặt biến môi trường `MAIL_USERNAME` và `MAIL_APP_PASSWORD` trước khi mở
 ứng dụng để gửi OTP đặt lại mật khẩu; với Gmail, `MAIL_APP_PASSWORD` là App
 Password. OTP có hiệu lực trong 5 phút.
 
-## Các script cập nhật cơ sở dữ liệu
+## Chạy ứng dụng
 
-Chạy lần lượt các script trong thư mục `database/` trên database đang dùng (mặc định là `tour`). Mỗi script chỉ cần chạy một lần.
+**Khi phát triển:** mở project bằng IntelliJ và chạy `org.toursalesmanager.main.Main`. IntelliJ chạy thẳng từ `target/classes`, sửa code xong chạy lại là thấy thay đổi, **không cần build jar**. Cấu hình DB lấy từ `src/main/resources/config.properties`.
+
+**Khi cần gửi app đi** (nộp đồ án, demo trên máy khác), build file jar:
+
+```powershell
+mvn clean package
+```
+Trong IntelliJ thì bấm *Maven → Lifecycle → package*. Kết quả là file `target/TourSalesManager.jar` (khoảng 23 MB), đã gói kèm toàn bộ thư viện.
+
+File jar **không tự cập nhật**. Sau khi sửa code, muốn gửi bản mới thì chạy lại `mvn clean package`.
+
+Để chạy file jar:
+1. Chép `TourSalesManager.jar` sang thư mục bất kỳ.
+2. Đặt file `config.properties` **cùng thư mục với file jar**. File này cố ý không được đóng gói vào jar để không lộ mật khẩu DB khi gửi jar cho người khác.
+3. Chạy `java -jar TourSalesManager.jar` hoặc nhấp đúp vào file. Máy chạy cần có **Java 21** trở lên và kết nối được MySQL.
+
+Thứ tự tìm `config.properties`: cạnh file jar → thư mục đang chạy lệnh → `src/main/resources` (khi chạy từ IDE).
+
+## Các script cập nhật cơ sở dữ liệu (chỉ cho CSDL cũ)
+
+Chỉ dùng khi bạn đang có CSDL tạo từ bản dump **cũ** và không muốn tạo lại từ `quanlytour.sql`. Chạy lần lượt trên database đang dùng (mặc định là `tour`), mỗi script chỉ cần chạy một lần. CSDL tạo từ `quanlytour.sql` mới đã có sẵn các thay đổi này.
 
 | Thứ tự | Script | Nội dung |
 |---|---|---|
@@ -183,12 +227,14 @@ Mã được tạo tự động theo số lớn nhất hiện có + 1, ô nhập
 ## Lỗi đã biết
 - [x] ~~`AccountDAO.existsByStaffId` truy vấn nhầm bảng `account`~~. Đã sửa.
 - [x] ~~Đăng nhập chưa kiểm tra cột `status`~~. Đã sửa. Chức năng khóa/mở khóa tài khoản trong `AccountBUS` vẫn đang bị comment, nên hiện chỉ khóa được bằng SQL: `UPDATE taikhoan SET status = 'LOCKED' WHERE idaccount = ?`.
-- [ ] `quanlytour.sql` đã cũ, cấu trúc bảng `taikhoan` khác với code:
-  - Dump có `userName`, `password varchar(30)`, `position`.
-  - Code dùng `idaccount`, `username`, `role`, `status`, `idstaff`, `idcustomer`, `email`.
-  - `password varchar(30)` không đủ chứa chuỗi băm BCrypt (60 ký tự).
-  
-  Cần export lại dump từ CSDL hiện tại.
+- [x] ~~`quanlytour.sql` đã cũ, cấu trúc bảng `taikhoan` khác với code~~. Đã dump lại từ CSDL hiện tại và chuyển vào `database/quanlytour.sql`.
+- [x] ~~Dữ liệu mẫu trong `taikhoan` còn lỗi~~. Đã dọn trên CSDL `tour` và dump lại:
+  - Xoá tài khoản trùng tên `hieutran` (id 8, giữ id 7) và tài khoản gõ nhầm `` hieutran` `` (id 10).
+  - Băm BCrypt mật khẩu `123` của `hieutran1` (vẫn đăng nhập bằng `123`).
+  - Trong **file dump**, email thật được thay bằng email mẫu `kh008@example.com`, `kh009@example.com`. CSDL local vẫn giữ email thật để nhận OTP.
+  - Thêm `UNIQUE` cho `userName`; `email` thành `varchar(254)` + `UNIQUE`.
+- [ ] Một số tài khoản khách hàng chưa có `idcustomer` (`hieutran`, `hieutran1`), nên không tự đặt tour được. Xem mục *Tài khoản cũ chưa có `idstaff` / `idcustomer`*.
+- [ ] `AccountBUS.registerCustomer` chưa bắt lỗi trùng khoá. Nếu hai người đăng ký cùng tên/email cùng lúc, ràng buộc `UNIQUE` sẽ chặn lại nhưng thông báo lỗi chưa thân thiện.
 - [ ] `TourPlanDAO`, `TourTypeDAO` còn ghép chuỗi SQL (`createStatement`), dễ lỗi khi dữ liệu có dấu `'` và có nguy cơ SQL injection. Các DAO này cũng giữ một `Connection` dùng chung suốt vòng đời đối tượng.
 
 ## Còn thiếu 
@@ -198,9 +244,9 @@ Mã được tạo tự động theo số lớn nhất hiện có + 1, ô nhập
 - [ ] Mật khẩu mặc định của tài khoản nhân viên đang cố định là `123456`. Nên sinh ngẫu nhiên và bắt đổi ở lần đăng nhập đầu.
 - [ ] Áp dụng quyền mới ngay cho phiên đang đăng nhập, không phải chờ đăng nhập lại.
 - [x] ~~Dialog hiển thị giữa màn hình thay vì giữa cửa sổ cha~~. Đã sửa.
-- [ ] Trang Thông tin cá nhân còn hiển thị giới tính `null` và email `-`.
-- [ ] `ProfilePanel` dùng String Template `STR` (preview của Java 21, đã bị gỡ từ Java 23). Nên đổi sang nối chuỗi thường để bỏ `--enable-preview`.
-- [ ] `pom.xml` đang đóng gói `war` và có dependency servlet/JSTL dù đây là ứng dụng Swing. Nên chuyển sang `jar` có `Main-Class`.
+- [x] ~~Trang Thông tin cá nhân hiển thị giới tính `null` và email `-`~~. Đã sửa: email lấy từ tài khoản, ngày sinh định dạng `dd/MM/yyyy`. Giới tính hiện `-` vì CSDL chưa có cột này.
+- [x] ~~`ProfilePanel` dùng String Template `STR` (preview)~~. Đã đổi sang ghép chuỗi thường và bỏ `--enable-preview` trong `pom.xml`.
+- [x] ~~`pom.xml` đóng gói `war` và có dependency servlet/JSTL thừa~~. Đã chuyển sang `jar` chạy được (`maven-shade-plugin`, `Main-Class`), bỏ servlet/JSTL, `config.properties` đặt ngoài jar.
 - [ ] Chưa có unit test (`src/test` trống). Nên bắt đầu với các lớp BUS: kiểm tra dữ liệu, phân quyền, tạo mã tự tăng.
 - [ ] Tạo mã tự tăng bằng `MAX + 1` có thể trùng khi hai người thêm cùng lúc. Nên tạo mã trong transaction hoặc xử lý lỗi trùng khóa rồi thử lại.
 
