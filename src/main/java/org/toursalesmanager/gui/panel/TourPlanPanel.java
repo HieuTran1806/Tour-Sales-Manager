@@ -8,6 +8,7 @@ import org.toursalesmanager.dto.TourPlanDTO;
 import org.toursalesmanager.dto.TourDTO;
 import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.gui.MainFrame;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.TourPlanDetailDialog;
 import org.toursalesmanager.gui.dialog.TourPlanDialog;
@@ -119,7 +120,7 @@ public class TourPlanPanel extends JPanel {
         southPanel.add(detailsBtn);
 
         booking();
-        bookingBtn.setVisible(SessionManager.hasPermission(Permission.CREATE_BOOKING));
+        bookingBtn.setVisible(SessionManager.canRequestBooking());
         southPanel.add(bookingBtn);
 
         refresh();
@@ -197,33 +198,43 @@ public class TourPlanPanel extends JPanel {
 
     private void booking(){
         bookingBtn = ButtonFactory.create(
-                SessionManager.hasRole(Role.CUSTOMER) ? "Đặt tour" : "Tạo phiếu đặt",
+                !SessionManager.isLoggedIn() || SessionManager.hasRole(Role.CUSTOMER)
+                        ? "Đặt tour" : "Tạo phiếu đặt",
                 UIColors.BOOKING
         );
         bookingBtn.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (SessionManager.hasRole(Role.CUSTOMER) && row < 0) {
-                customerTourBookingDialog = new CustomerTourBookingDialog(
-                        null, true, tourPlanBUS, null, null);
-                customerTourBookingDialog.setVisible(true);
-                return;
-            }
-            if (row < 0) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn kế hoạch tour cần đặt.");
-                return;
-            }
-            int modelRow = table.convertRowIndexToModel(row);
-            String planId = tableModel.getValueAt(modelRow, 0).toString();
-            if (SessionManager.hasRole(Role.CUSTOMER)) {
-                customerTourBookingDialog = new CustomerTourBookingDialog(
-                        null, true, tourPlanBUS, planId, null);
-                customerTourBookingDialog.setVisible(true);
-            } else {
-                tourBookingDialog = new TourBookingDialog(
-                        null, true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
-                tourBookingDialog.setVisible(true);
-            }
+            String planId = row >= 0
+                    ? tableModel.getValueAt(table.convertRowIndexToModel(row), 0).toString()
+                    : null;
+            // Sau khi đăng nhập, MainFrame dựng lại panel mới nên giữ lại cửa sổ cha
+            Window owner = SwingUtilities.getWindowAncestor(this);
+
+            MainFrame.requireLogin(this, () -> openBookingDialog(owner, planId));
         });
+    }
+
+    private void openBookingDialog(Window owner, String planId) {
+        if (!SessionManager.hasPermission(Permission.CREATE_BOOKING)) {
+            JOptionPane.showMessageDialog(owner,
+                    "Tài khoản hiện tại không có quyền đặt tour.",
+                    "Không đủ quyền",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (SessionManager.hasRole(Role.CUSTOMER)) {
+            customerTourBookingDialog = new CustomerTourBookingDialog(
+                    null, true, tourPlanBUS, planId, null);
+            customerTourBookingDialog.setVisible(true);
+            return;
+        }
+        if (planId == null) {
+            JOptionPane.showMessageDialog(owner, "Vui lòng chọn kế hoạch tour cần đặt.");
+            return;
+        }
+        tourBookingDialog = new TourBookingDialog(
+                null, true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
+        tourBookingDialog.setVisible(true);
     }
 
     private void delete(){
@@ -313,8 +324,8 @@ public class TourPlanPanel extends JPanel {
             deleteBtn.setEnabled(hadSelection);
             editBtn.setEnabled(hadSelection);
             detailsBtn.setEnabled(hadSelection);
-            bookingBtn.setEnabled(SessionManager.hasPermission(Permission.CREATE_BOOKING)
-                    && (SessionManager.hasRole(Role.CUSTOMER) || hadSelection));
+            bookingBtn.setEnabled(SessionManager.canRequestBooking()
+                    && (!SessionManager.isLoggedIn() || SessionManager.hasRole(Role.CUSTOMER) || hadSelection));
         });
     }
 

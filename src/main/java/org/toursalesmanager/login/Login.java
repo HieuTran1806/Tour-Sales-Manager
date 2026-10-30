@@ -17,18 +17,25 @@ import java.util.Objects;
 import javax.swing.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Login extends JFrame {
+public class Login extends JDialog {
     JButton loginBtn, logoutBtn, registerBtn;
     JButton forgotPasswordBtn;
     JLabel jlbAccount, jlbPassword;
     JTextField txtUsername;
     JPasswordField txtPassword;
     AccountBUS accountBUS;
+    private Runnable successAction;
 
     public Login() {
+        this(null, null);
+    }
+
+    public Login(Window parent, Runnable successAction) {
+        super(parent, "Đăng Nhập - Tour Management System", ModalityType.APPLICATION_MODAL);
+        this.successAction = successAction;
         accountBUS = new AccountBUS();
         initComponents();
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(parent);
 
         // Set the login button as the default button
         this.getRootPane().setDefaultButton(loginBtn);
@@ -78,7 +85,7 @@ public class Login extends JFrame {
         headerPanel.add(jlbTitle);
 
         //set close operation
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         jlbAccount.setText("Tài khoản:");
 
@@ -344,6 +351,11 @@ public class Login extends JFrame {
             }
 
             SessionManager.loginAccount(account);
+            if (successAction != null) {
+                SwingUtilities.invokeLater(successAction);
+                dispose();
+                return;
+            }
             MainFrame mainFrame = new MainFrame();
             mainFrame.setVisible(true);
             this.dispose();
@@ -371,7 +383,7 @@ public class Login extends JFrame {
         registerBtn = ButtonFactory.create("Đăng ký", UIColors.VIEW);
         registerBtn.addActionListener(e -> {
             RegisterDialog dialog = new RegisterDialog(
-                    this,
+                    null,
                     accountBUS
             );
 

@@ -1,13 +1,13 @@
 package org.toursalesmanager.main;
 
-import org.toursalesmanager.login.Login;
+import org.toursalesmanager.gui.MainFrame;
 
 import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new Login().setVisible(true);
+            new MainFrame().setVisible(true);
         });
     }
 }

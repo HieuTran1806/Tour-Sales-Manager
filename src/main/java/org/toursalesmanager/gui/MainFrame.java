@@ -38,8 +38,6 @@ public class MainFrame extends JFrame {
     }
 
     public MainFrame() {
-        account = SessionManager.getCurrentAccount();
-
         // Set favicon
         try {
             ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("logosgu.png")));
@@ -57,10 +55,46 @@ public class MainFrame extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         setLayout(new BorderLayout());
-        add(buildSideBar(), BorderLayout.WEST);
-        add(buildContentArea(), BorderLayout.CENTER);
+        buildLayout();
 
         setVisible(true);
+    }
+
+    // Dựng lại sidebar và nội dung theo trạng thái đăng nhập hiện tại
+    private void buildLayout() {
+        account = SessionManager.isLoggedIn() ? SessionManager.getCurrentAccount() : null;
+        activeButton = null;
+
+        getContentPane().removeAll();
+        add(buildSideBar(), BorderLayout.WEST);
+        add(buildContentArea(), BorderLayout.CENTER);
+        cardLayout.show(contentArea, "Tour");
+
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Chạy action ngay nếu đã đăng nhập; nếu chưa thì mở hộp thoại đăng nhập,
+     * đăng nhập thành công thì dựng lại giao diện theo quyền mới rồi mới chạy action.
+     */
+    public static void requireLogin(Component source, Runnable action) {
+        if (SessionManager.isLoggedIn()) {
+            action.run();
+            return;
+        }
+
+        // source có thể chính là MainFrame (nút ở sidebar), khi đó getWindowAncestor trả về null
+        Window owner = source instanceof Window window
+                ? window
+                : SwingUtilities.getWindowAncestor(source);
+        Login login = new Login(owner, () -> {
+            if (owner instanceof MainFrame mainFrame) {
+                mainFrame.buildLayout();
+            }
+            action.run();
+        });
+        login.setVisible(true);
     }
 
     private JPanel buildSideBar(){
@@ -98,15 +132,23 @@ public class MainFrame extends JFrame {
             sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
         }
 
-        sidebar.add(createMenuButton("Thông tin cá nhân", "ThongTinCaNhan", null));
-        sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
+        if (SessionManager.isLoggedIn()) {
+            sidebar.add(createMenuButton("Thông tin cá nhân", "ThongTinCaNhan", null));
+            sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
+        }
 
         sidebar.add(Box.createVerticalGlue());
 
-        JButton logoutBtn = createMenuButton("Đăng xuất", null, UIColors.LOGOUT_BACKGROUND);
-        logoutBtn.addActionListener(e -> handleLogout());
+        JButton authBtn;
+        if (SessionManager.isLoggedIn()) {
+            authBtn = createMenuButton("Đăng xuất", null, UIColors.LOGOUT_BACKGROUND);
+            authBtn.addActionListener(e -> handleLogout());
+        } else {
+            authBtn = createMenuButton("Đăng nhập", null, UIColors.LOGOUT_BACKGROUND);
+            authBtn.addActionListener(e -> requireLogin(this, () -> {}));
+        }
 
-        sidebar.add(logoutBtn);
+        sidebar.add(authBtn);
 
         return sidebar;
     }
@@ -150,6 +192,11 @@ public class MainFrame extends JFrame {
             contentArea.add(new StatisticsPanel(), "ThongKe");
         }
 
+
+        // Khách chưa đăng nhập không có trang thông tin cá nhân
+        if (account == null) {
+            return contentArea;
+        }
 
         CustomerDTO customerDTO = null;
         StaffDTO staffDTO = null;
@@ -220,14 +267,7 @@ public class MainFrame extends JFrame {
     }
 
     private void handleLogout() {
-        try {
-            SessionManager.class.getMethod("dangXuat").invoke(null);
-        } catch (Exception ignored) {}
-
-        SwingUtilities.invokeLater(() -> {
-            Login login = new Login();
-            login.setVisible(true);
-            this.dispose();
-        });
+        SessionManager.logoutAccount();
+        buildLayout();
     }
 }

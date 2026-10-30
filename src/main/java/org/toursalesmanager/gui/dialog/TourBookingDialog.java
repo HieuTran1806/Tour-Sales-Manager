@@ -210,6 +210,8 @@ public class TourBookingDialog extends JDialog {
         add(southPanel, BorderLayout.SOUTH);
 
         initEvents();
+        // Combo tự chọn sẵn kế hoạch đầu tiên nhưng không bắn sự kiện, nên điền giá vé ngay từ đầu
+        handleTourPlanChanged();
         pack();
         setLocationRelativeTo(null);
     }
@@ -228,10 +230,6 @@ public class TourBookingDialog extends JDialog {
     }
 
     private void initEvents() {
-        saveBtn.addActionListener(e ->
-                handleSave()
-        );
-
         closeBtn.addActionListener(e ->
                 dispose()
         );
@@ -268,28 +266,20 @@ public class TourBookingDialog extends JDialog {
         saveBtn.addActionListener(v -> {
             // get data
             String idCustomer = txtIdCustomer.getText().trim();
-            String firstName = txtFirstName.getText().trim();
-            String lastName = txtLastName.getText().trim();
             LocalDateTime bookingDate = LocalDateTime.now();
-            int tickets = Integer.parseInt(txtTickets.getText().trim());
-            BigDecimal price = BigDecimal.valueOf(Long.parseLong(txtPrice.getText().trim()));
             String note = txtNote.getText().trim();
 
-            String idTourPlan;
             try {
-                idTourPlan = getSelectedTourPlanId();
-            } catch (ValidationException e) {
-                throw new RuntimeException(e);
-            }
-            if(txtPrice.getText().trim().isEmpty()){
-                BigDecimal gia = tourBookingBUS.getPriceByIdTourPlan(idTourPlan);
-                txtPrice.setText(String.valueOf(gia));
-            }
-            BigDecimal giaVe = BigDecimal.valueOf(Long.parseLong(txtPrice.getText().trim()));
-
-            try {
+                String idTourPlan = getSelectedTourPlanId();
                 validateIdTourPlan(idTourPlan);
                 validateCustomerId(idCustomer);
+
+                int tickets = parseTickets();
+                BigDecimal price = tourBookingBUS.getPriceByIdTourPlan(idTourPlan);
+                if (price == null) {
+                    throw new ValidationException("Kế hoạch tour này chưa có giá vé");
+                }
+                txtPrice.setText(price.toPlainString());
 
                 BigDecimal total = price.multiply(BigDecimal.valueOf(tickets));
                 String status = getSelectedStatus();
@@ -321,9 +311,28 @@ public class TourBookingDialog extends JDialog {
                         "Lỗi nhập liệu",
                         JOptionPane.ERROR_MESSAGE
                 );
-                return;
+            } catch (IllegalArgumentException | IllegalStateException | SecurityException exception) {
+                // Lỗi nghiệp vụ từ BUS (thiếu quyền, sai mã khách hàng, ...)
+                JOptionPane.showMessageDialog(
+                        this,
+                        exception.getMessage(),
+                        "Không thể lưu phiếu đặt",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         });
+    }
+
+    private int parseTickets() throws ValidationException {
+        try {
+            int tickets = Integer.parseInt(txtTickets.getText().trim());
+            if (tickets <= 0) {
+                throw new ValidationException("Số lượng vé phải lớn hơn 0");
+            }
+            return tickets;
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Số lượng vé phải là số nguyên dương");
+        }
     }
 
 
@@ -496,7 +505,7 @@ public class TourBookingDialog extends JDialog {
     }
 
     private String getSelectedStatus(){
-        return Objects.requireNonNull(tourPlanCombo.getSelectedItem()).toString();
+        return Objects.requireNonNull(tourBookingStatusCombo.getSelectedItem()).toString();
     }
 
     private void loadCustomerInformation(String customerId) {

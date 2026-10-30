@@ -5,12 +5,15 @@ import org.toursalesmanager.bus.TourBUS;
 import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourDTO;
 import org.toursalesmanager.enums.Permission;
+import org.toursalesmanager.enums.Role;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.TourDetailDialog;
 import org.toursalesmanager.gui.dialog.TourDiaLog;
 import org.toursalesmanager.gui.dialog.CustomerTourBookingDialog;
+import org.toursalesmanager.gui.dialog.TourBookingDialog;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
+import org.toursalesmanager.gui.MainFrame;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -131,7 +134,7 @@ public class TourPanel extends JPanel {
         southPanel.add(detailBtn);
 
         booking();
-        bookingBtn.setVisible(SessionManager.hasPermission(Permission.CREATE_BOOKING));
+        bookingBtn.setVisible(SessionManager.canRequestBooking());
         southPanel.add(bookingBtn);
 
         refresh();
@@ -282,9 +285,33 @@ public class TourPanel extends JPanel {
                 int modelRow = table.convertRowIndexToModel(row);
                 selectedTourId = tableModel.getValueAt(modelRow, 0).toString();
             }
-            CustomerTourBookingDialog dialog = new CustomerTourBookingDialog(
-                    null, true, new TourPlanBUS(), null, selectedTourId);
-            dialog.setVisible(true);
+
+            final String selectedTourIdForDialog = selectedTourId;
+            final Frame parentFrame = (this.getTopLevelAncestor() instanceof Frame frame)
+                    ? frame
+                    : null;
+
+            // Sau khi đăng nhập, MainFrame dựng lại panel mới nên dùng parentFrame thay vì this
+            MainFrame.requireLogin(this, () -> {
+                if (!SessionManager.hasPermission(Permission.CREATE_BOOKING)) {
+                    JOptionPane.showMessageDialog(parentFrame,
+                            "Tài khoản hiện tại không có quyền đặt tour.",
+                            "Không đủ quyền",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                if (SessionManager.hasRole(Role.CUSTOMER)) {
+                    CustomerTourBookingDialog dialog = new CustomerTourBookingDialog(
+                            parentFrame, true, new TourPlanBUS(), null, selectedTourIdForDialog);
+                    dialog.setVisible(true);
+                } else {
+                    // Admin/nhân viên tạo phiếu đặt hộ khách hàng
+                    TourBookingDialog dialog = new TourBookingDialog(
+                            parentFrame, true, TourBookingDialog.Mode.ADD, null, new TourPlanBUS());
+                    dialog.setVisible(true);
+                }
+            });
         });
     }
 
