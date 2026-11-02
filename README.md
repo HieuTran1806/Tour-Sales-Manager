@@ -279,7 +279,7 @@ Users find tour information, login button at the left-bottom corner, show remain
 
 Enter email to form -> service send OTP to email -> authorize  
 7. View tour information 
-<img width="778" height="532" alt="TourUI" src="https://github.com/user-attachments/assets/2b8d0ee1-0031-4014-9e41-54ecaf4259dc" /> 
+<img width="959" height="539" alt="TourUI" src="https://github.com/user-attachments/assets/afddb3a9-8c92-435b-bfe9-b0d0c1d36922" />
 
 8. View tour type information
 <img width="957" height="539" alt="TourTypeUI" src="https://github.com/user-attachments/assets/67c546e5-3464-42c7-b0ff-3317afb90e29" />
