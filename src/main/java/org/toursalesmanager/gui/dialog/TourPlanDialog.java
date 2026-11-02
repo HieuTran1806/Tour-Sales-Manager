@@ -182,7 +182,12 @@ public class TourPlanDialog extends JDialog {
 
         // load idStaff
         String idStaff = tourPlanDTO.getIdTourGuide();
-        cbStaff.setSelectedItem(idStaff);
+        for (int i = 0; i < cbStaff.getItemCount(); i++) {
+            if (Objects.equals(cbStaff.getItemAt(i).getIdStaff(), idStaff)) {
+                cbStaff.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 
     private void addTicketCountListener() {
@@ -321,9 +326,17 @@ public class TourPlanDialog extends JDialog {
 
                     boolean validated = validatedForm(tourPlanDTO);
                     if (validated) {
-                        tourPlanBUS.editKeHoachTour(tourPlanDTO); // edit by keHoachTourBus
-                        JOptionPane.showMessageDialog(this, "Đã sửa ");
-                        dispose();
+                        if (tourPlanBUS.editKeHoachTour(tourPlanDTO)) {
+                            JOptionPane.showMessageDialog(this, "Đã sửa ");
+                            dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Không thể sửa kế hoạch tour.",
+                                    "Lỗi",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                        }
                     }
                 }
             } catch (ValidationException validationException) {

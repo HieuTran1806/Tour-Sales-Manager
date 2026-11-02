@@ -110,23 +110,21 @@ public class TourPlanDAO {
 
     //edit
     public boolean editKeHoachTour(TourPlanDTO t){
-        String id = t.getIdTour();
+        String sql = "update kehoachtour set ngaykhoihanh = ?, ngayketthuc = ?, tongsove = ?, tongchidukien = ?, "
+                + "soveconlai = ?, trangthai = ?, matour = ?, manvhd = ? where makhtour = ?";
 
-        try{
-            String qry = "update kehoachtour set ";
-            qry += "ngaykhoihanh = " + "'" + t.getDepartureDate() + "'";
-            qry += ",ngayketthuc = " + "'" + t.getEndDate() + "'";
-            qry += ",tongsove = " + "'" + t.getTickets() + "'";
-            qry += ",tongchidukien = " + "'" + t.getEstimatedCost() + "'";
-            qry += ",soveconlai = " + "'" + t.getRemainingTickets() + "'";
-            qry += ",trangthai = " + "'" + t.getStatus() + "'";
-            qry += ",matour = " + "'" + t.getIdTour() + "'";
-            qry += ",manvhd = " + "'" + t.getIdTourGuide() + "'";
-            qry += "where makhtour = '" + id + "';";
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(t.getDepartureDate()));
+            ps.setDate(2, Date.valueOf(t.getEndDate()));
+            ps.setInt(3, t.getTickets());
+            ps.setBigDecimal(4, t.getEstimatedCost());
+            ps.setInt(5, t.getRemainingTickets());
+            ps.setString(6, t.getStatus());
+            ps.setString(7, t.getIdTour());
+            ps.setString(8, t.getIdTourGuide());
+            ps.setString(9, t.getIdTourPlan());
 
-            st = c.createStatement();
-            st.executeUpdate(qry);
-            return true;
+            return ps.executeUpdate() > 0;
         }catch (SQLException e){
             e.printStackTrace();
             return false;

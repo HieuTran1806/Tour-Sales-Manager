@@ -14,7 +14,9 @@ import org.toursalesmanager.gui.panel.*;
 import org.toursalesmanager.login.SessionManager;
 
 import java.awt.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.swing.*;
@@ -27,6 +29,7 @@ public class MainFrame extends JFrame {
     CardLayout cardLayout;
     JPanel contentArea;
     JButton activeButton;
+    final Map<String, JButton> menuButtons = new HashMap<>();
 
     AccountDTO account;
 
@@ -64,6 +67,7 @@ public class MainFrame extends JFrame {
     private void buildLayout() {
         account = SessionManager.isLoggedIn() ? SessionManager.getCurrentAccount() : null;
         activeButton = null;
+        menuButtons.clear();
 
         getContentPane().removeAll();
         add(buildSideBar(), BorderLayout.WEST);
@@ -95,6 +99,28 @@ public class MainFrame extends JFrame {
             action.run();
         });
         login.setVisible(true);
+    }
+
+    // Chuyển sang trang kế hoạch tour và lọc sẵn theo mã tour
+    public void showTourPlans(String tourId) {
+        for (Component component : contentArea.getComponents()) {
+            if (component instanceof TourPlanPanel tourPlanPanel) {
+                tourPlanPanel.selectTour(tourId);
+                cardLayout.show(contentArea, "KeHoachTour");
+                setActiveButton(menuButtons.get("KeHoachTour"));
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(this, "Bạn không có quyền xem kế hoạch tour.");
+    }
+
+    private void setActiveButton(JButton button) {
+        JButton previous = activeButton;
+        activeButton = button;
+        if (previous != null) // fix color painted
+            previous.repaint();
+        if (button != null)
+            button.repaint();
     }
 
     private JPanel buildSideBar(){
@@ -263,15 +289,14 @@ public class MainFrame extends JFrame {
         btn.setBorder(BorderFactory.createEmptyBorder(0, 24, 0, 0));
 
         btn.addActionListener(e -> {
-            if(activeButton != null) // fix color painted
-                activeButton.repaint();
-
-            activeButton = btn;
-            btn.repaint();
+            setActiveButton(btn);
             if(card != null) {
                 cardLayout.show(contentArea, card);
             }
         });
+        if (card != null) {
+            menuButtons.put(card, btn);
+        }
         return btn;
     }
 

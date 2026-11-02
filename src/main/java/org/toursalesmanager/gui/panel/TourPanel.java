@@ -4,15 +4,11 @@ import org.toursalesmanager.gui.helper.TableSelectionHelper;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.TourBUS;
-import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourDTO;
 import org.toursalesmanager.enums.Permission;
-import org.toursalesmanager.enums.Role;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.TourDetailDialog;
 import org.toursalesmanager.gui.dialog.TourDiaLog;
-import org.toursalesmanager.gui.dialog.CustomerTourBookingDialog;
-import org.toursalesmanager.gui.dialog.TourBookingDialog;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
 import org.toursalesmanager.gui.MainFrame;
@@ -280,40 +276,17 @@ public class TourPanel extends JPanel {
 
     private void booking() {
         bookingBtn = ButtonFactory.create("Chọn lịch & đặt tour", UIColors.BOOKING);
+        bookingBtn.setEnabled(false);
+        // Chuyển sang trang kế hoạch tour của tour đang chọn để chọn lịch rồi mới đặt
         bookingBtn.addActionListener(e -> {
-            int row = table.getSelectedRow();
-            String selectedTourId = null;
-            if (row >= 0) {
-                int modelRow = table.convertRowIndexToModel(row);
-                selectedTourId = tableModel.getValueAt(modelRow, 0).toString();
+            String maTour = getSelectedTourId();
+            if (maTour == null) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn tour cần đặt");
+                return;
             }
-
-            final String selectedTourIdForDialog = selectedTourId;
-            final Frame parentFrame = (this.getTopLevelAncestor() instanceof Frame frame)
-                    ? frame
-                    : null;
-
-            // Sau khi đăng nhập, MainFrame dựng lại panel mới nên dùng parentFrame thay vì this
-            MainFrame.requireLogin(this, () -> {
-                if (!SessionManager.hasPermission(Permission.CREATE_BOOKING)) {
-                    JOptionPane.showMessageDialog(parentFrame,
-                            "Tài khoản hiện tại không có quyền đặt tour.",
-                            "Không đủ quyền",
-                            JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                if (SessionManager.hasRole(Role.CUSTOMER)) {
-                    CustomerTourBookingDialog dialog = new CustomerTourBookingDialog(
-                            parentFrame, true, new TourPlanBUS(), null, selectedTourIdForDialog);
-                    dialog.setVisible(true);
-                } else {
-                    // Admin/nhân viên tạo phiếu đặt hộ khách hàng
-                    TourBookingDialog dialog = new TourBookingDialog(
-                            parentFrame, true, TourBookingDialog.Mode.ADD, null, new TourPlanBUS());
-                    dialog.setVisible(true);
-                }
-            });
+            if (SwingUtilities.getWindowAncestor(this) instanceof MainFrame mainFrame) {
+                mainFrame.showTourPlans(maTour);
+            }
         });
     }
 
@@ -344,7 +317,7 @@ public class TourPanel extends JPanel {
         TableSelectionHelper.bindButtons(table,
                 () -> SessionManager.hasPermission(Permission.MANAGE_TOUR),
                 deleteBtn, editBtn);
-        TableSelectionHelper.bindButtons(table, detailBtn);
+        TableSelectionHelper.bindButtons(table, detailBtn, bookingBtn);
     }
 
     private String getSelectedTourId() {

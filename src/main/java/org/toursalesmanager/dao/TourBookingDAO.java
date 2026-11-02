@@ -36,26 +36,46 @@ public class TourBookingDAO {
     }
 
 
+    // Lưu phiếu đặt và trừ số vé còn lại của kế hoạch tour trong cùng một transaction
     public boolean addTourBooking(TourBookingDTO dto) {
 
-        String sql = "INSERT INTO tourbooking (idCustomer, idTourPlan, bookingDate, tickets, price, costTotal, bookingStatus, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String reserveSql = "UPDATE kehoachtour SET soveconlai = soveconlai - ? WHERE makhtour = ? AND soveconlai >= ?";
+        String insertSql = "INSERT INTO tourbooking (idCustomer, idTourPlan, bookingDate, tickets, price, costTotal, bookingStatus, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = MyConnection.getConnection();
-             PreparedStatement pre = conn.prepareStatement(sql)) {
+        try (Connection conn = MyConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement reserve = conn.prepareStatement(reserveSql);
+                 PreparedStatement pre = conn.prepareStatement(insertSql)) {
 
-            // get data from form to insert to table
-            pre.setString(1, dto.getIdCustomer().trim());
-            pre.setString(2, dto.getIdTourPlan().trim());
-            pre.setTimestamp(3, Timestamp.valueOf(dto.getBookingDate()));
-            pre.setInt(4, dto.getTickets());
-            pre.setBigDecimal(5, dto.getPrice());
-            pre.setBigDecimal(6, dto.getCostTotal());
-            pre.setString(7, dto.getBookingStatus().trim());
-            pre.setString(8, dto.getNote().trim());
+                reserve.setInt(1, dto.getTickets());
+                reserve.setString(2, dto.getIdTourPlan().trim());
+                reserve.setInt(3, dto.getTickets());
+                // Không đủ vé (hoặc người khác vừa đặt hết) thì không lưu phiếu
+                if (reserve.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false;
+                }
 
-            int rows = pre.executeUpdate();
-            return rows > 0;
+                // get data from form to insert to table
+                pre.setString(1, dto.getIdCustomer().trim());
+                pre.setString(2, dto.getIdTourPlan().trim());
+                pre.setTimestamp(3, Timestamp.valueOf(dto.getBookingDate()));
+                pre.setInt(4, dto.getTickets());
+                pre.setBigDecimal(5, dto.getPrice());
+                pre.setBigDecimal(6, dto.getCostTotal());
+                pre.setString(7, dto.getBookingStatus().trim());
+                pre.setString(8, dto.getNote().trim());
 
+                if (pre.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false;
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -155,38 +175,130 @@ public class TourBookingDAO {
     //     return results;
     // }
 
-    public boolean deleteTourBooking(String MaKHTour, String MaKHang) {
-        String sql = "DELETE FROM tourbooking WHERE MaKHTour = ? AND MaKHang = ?";
-        try (Connection conn = MyConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, MaKHTour);
-            pstmt.setString(2, MaKHang);
-            return pstmt.executeUpdate() > 0;
+    // Xóa phiếu đặt và hoàn lại số vé phiếu đang giữ cho kế hoạch tour trong cùng một transaction
+    public boolean deleteTourBooking(int idTourBooking) {
+        String selectSql = "SELECT idTourPlan, tickets, bookingStatus FROM tourbooking WHERE idTourBooking = ? FOR UPDATE";
+        String releaseSql = "UPDATE kehoachtour SET soveconlai = soveconlai + ? WHERE makhtour = ?";
+        String deleteSql = "DELETE FROM tourbooking WHERE idTourBooking = ?";
+
+        try (Connection conn = MyConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement select = conn.prepareStatement(selectSql);
+                 PreparedStatement release = conn.prepareStatement(releaseSql);
+                 PreparedStatement delete = conn.prepareStatement(deleteSql)) {
+
+                String plan;
+                int held;
+                select.setInt(1, idTourBooking);
+                try (ResultSet rs = select.executeQuery()) {
+                    if (!rs.next()) {
+                        conn.rollback();
+                        return false;
+                    }
+                    plan = rs.getString("idTourPlan");
+                    held = heldTickets(rs.getString("bookingStatus"), rs.getInt("tickets"));
+                }
+
+                if (held > 0) {
+                    release.setInt(1, held);
+                    release.setString(2, plan);
+                    release.executeUpdate();
+                }
+
+                delete.setInt(1, idTourBooking);
+                if (delete.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false;
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
 
+    // Phiếu đã hủy không còn giữ chỗ trên kế hoạch tour
+    private static final String CANCELLED_STATUS = "Đã hủy";
+
+    private static int heldTickets(String status, int tickets) {
+        return status != null && CANCELLED_STATUS.equals(status.trim()) ? 0 : tickets;
+    }
+
+    // Cập nhật phiếu đặt và điều chỉnh số vé còn lại của kế hoạch tour trong cùng một transaction:
+    // hoàn số vé phiếu cũ đang giữ cho kế hoạch cũ, rồi giữ số vé mới trên kế hoạch mới.
     public boolean updateTourBooking(TourBookingDTO dto) {
-        String sql = "UPDATE tourbooking SET idCustomer = ?, idTourPlan = ?, bookingDate = ?, tickets = ?" +
-                "price = ?, costTotal = ?, bookingStatus = ?, note; = ? WHERE idTourBooking = ?";
-        try (Connection conn = MyConnection.getConnection();
-             PreparedStatement pre = conn.prepareStatement(sql)) {
+        String selectOldSql = "SELECT idTourPlan, tickets, bookingStatus FROM tourbooking WHERE idTourBooking = ? FOR UPDATE";
+        String releaseSql = "UPDATE kehoachtour SET soveconlai = soveconlai + ? WHERE makhtour = ?";
+        String reserveSql = "UPDATE kehoachtour SET soveconlai = soveconlai - ? WHERE makhtour = ? AND soveconlai >= ?";
+        String updateSql = "UPDATE tourbooking SET idCustomer = ?, idTourPlan = ?, bookingDate = ?, tickets = ?, " +
+                "price = ?, costTotal = ?, bookingStatus = ?, note = ? WHERE idTourBooking = ?";
 
+        try (Connection conn = MyConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement selectOld = conn.prepareStatement(selectOldSql);
+                 PreparedStatement release = conn.prepareStatement(releaseSql);
+                 PreparedStatement reserve = conn.prepareStatement(reserveSql);
+                 PreparedStatement pre = conn.prepareStatement(updateSql)) {
 
-            pre.setString(1, dto.getIdCustomer().trim());
-            pre.setString(2, dto.getIdTourPlan().trim());
-            pre.setTimestamp(3, Timestamp.valueOf(dto.getBookingDate()));
-            pre.setInt(4, dto.getTickets());
-            pre.setBigDecimal(5, dto.getPrice());
-            pre.setBigDecimal(6, dto.getCostTotal());
-            pre.setString(7, dto.getBookingStatus().trim());
-            pre.setString(8, dto.getNote().trim());
+                // Đọc và khóa phiếu cũ để tránh hai người sửa cùng lúc
+                String oldPlan;
+                int oldHeld;
+                selectOld.setInt(1, dto.getIdTourBooking());
+                try (ResultSet rs = selectOld.executeQuery()) {
+                    if (!rs.next()) {
+                        conn.rollback();
+                        return false;
+                    }
+                    oldPlan = rs.getString("idTourPlan");
+                    oldHeld = heldTickets(rs.getString("bookingStatus"), rs.getInt("tickets"));
+                }
 
-            int rowsAffected = pre.executeUpdate();
+                String newPlan = dto.getIdTourPlan().trim();
+                int newHeld = heldTickets(dto.getBookingStatus(), dto.getTickets());
 
-            return rowsAffected > 0;
+                // Hoàn vé cho kế hoạch cũ
+                if (oldHeld > 0) {
+                    release.setInt(1, oldHeld);
+                    release.setString(2, oldPlan);
+                    release.executeUpdate();
+                }
+
+                // Giữ vé trên kế hoạch mới; không đủ vé thì hủy toàn bộ thay đổi
+                if (newHeld > 0) {
+                    reserve.setInt(1, newHeld);
+                    reserve.setString(2, newPlan);
+                    reserve.setInt(3, newHeld);
+                    if (reserve.executeUpdate() == 0) {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+
+                pre.setString(1, dto.getIdCustomer().trim());
+                pre.setString(2, newPlan);
+                pre.setTimestamp(3, Timestamp.valueOf(dto.getBookingDate()));
+                pre.setInt(4, dto.getTickets());
+                pre.setBigDecimal(5, dto.getPrice());
+                pre.setBigDecimal(6, dto.getCostTotal());
+                pre.setString(7, dto.getBookingStatus().trim());
+                pre.setString(8, dto.getNote() == null ? "" : dto.getNote().trim());
+                pre.setInt(9, dto.getIdTourBooking());
+
+                if (pre.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false;
+                }
+                conn.commit();
+                return true;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

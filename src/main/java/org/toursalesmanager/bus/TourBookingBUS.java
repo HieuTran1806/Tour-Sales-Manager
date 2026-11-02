@@ -58,6 +58,12 @@ public class TourBookingBUS {
             throw new IllegalStateException("Không tìm thấy giá của kế hoạch tour đã chọn");
         }
 
+        TourPlanDTO plan = findTourPlan(dto.getIdTourPlan());
+        if (dto.getTickets() > plan.getRemainingTickets()) {
+            throw new IllegalArgumentException(
+                    "Số vé yêu cầu vượt quá số vé còn lại (" + plan.getRemainingTickets() + ")");
+        }
+
         dto.setIdCustomer(customerId);
         dto.setBookingDate(dto.getBookingDate() == null ? LocalDateTime.now() : dto.getBookingDate());
         dto.setPrice(price);
@@ -89,15 +95,9 @@ public class TourBookingBUS {
             throw new IllegalArgumentException("Kế hoạch tour và số vé không hợp lệ");
         }
 
-        TourPlanDTO plan = new TourPlanBUS().getAllKeHoachTours().stream()
-                .filter(item -> idTourPlan.equals(item.getIdTourPlan()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy kế hoạch tour"));
+        TourPlanDTO plan = findTourPlan(idTourPlan);
         if (plan.getDepartureDate() == null || plan.getDepartureDate().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Không thể đặt kế hoạch tour đã khởi hành");
-        }
-        if (tickets > plan.getRemainingTickets()) {
-            throw new IllegalArgumentException("Số vé yêu cầu vượt quá số vé còn lại");
         }
 
         return addTourBooking(new TourBookingDTO(
@@ -112,6 +112,13 @@ public class TourBookingBUS {
         ));
     }
 
+    private TourPlanDTO findTourPlan(String idTourPlan) {
+        return new TourPlanBUS().getAllKeHoachTours().stream()
+                .filter(item -> idTourPlan.equals(item.getIdTourPlan()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy kế hoạch tour"));
+    }
+
     private String getCurrentCustomerId(AccountDTO account) {
         String customerId = account.getIdCustomer();
         if (customerId == null || customerId.isBlank()) {
@@ -120,19 +127,17 @@ public class TourBookingBUS {
         return customerId;
     }
 
-    public void deleteTourBooking(String maKHTour, String maKHang) {
+    public boolean deleteTourBooking(int idTourBooking) {
         if (!SessionManager.isAdmin()) {
             throw new SecurityException("Chỉ quản trị viên mới được xóa phiếu đặt tour");
         }
-        try {
-            if (dsKHKHTour == null) {
-                return;
-            }
-            tourBookingDao.deleteTourBooking(maKHTour, maKHang);
-            dsKHKHTour.removeIf(kht -> kht.getIdTourPlan().equals(maKHTour) && kht.getIdCustomer().equals(maKHang));
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (!tourBookingDao.deleteTourBooking(idTourBooking)) {
+            return false;
         }
+        if (dsKHKHTour != null) {
+            dsKHKHTour.removeIf(kht -> kht.getIdTourBooking() == idTourBooking);
+        }
+        return true;
     }
 
     // have to update again
@@ -140,14 +145,20 @@ public class TourBookingBUS {
         if (!SessionManager.hasPermission(Permission.UPDATE_BOOKING)) {
             throw new SecurityException("Bạn không có quyền sửa phiếu đặt tour");
         }
+        if (kht != null && kht.getTickets() <= 0) {
+            throw new IllegalArgumentException("Số vé phải lớn hơn 0");
+        }
         try {
             if (dsKHKHTour == null || kht == null || kht.getIdTourPlan() == null || kht.getIdTourPlan().isEmpty()) {
                 return false;
             }
+            // So khớp theo khóa chính, vì mã khách hàng / kế hoạch tour có thể vừa bị sửa
             for (int i = 0; i < dsKHKHTour.size(); i++) {
                 TourBookingDTO existingKHT = dsKHKHTour.get(i);
-                if (existingKHT.getIdTourPlan().equals(kht.getIdTourPlan()) && existingKHT.getIdCustomer().equals(kht.getIdCustomer())) {
-                    tourBookingDao.updateTourBooking(kht);
+                if (existingKHT.getIdTourBooking() == kht.getIdTourBooking()) {
+                    if (!tourBookingDao.updateTourBooking(kht)) {
+                        return false;
+                    }
                     dsKHKHTour.set(i, kht);
                     return true;
                 }
@@ -157,6 +168,18 @@ public class TourBookingBUS {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public TourBookingDTO findTourBookingById(int idTourBooking) {
+        if (dsKHKHTour == null) {
+            return null;
+        }
+        for (TourBookingDTO kht : dsKHKHTour) {
+            if (kht.getIdTourBooking() == idTourBooking) {
+                return kht;
+            }
+        }
+        return null;
     }
 
     public TourBookingDTO findTourBookingByIdTourPlan(String maKHTour) {
@@ -224,6 +247,8 @@ public class TourBookingBUS {
     }
 
     public List<TourBookingDTO> getVisibleBookings(){
-        return getAllTourBooking();
+        // Làm mới cache để các thao tác tìm/sửa luôn dựa trên dữ liệu mới nhất
+        dsKHKHTour = new ArrayList<>(getAllTourBooking());
+        return dsKHKHTour;
     }
 }

@@ -6,6 +6,8 @@ import org.toursalesmanager.gui.helper.WindowHelper;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -20,7 +22,6 @@ import org.toursalesmanager.bus.TourPlanBUS;
 import org.toursalesmanager.dto.TourBookingDTO;
 import org.toursalesmanager.enums.Permission;
 import org.toursalesmanager.enums.Role;
-import org.toursalesmanager.gui.dialog.CustomerTourBookingDialog;
 import org.toursalesmanager.gui.dialog.TourBookingDialog;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.UIColors;
@@ -46,13 +47,10 @@ public class TourBookingPanel extends JPanel {
     TourBookingBUS tourBookingBus;
     TourPlanBUS tourPlanBUS;
     TourBookingDialog tourBookingDialog;
-    CustomerTourBookingDialog customerTourBookingDialog;
 
     public TourBookingPanel()  {
         tourBookingBus = new TourBookingBUS();
         tourPlanBUS = new TourPlanBUS();
-
-        scrollPane = new JScrollPane();
 
         initComponents();
         boolean customer = SessionManager.hasRole(Role.CUSTOMER);
@@ -62,6 +60,14 @@ public class TourBookingPanel extends JPanel {
         deleteBtn.setVisible(!customer && SessionManager.isAdmin());
         loadTourBookingData(tourBookingBus.getVisibleBookings());
         hasSelectedRow();
+
+        // Phiếu có thể được tạo từ trang khác (kế hoạch tour) nên tải lại mỗi khi mở trang
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(ComponentEvent e) {
+                loadTourBookingData(tourBookingBus.getVisibleBookings());
+            }
+        });
     }
 
     private void initComponents() {
@@ -132,21 +138,17 @@ public class TourBookingPanel extends JPanel {
 
         northPanel.add(searchPanel, BorderLayout.CENTER);
 
+        // Phải tạo bảng trước khi add scrollPane, nếu không giao diện chỉ có scrollPane rỗng
+        initTable();
 
         add(northPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
 
-        initTable();
-
     }// </editor-fold>//GEN-END:initComponents
     private void jComboBox2ActionPerformed(ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBox2ActionPerformed
-
-    private JButton createBtn(String text, Color color){
-        return ButtonFactory.create(text, color);
-    }
 
     public void initTable(){
         String[] columns = {"Mã phiếu đặt", "Mã khách hàng", "Mã kế hoạch tour", "Thời gian đặt", "Số vé", "Đơn giá", "Tổng tiền", "Trạng thái", "Ghi chú"};
@@ -164,23 +166,17 @@ public class TourBookingPanel extends JPanel {
 
 
     private void setAddBtn(){
-        addBtn = createBtn("Thêm", UIColors.ADD);
+        addBtn = ButtonFactory.create("Thêm", UIColors.ADD);
         addBtn.addActionListener(v -> {
-            if (SessionManager.hasRole(Role.CUSTOMER)) {
-                customerTourBookingDialog = new CustomerTourBookingDialog(
-                        WindowHelper.getParentFrame(this), true, tourPlanBUS, null, null);
-                customerTourBookingDialog.setVisible(true);
-            } else {
-                tourBookingDialog = new TourBookingDialog(
-                        WindowHelper.getParentFrame(this), true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
-                tourBookingDialog.setVisible(true);
-            }
+            tourBookingDialog = new TourBookingDialog(
+                    WindowHelper.getParentFrame(this), true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
+            tourBookingDialog.setVisible(true);
             loadTourBookingData(tourBookingBus.getVisibleBookings());
         });
     }
 
     private void setDeleteBtn(){
-        deleteBtn = createBtn("Xóa", UIColors.DELETE);
+        deleteBtn = ButtonFactory.create("Xóa", UIColors.DELETE);
         deleteBtn.setEnabled(false);
         deleteBtn.addActionListener(v -> {
             if (!SessionManager.isAdmin()) {
@@ -191,17 +187,18 @@ public class TourBookingPanel extends JPanel {
             int result = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa?", "Xác nhận", JOptionPane.YES_NO_OPTION);
             if (result == JOptionPane.YES_OPTION && i >= 0) {
                 int modelRow = table.convertRowIndexToModel(i);
-                String maKHang = (String) tableModel.getValueAt(modelRow, 1);
-                String maKHTour = (String) tableModel.getValueAt(modelRow, 2);
-                TourBookingBUS tourBookingBus = new TourBookingBUS();
-                tourBookingBus.deleteTourBooking(maKHTour, maKHang);
+                int idTourBooking = (Integer) tableModel.getValueAt(modelRow, 0);
+                if (!tourBookingBus.deleteTourBooking(idTourBooking)) {
+                    JOptionPane.showMessageDialog(this, "Không thể xóa phiếu đặt tour.",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
                 loadTourBookingData(tourBookingBus.getVisibleBookings());
             }
         });
     }
 
     private void setEditBtn(){
-        editBtn = createBtn("Sửa", UIColors.EDIT);
+        editBtn = ButtonFactory.create("Sửa", UIColors.EDIT);
         editBtn.setEnabled(false);
         editBtn.addActionListener(v -> {
             int row = table.getSelectedRow();
@@ -212,10 +209,9 @@ public class TourBookingPanel extends JPanel {
 
             if (row >= 0) {
                 int modelRow = table.convertRowIndexToModel(row);
-                String maKHang = (String) tableModel.getValueAt(modelRow, 1);
-                String maKHTour = (String) tableModel.getValueAt(modelRow, 2);
-                TourBookingDTO khangkht = tourBookingBus.findTourBookingByIdTourPlan(maKHTour);
-                if (khangkht != null && khangkht.getIdCustomer().equals(maKHang)) {
+                int idTourBooking = (Integer) tableModel.getValueAt(modelRow, 0);
+                TourBookingDTO khangkht = tourBookingBus.findTourBookingById(idTourBooking);
+                if (khangkht != null) {
                     tourBookingDialog = new TourBookingDialog(
                             WindowHelper.getParentFrame(this), true, TourBookingDialog.Mode.EDIT, khangkht, tourPlanBUS);
                     tourBookingDialog.setVisible(true);
@@ -227,7 +223,7 @@ public class TourBookingPanel extends JPanel {
     }
 
     private void setRefreshBtn(){
-        refreshBtn = createBtn("Làm mới", UIColors.REFRESH);
+        refreshBtn = ButtonFactory.create("Làm mới", UIColors.REFRESH);
         refreshBtn.addActionListener(v -> {
             loadTourBookingData(tourBookingBus.getVisibleBookings());
         });

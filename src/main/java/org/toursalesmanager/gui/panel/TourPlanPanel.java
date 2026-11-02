@@ -16,7 +16,6 @@ import org.toursalesmanager.gui.MainFrame;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.dialog.TourPlanDialog;
 import org.toursalesmanager.gui.dialog.TourBookingDialog;
-import org.toursalesmanager.gui.dialog.CustomerTourBookingDialog;
 import org.toursalesmanager.gui.helper.UIColors;
 import org.toursalesmanager.login.SessionManager;
 
@@ -50,7 +49,6 @@ public class TourPlanPanel extends JPanel {
     ArrayList<TourPlanDTO> lsKeHoachTours;
 
     TourBookingDialog tourBookingDialog;
-    CustomerTourBookingDialog customerTourBookingDialog;
 
     // formatter
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -164,6 +162,24 @@ public class TourPlanPanel extends JPanel {
         }
     }
 
+    // Chọn tour trong combo (tải lại danh sách tour để có cả tour mới thêm) và hiện kế hoạch của tour đó
+    public void selectTour(String maTour) {
+        toursModel = CBTourPresent();
+        cbTour.setModel(toursModel);
+        for (int i = 0; i < toursModel.getSize(); i++) {
+            TourDTO tour = toursModel.getElementAt(i);
+            if (tour.getIdTour().trim().equalsIgnoreCase(maTour.trim())) {
+                cbTour.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        TourDTO selectedTour = (TourDTO) cbTour.getSelectedItem();
+        if (selectedTour != null) {
+            loadTable(selectedTour.getIdTour());
+        }
+    }
+
     private DefaultComboBoxModel<TourDTO> CBTourPresent(){
         DefaultComboBoxModel<TourDTO> model;
         model = new DefaultComboBoxModel<>();
@@ -224,19 +240,19 @@ public class TourPlanPanel extends JPanel {
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (SessionManager.hasRole(Role.CUSTOMER)) {
-            customerTourBookingDialog = new CustomerTourBookingDialog(
-                    WindowHelper.getParentFrame(this), true, tourPlanBUS, planId, null);
-            customerTourBookingDialog.setVisible(true);
-            return;
-        }
-        if (planId == null) {
+        if (planId == null && !SessionManager.hasRole(Role.CUSTOMER)) {
             JOptionPane.showMessageDialog(owner, "Vui lòng chọn kế hoạch tour cần đặt.");
             return;
         }
         tourBookingDialog = new TourBookingDialog(
-                WindowHelper.getParentFrame(this), true, TourBookingDialog.Mode.ADD, null, tourPlanBUS);
+                WindowHelper.getParentFrame(this), true, TourBookingDialog.Mode.ADD, null, tourPlanBUS, planId);
         tourBookingDialog.setVisible(true);
+
+        // Cập nhật số vé còn lại sau khi đặt
+        TourDTO selectedTour = (TourDTO) cbTour.getSelectedItem();
+        if (selectedTour != null) {
+            loadTable(selectedTour.getIdTour());
+        }
     }
 
     private void delete(){
