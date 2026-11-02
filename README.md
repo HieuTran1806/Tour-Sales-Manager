@@ -262,15 +262,19 @@ git push origin main/your-feture-name
 
 # Design 
 
-# Demo features 
+# Demo features - UI 
 1. Đăng ký tài khoản khách hàng, đăng nhập, quên mật khẩu bằng OTP qua email.
-Main UI 
-<img width="959" height="539" alt="image" src="https://github.com/user-attachments/assets/f04477c5-dfd0-4050-bed1-7b10dfff4398" />
+Main UI
+Users find tour information, login button at the left-bottom corner, show remaining panels at the side bar.
+<img width="959" height="539" alt="MainUI" src="https://github.com/user-attachments/assets/868768a5-68c5-4ea7-93d2-216e01ef55de" />
+3. Login UI
+<img width="337" height="308" alt="LoginUI" src="https://github.com/user-attachments/assets/abc34769-661a-48b1-bb0a-62debc7bbf29" />
 
-3. Xem tour / kế hoạch tour khi chưa đăng nhập; đặt tour sau khi đăng nhập (trạng thái **Chờ xác nhận**).
-4. Quản lý tour, loại tour, kế hoạch tour và chi tiết kế hoạch tour, địa điểm, khách hàng, nhân viên, hóa đơn, khuyến mãi; mã tự tăng.
-5. Lịch khuyến mãi, thống kê, xuất Excel.
-6. Giao diện và thao tác hiển thị theo quyền; admin phân quyền riêng cho từng tài khoản trong trang **Phân quyền**.
+
+4. Xem tour / kế hoạch tour khi chưa đăng nhập; đặt tour sau khi đăng nhập (trạng thái **Chờ xác nhận**).
+5. Quản lý tour, loại tour, kế hoạch tour và chi tiết kế hoạch tour, địa điểm, khách hàng, nhân viên, hóa đơn, khuyến mãi; mã tự tăng.
+6. Lịch khuyến mãi, thống kê, xuất Excel.
+7. Giao diện và thao tác hiển thị theo quyền; admin phân quyền riêng cho từng tài khoản trong trang **Phân quyền**.
 
 
 # Developer
