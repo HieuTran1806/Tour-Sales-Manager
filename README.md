@@ -263,6 +263,7 @@ git push origin main/your-feture-name
 # Design 
 
 # Demo features - UI 
+All users 
 1. Main UI
 Users find tour information, login button at the left-bottom corner, show remaining panels at the side bar  
 <img width="959" height="539" alt="MainUI" src="https://github.com/user-attachments/assets/868768a5-68c5-4ea7-93d2-216e01ef55de" />
@@ -274,18 +275,34 @@ Users find tour information, login button at the left-bottom corner, show remain
 <img width="331" height="295" alt="RegisterForm" src="https://github.com/user-attachments/assets/8c6121f3-6e7d-4149-80f9-2dcad54328f9" />
 
 6. Forgot password form  
-<img width="194" height="92" alt="ForgotPassForm" src="https://github.com/user-attachments/assets/5db8a3c6-eafe-443a-918c-b6f07bbae0ff" />  
+<img width="194" height="92" alt="ForgotPassForm" src="https://github.com/user-attachments/assets/5db8a3c6-eafe-443a-918c-b6f07bbae0ff" />
+
 Enter email to form -> service send OTP to email -> authorize  
-7. View tour information (all users)  
-<img width="778" height="532" alt="TourUI" src="https://github.com/user-attachments/assets/2b8d0ee1-0031-4014-9e41-54ecaf4259dc" />  
-8. View tour plan information (all users)  
-<img width="950" height="538" alt="TourPlanUI" src="https://github.com/user-attachments/assets/d1fe849f-e6ae-423b-bd51-eb64b96be53c" />  
-9. View locations  
+7. View tour information 
+<img width="778" height="532" alt="TourUI" src="https://github.com/user-attachments/assets/2b8d0ee1-0031-4014-9e41-54ecaf4259dc" /> 
+
+8. View tour type information
+<img width="957" height="539" alt="TourTypeUI" src="https://github.com/user-attachments/assets/67c546e5-3464-42c7-b0ff-3317afb90e29" />
+
+9. View tour plan information 
+<img width="950" height="538" alt="TourPlanUI" src="https://github.com/user-attachments/assets/d1fe849f-e6ae-423b-bd51-eb64b96be53c" />
+
+10. View locations  
 <img width="956" height="536" alt="LocationUI" src="https://github.com/user-attachments/assets/b44c87e1-b894-4b21-bd9d-fbe4741ad8dc" />  
 
-10. Quản lý tour, loại tour, kế hoạch tour và chi tiết kế hoạch tour, địa điểm, khách hàng, nhân viên, hóa đơn, khuyến mãi; mã tự tăng.
-11. Lịch khuyến mãi, thống kê, xuất Excel.
-12. Giao diện và thao tác hiển thị theo quyền; admin phân quyền riêng cho từng tài khoản trong trang **Phân quyền**.
+11. View promotions
+<img width="953" height="538" alt="PromotionUI" src="https://github.com/user-attachments/assets/493e2fc7-6317-4319-af7a-e667b656d6e6" />
+
+12. Profile
+<img width="959" height="539" alt="ProfileUI" src="https://github.com/user-attachments/assets/5dadc589-3b42-4a5d-b1e3-53f1f30e913c" />
+
+Accountant 
+14. Statistics
+<img width="959" height="539" alt="Statictis" src="https://github.com/user-attachments/assets/371239dd-6ea6-48c8-810c-b424eab714e9" />
+
+Only Amin (admin full access) 
+13. Authorization UI 
+<img width="954" height="539" alt="AuthorizationUI" src="https://github.com/user-attachments/assets/a8789efc-900c-422a-b032-3f0f53b6ea81" />
 
 # Developer
 Trần Viết Hiếu 
