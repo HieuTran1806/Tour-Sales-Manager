@@ -264,28 +264,21 @@ git push origin main/your-feture-name
 
 # Demo features - UI 
 1. Main UI
-Users find tour information, login button at the left-bottom corner, show remaining panels at the side bar.
-
-<img width="959" height="539" alt="MainUI" src="https://github.com/user-attachments/assets/868768a5-68c5-4ea7-93d2-216e01ef55de" />
-3. Login UI.
-
-<img width="337" height="308" alt="LoginUI" src="https://github.com/user-attachments/assets/abc34769-661a-48b1-bb0a-62debc7bbf29" />
-4. Register form
-
-<img width="331" height="295" alt="RegisterForm" src="https://github.com/user-attachments/assets/8c6121f3-6e7d-4149-80f9-2dcad54328f9" />
-5. Forgot password form
-
-<img width="194" height="92" alt="ForgotPassForm" src="https://github.com/user-attachments/assets/5db8a3c6-eafe-443a-918c-b6f07bbae0ff" />
-Enter email to form -> service send OTP to email -> authorize
-6. View tour information (all users) 
-
-<img width="778" height="532" alt="TourUI" src="https://github.com/user-attachments/assets/2b8d0ee1-0031-4014-9e41-54ecaf4259dc" />
-7. View tour plan information (all users)
-
-<img width="950" height="538" alt="TourPlanUI" src="https://github.com/user-attachments/assets/d1fe849f-e6ae-423b-bd51-eb64b96be53c" />
-8. View locations
-
-<img width="956" height="536" alt="LocationUI" src="https://github.com/user-attachments/assets/b44c87e1-b894-4b21-bd9d-fbe4741ad8dc" />
+Users find tour information, login button at the left-bottom corner, show remaining panels at the side bar  
+<img width="959" height="539" alt="MainUI" src="https://github.com/user-attachments/assets/868768a5-68c5-4ea7-93d2-216e01ef55de" />  
+3. Login UI  
+<img width="337" height="308" alt="LoginUI" src="https://github.com/user-attachments/assets/abc34769-661a-48b1-bb0a-62debc7bbf29" />  
+4. Register form  
+<img width="331" height="295" alt="RegisterForm" src="https://github.com/user-attachments/assets/8c6121f3-6e7d-4149-80f9-2dcad54328f9" />  
+5. Forgot password form  
+<img width="194" height="92" alt="ForgotPassForm" src="https://github.com/user-attachments/assets/5db8a3c6-eafe-443a-918c-b6f07bbae0ff" />  
+Enter email to form -> service send OTP to email -> authorize  
+6. View tour information (all users)  
+<img width="778" height="532" alt="TourUI" src="https://github.com/user-attachments/assets/2b8d0ee1-0031-4014-9e41-54ecaf4259dc" />  
+7. View tour plan information (all users)  
+<img width="950" height="538" alt="TourPlanUI" src="https://github.com/user-attachments/assets/d1fe849f-e6ae-423b-bd51-eb64b96be53c" />  
+8. View locations  
+<img width="956" height="536" alt="LocationUI" src="https://github.com/user-attachments/assets/b44c87e1-b894-4b21-bd9d-fbe4741ad8dc" />  
 
 9. Quản lý tour, loại tour, kế hoạch tour và chi tiết kế hoạch tour, địa điểm, khách hàng, nhân viên, hóa đơn, khuyến mãi; mã tự tăng.
 10. Lịch khuyến mãi, thống kê, xuất Excel.
