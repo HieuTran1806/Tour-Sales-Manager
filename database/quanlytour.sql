@@ -334,6 +334,35 @@ INSERT INTO `nhanvien` VALUES ('NV003','Tiêu Viết','Vương','abc','012345678
 UNLOCK TABLES;
 
 --
+-- Table structure for table `payment`
+--
+
+DROP TABLE IF EXISTS `payment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `payment` (
+  `idPayment` int NOT NULL AUTO_INCREMENT,
+  `idTourBooking` int NOT NULL,
+  `method` varchar(20) NOT NULL,
+  `amount` decimal(12,0) NOT NULL,
+  `receivedAmount` decimal(12,0) DEFAULT NULL,
+  `transferContent` varchar(50) DEFAULT NULL,
+  `transactionRef` varchar(50) DEFAULT NULL,
+  `status` varchar(30) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `expiresAt` datetime DEFAULT NULL,
+  `paidAt` datetime DEFAULT NULL,
+  `confirmedAt` datetime DEFAULT NULL,
+  `confirmedBy` varchar(50) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`idPayment`),
+  KEY `fk_payment_tourbooking_idx` (`idTourBooking`),
+  KEY `idx_payment_status` (`status`),
+  CONSTRAINT `fk_payment_tourbooking` FOREIGN KEY (`idTourBooking`) REFERENCES `tourbooking` (`idTourBooking`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `taikhoan`
 --
 
