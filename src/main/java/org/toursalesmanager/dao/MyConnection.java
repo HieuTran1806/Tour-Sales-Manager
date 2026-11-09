@@ -31,12 +31,11 @@ public class MyConnection {
         }
     }
 
-    /**
-     * Thứ tự tìm config.properties:
-     * 1. Cạnh file jar (khi chạy bằng java -jar TourSalesManager.jar)
-     * 2. Thư mục đang chạy lệnh
-     * 3. Trong classpath, tức src/main/resources (khi chạy từ IntelliJ)
-     */
+    // Đọc config.properties cho các cấu hình khác ngoài CSDL (ví dụ: tài khoản nhận thanh toán)
+    public static Properties getConfig() {
+        return loadConfig();
+    }
+
     private static Properties loadConfig() {
         Properties config = new Properties();
 
