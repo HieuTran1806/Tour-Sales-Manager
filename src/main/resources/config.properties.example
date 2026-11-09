@@ -1,4 +1,50 @@
-# Copy this file to config.properties and set values for your local MySQL account.
-db.url=jdbc:mysql://localhost:3306/tour?useSSL=false&serverTimezone=UTC
+# Sao chép file này thành config.properties rồi điền giá trị thật.
+# KHÔNG điền mật khẩu / số tài khoản thật vào file .example (file này được đưa lên Git).
+# Lưu ý: file .properties không hỗ trợ comment cùng dòng, comment phải nằm ở dòng riêng.
+# Key nào để trống hoặc bỏ đi thì ứng dụng dùng giá trị mặc định (xem config/AppConfig.java).
+
+# ---------- Ứng dụng / đơn vị ----------
+app.name=Quản lý Tour du lịch
+# Hiển thị cuối email gửi khách và trong các thông báo "liên hệ nhân viên"
+company.hotline=
+company.email=
+
+# ---------- Cơ sở dữ liệu (bắt buộc) ----------
+db.url=jdbc:mysql://localhost:3306/tour?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh
 db.username=root
+# Có thể đặt bằng biến môi trường DB_PASSWORD thay cho dòng này
 db.password=CHANGE_ME
+
+# ---------- Email (gửi OTP, thông báo thanh toán) ----------
+mail.smtp.host=smtp.gmail.com
+mail.smtp.port=587
+mail.smtp.starttls=true
+mail.timeout.ms=10000
+# Nên đặt bằng biến môi trường MAIL_USERNAME / MAIL_APP_PASSWORD (được ưu tiên hơn 2 dòng dưới)
+mail.username=
+mail.app.password=
+
+# ---------- OTP đặt lại mật khẩu ----------
+otp.lifetime.minutes=5
+otp.resend.seconds=60
+otp.max.attempts=5
+
+# ---------- Tài khoản / bảo mật ----------
+# Mật khẩu ban đầu của tài khoản nhân viên mới. Để trống: sinh ngẫu nhiên cho từng tài khoản (khuyến nghị)
+account.default.password=
+# Độ mạnh băm BCrypt (4-31); tăng thì đăng nhập chậm hơn
+security.bcrypt.rounds=10
+
+# ---------- Thanh toán chuyển khoản / QR (VietQR) ----------
+# Để trống bin/accountNo thì chỉ dùng được thanh toán trực tiếp.
+# payment.bank.bin: mã BIN 6 số của ngân hàng nhận (ví dụ Vietcombank 970436, MB 970422, BIDV 970418)
+payment.bank.bin=
+payment.bank.name=
+payment.bank.accountNo=
+payment.bank.accountName=
+# Tiền tố nội dung chuyển khoản: chữ/số không dấu, tối đa 6 ký tự
+payment.transfer.prefix=TSM
+# Mã QR hết hạn sau bao nhiêu phút
+payment.qr.expire.minutes=15
+# Hạn thanh toán tính từ lúc đặt (giờ), không muộn hơn ngày khởi hành
+payment.deadline.hours=48
