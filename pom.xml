@@ -60,6 +60,13 @@
             <artifactId>angus-mail</artifactId>
             <version>2.0.3</version>
         </dependency>
+
+        <!-- Tạo mã QR chuyển khoản (VietQR) -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.3</version>
+        </dependency>
     </dependencies>
     <build>
         <!-- File jar chạy được: target/TourSalesManager.jar -->
