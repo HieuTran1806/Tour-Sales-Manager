@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.AccountBUS;
+import org.toursalesmanager.config.AppConfig;
 import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.gui.MainFrame;
 import org.toursalesmanager.gui.component.ButtonFactory;
@@ -47,7 +48,7 @@ public class Login extends JDialog {
         initLogoWithLink("logosgu.png");
 
         //set title
-        setTitle("Đăng Nhập - Tour Management System");
+        setTitle("Đăng Nhập - " + AppConfig.appName());
 
         jlbAccount = new JLabel();
         jlbPassword = new JLabel();
@@ -277,7 +278,8 @@ public class Login extends JDialog {
         dialog.add(content, BorderLayout.CENTER);
         dialog.add(buttons, BorderLayout.SOUTH);
 
-        int[] secondsRemaining = {60};
+        int resendSeconds = AppConfig.otpResendSeconds();
+        int[] secondsRemaining = {resendSeconds};
         Timer resendTimer = new Timer(1000, event -> {
             secondsRemaining[0]--;
             if (secondsRemaining[0] <= 0) {
@@ -288,7 +290,7 @@ public class Login extends JDialog {
                 resendButton.setText("Gửi lại OTP (" + secondsRemaining[0] + "s)");
             }
         });
-        resendButton.setText("Gửi lại OTP (60s)");
+        resendButton.setText("Gửi lại OTP (" + resendSeconds + "s)");
         resendTimer.start();
 
         String[] verifiedCode = {null};
@@ -313,9 +315,9 @@ public class Login extends JDialog {
                 messageLabel.setText("Đã gửi mã OTP mới đến email của bạn.");
                 messageLabel.setForeground(Color.GRAY);
                 codeField.setText("");
-                secondsRemaining[0] = 60;
+                secondsRemaining[0] = resendSeconds;
                 resendButton.setEnabled(false);
-                resendButton.setText("Gửi lại OTP (60s)");
+                resendButton.setText("Gửi lại OTP (" + resendSeconds + "s)");
                 resendTimer.restart();
             } catch (MessagingException | IllegalArgumentException | IllegalStateException ex) {
                 messageLabel.setText(ex.getMessage());
