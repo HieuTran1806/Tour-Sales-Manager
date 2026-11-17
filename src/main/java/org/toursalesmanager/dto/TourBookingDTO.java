@@ -44,6 +44,6 @@ public class TourBookingDTO {
     }
 
     public String getBookingCode(){
-        return String.format("PDT%03", idTourBooking);
+        return String.format("PDT%03d", idTourBooking);
     }
 }
