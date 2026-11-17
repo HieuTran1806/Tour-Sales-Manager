@@ -7,7 +7,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.gui.component.ButtonFactory;
 import org.toursalesmanager.gui.helper.AddComponentToForm;
-import org.toursalesmanager.validate.ValidationException;
+import org.toursalesmanager.exception.ValidationException;
 import org.toursalesmanager.bus.CustomerBUS;
 import org.toursalesmanager.dto.CustomerDTO;
 import org.toursalesmanager.gui.helper.UIColors;
