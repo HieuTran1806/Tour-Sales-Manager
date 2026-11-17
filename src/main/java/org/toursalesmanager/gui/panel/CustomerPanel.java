@@ -1,5 +1,7 @@
 package org.toursalesmanager.gui.panel;
 
+import org.toursalesmanager.gui.helper.TableLayoutHelper;
+
 import org.toursalesmanager.gui.helper.TableSelectionHelper;
 
 import java.awt.*;
@@ -86,6 +88,7 @@ public class CustomerPanel extends JPanel {
         txtSearch = new JTextField();
         jScrollPane1 = new JScrollPane();
         jTable1 = new JTable();
+        TableLayoutHelper.autoFit(jTable1);
         jPanel3 = new JPanel();
         addBtn = new JButton();
         deleteBtn = new JButton();
