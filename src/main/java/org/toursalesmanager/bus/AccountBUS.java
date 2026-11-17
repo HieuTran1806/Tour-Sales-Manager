@@ -1,5 +1,6 @@
 package org.toursalesmanager.bus;
 
+import org.toursalesmanager.config.AppConfig;
 import org.toursalesmanager.dao.AccountDAO;
 import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.enums.Role;
@@ -20,9 +21,6 @@ public class AccountBUS {
     private final AccountDAO accountDAO;
     private final Map<String, PasswordResetCode> passwordResetCodes = new ConcurrentHashMap<>();
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    private static final long RESET_CODE_LIFETIME_SECONDS = 5 * 60;
-    private static final long RESET_CODE_RESEND_DELAY_SECONDS = 60;
-    private static final int MAX_RESET_CODE_ATTEMPTS = 5;
     private static final String ACTIVE_STATUS = "ACTIVE";
     private final Map<String, Instant> passwordResetLastSentAt = new ConcurrentHashMap<>();
 
@@ -83,7 +81,8 @@ public class AccountBUS {
         }
     }
 
-    public boolean createStaffAccount(
+    // Tạo tài khoản cho nhân viên đã có hồ sơ; trả về mật khẩu ban đầu để báo cho nhân viên
+    public String createStaffAccount(
             String idStaff,
             Role role
     ) {
@@ -101,10 +100,11 @@ public class AccountBUS {
             );
         }
 
-        return accountDAO.createStaffAccount(
-                idStaff.trim(),
-                role
-        );
+        String initialPassword = PasswordUtil.newStaffPassword();
+        if (!accountDAO.createStaffAccount(idStaff.trim(), role, initialPassword)) {
+            throw new IllegalStateException("Không thể tạo tài khoản nhân viên");
+        }
+        return initialPassword;
     }
 
     public boolean updateStaffRole(
@@ -203,8 +203,8 @@ public class AccountBUS {
 
         Instant lastSentAt = passwordResetLastSentAt.get(normalizedEmail);
         if (lastSentAt != null
-                && Instant.now().isBefore(lastSentAt.plusSeconds(RESET_CODE_RESEND_DELAY_SECONDS))) {
-            long secondsRemaining = RESET_CODE_RESEND_DELAY_SECONDS
+                && Instant.now().isBefore(lastSentAt.plusSeconds(AppConfig.otpResendSeconds()))) {
+            long secondsRemaining = AppConfig.otpResendSeconds()
                     - java.time.Duration.between(lastSentAt, Instant.now()).getSeconds();
             throw new IllegalArgumentException("Vui lòng đợi " + secondsRemaining + " giây trước khi gửi lại OTP");
         }
@@ -213,7 +213,7 @@ public class AccountBUS {
         MailService.sendOtp(normalizedEmail, code);
         passwordResetCodes.put(normalizedEmail, new PasswordResetCode(
                 code,
-                Instant.now().plusSeconds(RESET_CODE_LIFETIME_SECONDS),
+                Instant.now().plusSeconds(AppConfig.otpLifetimeMinutes() * 60L),
                 0
         ));
         passwordResetLastSentAt.put(normalizedEmail, Instant.now());
@@ -253,7 +253,7 @@ public class AccountBUS {
             throw new IllegalArgumentException("Mã xác nhận đã hết hạn. Vui lòng yêu cầu mã mới");
         }
         if (code == null || !resetCode.code().equals(code.trim())) {
-            if (resetCode.failedAttempts() + 1 >= MAX_RESET_CODE_ATTEMPTS) {
+            if (resetCode.failedAttempts() + 1 >= AppConfig.otpMaxAttempts()) {
                 passwordResetCodes.remove(normalizedEmail, resetCode);
                 throw new IllegalArgumentException("Bạn đã nhập sai mã quá nhiều lần. Vui lòng yêu cầu mã mới");
             }

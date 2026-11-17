@@ -1,4 +1,6 @@
 package org.toursalesmanager.bus;
+
+import org.toursalesmanager.gui.helper.PasswordUtil;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,6 +17,8 @@ import javax.swing.*;
 public class StaffBUS {
     public ArrayList<StaffDTO> dsNV;
     public StaffDAO dao = new StaffDAO();
+    // Mật khẩu ban đầu của nhân viên vừa thêm, để giao diện hiển thị cho người tạo
+    private String lastInitialPassword;
 
     public StaffBUS() {
         this(true);
@@ -24,6 +28,10 @@ public class StaffBUS {
         if (dsNV == null) {
             dsNV = preloadStaff ? dao.getAllStaffs() : null;
         }
+    }
+
+    public String getLastInitialPassword() {
+        return lastInitialPassword;
     }
 
     public ArrayList<StaffDTO> getAllStaffs(){
@@ -50,7 +58,9 @@ public class StaffBUS {
             if (dsNV == null) {
                 dsNV = new ArrayList<>();
             }
-            boolean success = dao.addStaff(nv, role);
+            String initialPassword = PasswordUtil.newStaffPassword();
+            boolean success = dao.addStaff(nv, role, initialPassword);
+            lastInitialPassword = success ? initialPassword : null;
             if (success) {
                 nv.setRole(role);
                 dsNV.add(nv);
