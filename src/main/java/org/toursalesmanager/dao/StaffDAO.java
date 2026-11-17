@@ -29,7 +29,8 @@ public class StaffDAO {
         return dsNV;
     }
 
-    public boolean addStaff(StaffDTO nv, Role role) {
+    // initialPassword: mật khẩu ban đầu dạng rõ, được băm trước khi lưu
+    public boolean addStaff(StaffDTO nv, Role role, String initialPassword) {
         if (nv == null || nv.getIdStaff() == null || nv.getIdStaff().isBlank()) {
             throw new IllegalArgumentException("Thông tin nhân viên không hợp lệ");
         }
@@ -70,7 +71,7 @@ public class StaffDAO {
 
                 try (PreparedStatement pstmt = conn.prepareStatement(accountSql)) {
                     pstmt.setString(1, nv.getIdStaff());
-                    pstmt.setString(2, PasswordUtil.hash("123456"));
+                    pstmt.setString(2, PasswordUtil.hash(initialPassword));
                     pstmt.setString(3, role.name());
                     pstmt.setString(4, "ACTIVE");
                     pstmt.setString(5, nv.getIdStaff());
@@ -313,8 +314,8 @@ public class StaffDAO {
                         rs.getString("MaNV"),
                         rs.getString("Ho"),
                         rs.getString("Ten"),
-                        rs.getString("SDT"),
                         rs.getString("DiaChi"),
+                        rs.getString("SDT"),
                         dob
                 );
 

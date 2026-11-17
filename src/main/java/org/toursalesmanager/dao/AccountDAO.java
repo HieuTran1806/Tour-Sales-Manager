@@ -111,16 +111,16 @@ public class AccountDAO {
         }
     }
 
-    public boolean createStaffAccount(String idStaff, Role role) {
+    // initialPassword: mật khẩu ban đầu dạng rõ, được băm trước khi lưu
+    public boolean createStaffAccount(String idStaff, Role role, String initialPassword) {
 
-        String defaultPass = "123456";
         String sql = "INSERT INTO taikhoan (username, password, role, status, idstaff, idcustomer) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = MyConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, idStaff);
-            pstmt.setString(2, PasswordUtil.hash(defaultPass));
+            pstmt.setString(2, PasswordUtil.hash(initialPassword));
             pstmt.setString(3, role.name());
             pstmt.setString(4, "ACTIVE");
             pstmt.setString(5, idStaff);
