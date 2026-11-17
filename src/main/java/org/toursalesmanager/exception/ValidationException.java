@@ -1,10 +1,11 @@
-package org.toursalesmanager.validate;
+package org.toursalesmanager.exception;
 
-public class ValidationException extends Exception{
-    public ValidationException(String message){
+public class ValidationException extends BusinessException {
+    public ValidationException(String message) {
         super(message);
     }
-    public ValidationException(String message, Throwable cause){
+
+    public ValidationException(String message, Throwable cause) {
         super(message, cause);
     }
 }
