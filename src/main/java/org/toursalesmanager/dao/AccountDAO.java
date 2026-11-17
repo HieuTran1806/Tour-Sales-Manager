@@ -2,6 +2,7 @@ package org.toursalesmanager.dao;
 
 import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.exception.DataAccessException;
 import org.toursalesmanager.gui.helper.PasswordUtil;
 
 import java.sql.Connection;
@@ -12,9 +13,6 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class AccountDAO {
 
@@ -43,7 +41,7 @@ public class AccountDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DataAccessException("Lỗi truy vấn cơ sở dữ liệu khi đăng nhập.", e);
         }
 
         return null;
@@ -57,7 +55,7 @@ public class AccountDAO {
             pstmt.setString(2, username);
             return pstmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            throw new RuntimeException("Không thể cập nhật mật khẩu tài khoản.", e);
+            throw new DataAccessException("Không thể cập nhật mật khẩu tài khoản.", e);
         }
 
     }
@@ -77,7 +75,7 @@ public class AccountDAO {
                 return rs.next();
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Không thể kiểm tra email tài khoản.", e);
+            throw new DataAccessException("Không thể kiểm tra email tài khoản.", e);
         }
     }
 
@@ -94,7 +92,7 @@ public class AccountDAO {
             pstmt.setString(3, Role.CUSTOMER.name());
             return pstmt.executeUpdate() == 1;
         } catch (SQLException e) {
-            throw new RuntimeException("Không thể cập nhật mật khẩu tài khoản.", e);
+            throw new DataAccessException("Không thể cập nhật mật khẩu tài khoản.", e);
         }
     }
 
@@ -107,13 +105,12 @@ public class AccountDAO {
                 return rs.next();
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Không thể kiểm tra email đã đăng ký.", e);
+            throw new DataAccessException("Không thể kiểm tra email đã đăng ký.", e);
         }
     }
 
     // initialPassword: mật khẩu ban đầu dạng rõ, được băm trước khi lưu
     public boolean createStaffAccount(String idStaff, Role role, String initialPassword) {
-
         String sql = "INSERT INTO taikhoan (username, password, role, status, idstaff, idcustomer) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = MyConnection.getConnection();
@@ -128,8 +125,7 @@ public class AccountDAO {
             return pstmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new DataAccessException("Không thể tạo tài khoản nhân viên.", e);
         }
     }
 
@@ -317,8 +313,7 @@ public class AccountDAO {
                 return rs.next();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Không thể kiểm tra username đã tồn tại.", e);
         }
     }
 }

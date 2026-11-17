@@ -4,6 +4,8 @@ import org.toursalesmanager.config.AppConfig;
 import org.toursalesmanager.dao.AccountDAO;
 import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.enums.Role;
+import org.toursalesmanager.exception.DataAccessException;
+import org.toursalesmanager.exception.ValidationException;
 import org.toursalesmanager.gui.helper.PasswordUtil;
 import org.toursalesmanager.service.MailService;
 
@@ -17,7 +19,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AccountBUS {
-
     private final AccountDAO accountDAO;
     private final Map<String, PasswordResetCode> passwordResetCodes = new ConcurrentHashMap<>();
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
@@ -37,13 +38,13 @@ public class AccountBUS {
             String password
     ) {
         if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Tên đăng nhập không được để trống"
             );
         }
 
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Mật khẩu không được để trống"
             );
         }
@@ -75,7 +76,7 @@ public class AccountBUS {
     private void requireActive(AccountDTO account) {
         String status = account.getStatus();
         if (status != null && !status.trim().equalsIgnoreCase(ACTIVE_STATUS)) {
-            throw new IllegalStateException(
+            throw new ValidationException(
                     "Tài khoản đã bị khóa hoặc ngừng hoạt động. Vui lòng liên hệ quản trị viên."
             );
         }
@@ -87,7 +88,7 @@ public class AccountBUS {
             Role role
     ) {
         if (idStaff == null || idStaff.isBlank()) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Mã nhân viên không hợp lệ"
             );
         }
@@ -95,14 +96,14 @@ public class AccountBUS {
         validateStaffRole(role);
 
         if (accountDAO.existsByStaffId(idStaff.trim())) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Nhân viên này đã có tài khoản"
             );
         }
 
         String initialPassword = PasswordUtil.newStaffPassword();
         if (!accountDAO.createStaffAccount(idStaff.trim(), role, initialPassword)) {
-            throw new IllegalStateException("Không thể tạo tài khoản nhân viên");
+            throw new ValidationException("Không thể tạo tài khoản nhân viên");
         }
         return initialPassword;
     }
@@ -112,7 +113,7 @@ public class AccountBUS {
             Role role
     ) {
         if (idStaff == null || idStaff.isBlank()) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Mã nhân viên không hợp lệ"
             );
         }
@@ -125,41 +126,15 @@ public class AccountBUS {
         );
     }
 
-    // public boolean lockAccount(int idAccount) {
-    //     if (idAccount <= 0) {
-    //         throw new IllegalArgumentException(
-    //                 "Mã tài khoản không hợp lệ"
-    //         );
-    //     }
-    //
-    //     return accountDAO.updateStatus(
-    //             idAccount,
-    //             "LOCKED"
-    //     );
-    // }
-    //
-    // public boolean unlockAccount(int idAccount) {
-    //     if (idAccount <= 0) {
-    //         throw new IllegalArgumentException(
-    //                 "Mã tài khoản không hợp lệ"
-    //         );
-    //     }
-    //
-    //     return accountDAO.updateStatus(
-    //             idAccount,
-    //             "ACTIVE"
-    //     );
-    // }
-
     private void validateStaffRole(Role role) {
         if (role == null) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Vai trò không được để trống"
             );
         }
 
         if (role == Role.CUSTOMER) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Không thể gán vai trò CUSTOMER cho nhân viên"
             );
         }
@@ -268,89 +243,88 @@ public class AccountBUS {
                                       String address, String phoneNumber, LocalDate dob, String confirmPassword,
                                       String email) {
         if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Tên tài khoản không được để trống");
+            throw new ValidationException("Tên tài khoản không được để trống");
         }
         if (username.length() > 30) {
-            throw new IllegalArgumentException("Tên tài khoản không được dài quá 30 ký tự");
+            throw new ValidationException("Tên tài khoản không được dài quá 30 ký tự");
         }
 
         if (accountDAO.existsByUsername(username)) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Tên tài khoản đã tồn tại"
             );
         }
         validateEmail(email);
         if (accountDAO.emailExists(email)) {
-            throw new IllegalArgumentException("Email này đã được sử dụng");
+            throw new ValidationException("Email này đã được sử dụng");
         }
 
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("Mật khẩu không được để trống");
+            throw new ValidationException("Mật khẩu không được để trống");
         }
 
         if (confirmPassword == null || !password.equals(confirmPassword)) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Mật khẩu xác nhận không khớp"
             );
         }
         if (password.length() < 6) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                     "Mật khẩu phải có ít nhất 6 ký tự"
             );
         }
         if (password.getBytes(StandardCharsets.UTF_8).length > 72) {
-            throw new IllegalArgumentException("Mật khẩu không được vượt quá 72 byte UTF-8");
+            throw new ValidationException("Mật khẩu không được vượt quá 72 byte UTF-8");
         }
 
         if (firstName == null || firstName.isBlank()) {
-            throw new IllegalArgumentException("Tên không được để trống");
+            throw new ValidationException("Tên không được để trống");
         }
         if (firstName.length() > 45) {
-            throw new IllegalArgumentException("Tên không được dài quá 45 ký tự");
+            throw new ValidationException("Tên không được dài quá 45 ký tự");
         }
 
         if (lastName == null || lastName.isBlank()) {
-            throw new IllegalArgumentException("Họ không được để trống");
+            throw new ValidationException("Họ không được để trống");
         }
         if (lastName.length() > 45) {
-            throw new IllegalArgumentException("Họ không được dài quá 45 ký tự");
+            throw new ValidationException("Họ không được dài quá 45 ký tự");
         }
 
         if (address == null || address.isBlank()) {
-            throw new IllegalArgumentException("Địa chỉ không được để trống");
+            throw new ValidationException("Địa chỉ không được để trống");
         }
         if (address.length() > 255) {
-            throw new IllegalArgumentException("Địa chỉ không được dài quá 255 ký tự");
+            throw new ValidationException("Địa chỉ không được dài quá 255 ký tự");
         }
 
         if (phoneNumber == null || !phoneNumber.matches("^0\\d{9}$")) {
-            throw new IllegalArgumentException("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0");
+            throw new ValidationException("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0");
         }
         if (isPhoneExisted(phoneNumber)) {
-            throw new IllegalArgumentException("Số điện thoại này đã được sử dụng");
+            throw new ValidationException("Số điện thoại này đã được sử dụng");
         }
 
         if (dob == null) {
-            throw new IllegalArgumentException("Ngày sinh không được để trống");
+            throw new ValidationException("Ngày sinh không được để trống");
         }
         if (dob.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Ngày sinh không được sau ngày hiện tại");
+            throw new ValidationException("Ngày sinh không được sau ngày hiện tại");
         }
     }
 
     private void validateNewPassword(String password, String confirmPassword) {
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("Mật khẩu không được để trống");
+            throw new ValidationException("Mật khẩu không được để trống");
         }
         if (confirmPassword == null || !password.equals(confirmPassword)) {
-            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
+            throw new ValidationException("Mật khẩu xác nhận không khớp");
         }
         if (password.length() < 6) {
-            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự");
+            throw new ValidationException("Mật khẩu phải có ít nhất 6 ký tự");
         }
         if (password.getBytes(StandardCharsets.UTF_8).length > 72) {
-            throw new IllegalArgumentException("Mật khẩu không được vượt quá 72 byte UTF-8");
-        }
+               throw new ValidationException("Mật khẩu không được vượt quá 72 byte UTF-8");      }
     }
 
     private String normalizeEmail(String email) {
@@ -359,7 +333,7 @@ public class AccountBUS {
 
     private void validateEmail(String email) {
         if (email == null || email.length() > 254 || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
-            throw new IllegalArgumentException("Email không hợp lệ");
+            throw new ValidationException("Email không hợp lệ");
         }
     }
 
