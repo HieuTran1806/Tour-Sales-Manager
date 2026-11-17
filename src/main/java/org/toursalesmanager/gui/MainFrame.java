@@ -3,6 +3,7 @@ package org.toursalesmanager.gui;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.toursalesmanager.bus.CustomerBUS;
+import org.toursalesmanager.config.AppConfig;
 import org.toursalesmanager.bus.StaffBUS;
 import org.toursalesmanager.dto.AccountDTO;
 import org.toursalesmanager.dto.CustomerDTO;
@@ -48,7 +49,7 @@ public class MainFrame extends JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        setTitle("Quản lý Tour du lịch");
+        setTitle(AppConfig.appName());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
@@ -78,10 +79,6 @@ public class MainFrame extends JFrame {
         repaint();
     }
 
-    /**
-     * Chạy action ngay nếu đã đăng nhập; nếu chưa thì mở hộp thoại đăng nhập,
-     * đăng nhập thành công thì dựng lại giao diện theo quyền mới rồi mới chạy action.
-     */
     public static void requireLogin(Component source, Runnable action) {
         if (SessionManager.isLoggedIn()) {
             action.run();
@@ -136,6 +133,7 @@ public class MainFrame extends JFrame {
                 new MenuItem("Loại Tour", "LoaiTour", Permission.VIEW_TOUR_TYPE),
                 new MenuItem("Kế Hoạch Tour", "KeHoachTour", Permission.VIEW_TOUR_PLAN),
                 new MenuItem("Phiếu Đặt Tour", "PhieuDatTour", Permission.VIEW_BOOKING),
+                new MenuItem("Thanh toán", "ThanhToan", Permission.VIEW_PAYMENT),
                 new MenuItem("Hóa đơn", "HoaDon", Permission.VIEW_INVOICE),
                 new MenuItem("Địa điểm", "DiaDiem", Permission.VIEW_LOCATION),
                 new MenuItem("Nhân viên", "NhanVien", Permission.VIEW_STAFF),
@@ -150,7 +148,6 @@ public class MainFrame extends JFrame {
             if(!SessionManager.hasPermission(menu.permission)){
                 continue;
             }
-            System.out.println(menu.permission);
 
             JButton button = createMenuButton(menu.label, menu.cardName, null);
             sidebar.add(button);
@@ -201,6 +198,9 @@ public class MainFrame extends JFrame {
 
         if(SessionManager.hasPermission(Permission.VIEW_BOOKING))
             contentArea.add(new TourBookingPanel(), "PhieuDatTour");
+
+        if(SessionManager.hasPermission(Permission.VIEW_PAYMENT))
+            contentArea.add(new PaymentPanel(), "ThanhToan");
 
         if(SessionManager.hasPermission(Permission.VIEW_INVOICE))
             contentArea.add(new InvoicePanel(), "HoaDon");
