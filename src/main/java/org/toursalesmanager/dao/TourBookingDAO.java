@@ -1,4 +1,5 @@
 package org.toursalesmanager.dao;
+import org.toursalesmanager.enums.BookingStatus;
 import org.toursalesmanager.dto.TourBookingDTO;
 
 import java.math.BigDecimal;
@@ -79,6 +80,20 @@ public class TourBookingDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public TourBookingDTO findById(int idTourBooking) {
+        String sql = "SELECT * FROM tourbooking WHERE idTourBooking = ?";
+        try (Connection conn = MyConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idTourBooking);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapResultSetToDTO(rs) : null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -223,10 +238,8 @@ public class TourBookingDAO {
     }
 
     // Phiếu đã hủy không còn giữ chỗ trên kế hoạch tour
-    private static final String CANCELLED_STATUS = "Đã hủy";
-
     private static int heldTickets(String status, int tickets) {
-        return status != null && CANCELLED_STATUS.equals(status.trim()) ? 0 : tickets;
+        return BookingStatus.CANCELLED.matches(status) ? 0 : tickets;
     }
 
     // Cập nhật phiếu đặt và điều chỉnh số vé còn lại của kế hoạch tour trong cùng một transaction:

@@ -1,4 +1,5 @@
 package org.toursalesmanager.bus;
+import org.toursalesmanager.enums.BookingStatus;
 import org.toursalesmanager.dao.TourBookingDAO;
 import org.toursalesmanager.dto.TourPlanDTO;
 import org.toursalesmanager.dto.AccountDTO;
@@ -68,11 +69,11 @@ public class TourBookingBUS {
         dto.setBookingDate(dto.getBookingDate() == null ? LocalDateTime.now() : dto.getBookingDate());
         dto.setPrice(price);
         dto.setCostTotal(price.multiply(BigDecimal.valueOf(dto.getTickets())));
-        dto.setBookingStatus(account.getRole() == Role.CUSTOMER
-                ? "Chờ xác nhận"
-                : (dto.getBookingStatus() == null || dto.getBookingStatus().isBlank()
-                    ? "Chờ xác nhận"
-                    : dto.getBookingStatus()));
+        // Khách tự đặt luôn chờ nhân viên xác nhận; nhân viên chỉ được chọn trạng thái hợp lệ
+        BookingStatus requested = BookingStatus.fromLabel(dto.getBookingStatus());
+        dto.setBookingStatus(account.getRole() == Role.CUSTOMER || requested == null
+                ? BookingStatus.PENDING.getLabel()
+                : requested.getLabel());
         dto.setNote(dto.getNote() == null ? "" : dto.getNote().trim());
 
         boolean saved = tourBookingDao.addTourBooking(dto);
@@ -107,7 +108,7 @@ public class TourBookingBUS {
                 tickets,
                 null,
                 null,
-                "Chờ xác nhận",
+                BookingStatus.PENDING.getLabel(),
                 note
         ));
     }
